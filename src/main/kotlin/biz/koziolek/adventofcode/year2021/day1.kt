@@ -24,18 +24,7 @@ fun countIncreases(lines: Sequence<String>): Int =
 fun countIncreasesSlidingWindow(lines: Sequence<String>, windowSize: Int = 3): Int =
         lines
                 .map { it.toInt() }
-                .fold(Pair<Int, List<Int>>(0, listOf())) { acc, currentHeight ->
-                    val previousWindow = acc.second
-
-                    if (previousWindow.size < windowSize) {
-                        acc.copy(second = previousWindow + currentHeight)
-                    } else {
-                        val currentWindow = previousWindow.subList(1, previousWindow.size) + currentHeight
-
-                        if (currentWindow.sum() > previousWindow.sum()) {
-                            acc.copy(first = acc.first.inc(), second = currentWindow)
-                        } else {
-                            acc.copy(second = currentWindow)
-                        }
-                    }
-                }.first
+                .windowed(windowSize)
+                .map { it.sum() }
+                .map { it.toString() }
+                .let { countIncreases(it) }
