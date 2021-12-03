@@ -13,7 +13,23 @@ fun main() {
 }
 
 fun calculateGammaRate(lines: List<String>): Int {
-    val bitCount = lines[0].length
+    val mostCommonBits = getMostCommonBits(lines)
+    return mostCommonBits.toInt(2)
+}
+
+fun calculateEpsilonRate(lines: List<String>): Int {
+    val leastCommonBits = getLeastCommonBits(lines)
+    return leastCommonBits.toInt(2)
+}
+
+fun calculatePowerConsumption(lines: List<String>): Int {
+    val epsilonRate = calculateEpsilonRate(lines)
+    val gammaRate = calculateGammaRate(lines)
+    return epsilonRate * gammaRate
+}
+
+private fun getMostCommonBits(lines: List<String>): String {
+    val bitCount = getBitCount(lines)
     val initialAcc = MutableList(bitCount) { 0 }
     val oneCounts = lines
             .fold(initialAcc) { acc, line ->
@@ -25,31 +41,18 @@ fun calculateGammaRate(lines: List<String>): Int {
                 acc
             }
     val totalCount = lines.size
-    
-    var mostCommonBits = ""
 
-    for (oneCount in oneCounts) {
+    return oneCounts.fold("") { acc, oneCount ->
         val zeroCount = totalCount - oneCount
-        mostCommonBits += when {
-            oneCount > zeroCount -> "1"
-            oneCount < zeroCount -> "0" 
-            else -> throw RuntimeException("One count is the same as zero count")
-        }
+        acc + if (oneCount >= zeroCount) "1" else "0"
     }
-    
-    return mostCommonBits.toInt(2)
 }
 
-
-fun calculateEpsilonRate(lines: List<String>): Int {
-    val gammaRate = calculateGammaRate(lines)
-    val bitCount = lines[0].length
+private fun getLeastCommonBits(lines: List<String>): String {
+    val mostCommonBits = getMostCommonBits(lines)
+    val bitCount = getBitCount(lines)
     val mask = "1".repeat(bitCount).toInt(2)
-    return gammaRate xor mask
+    return mostCommonBits.toInt(2).xor(mask).toString(2)
 }
 
-fun calculatePowerConsumption(lines: List<String>): Int {
-    val epsilonRate = calculateEpsilonRate(lines)
-    val gammaRate = calculateGammaRate(lines)
-    return epsilonRate * gammaRate
-}
+private fun getBitCount(lines: List<String>) = lines[0].length
