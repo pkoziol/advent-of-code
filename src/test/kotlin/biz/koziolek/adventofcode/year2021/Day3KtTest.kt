@@ -53,4 +53,26 @@ internal class Day3KtTest {
         assertEquals(2179, epsilonRate)
         assertEquals(4174964, powerConsumption)
     }
+
+    @Test
+    fun testSampleInputPart2() {
+        val lines = sampleInput.split("\n")
+        val oxygenGeneratorRating = calculateOxygenGeneratorRating(lines)
+        val co2ScrubberRating = calculateCO2ScrubberRating(lines)
+        val lifeSupportRating = calculateLifeSupportRating(lines)
+        assertEquals(23, oxygenGeneratorRating)
+        assertEquals(10, co2ScrubberRating)
+        assertEquals(230, lifeSupportRating)
+    }
+
+    @Test
+    fun testFullInputPart2() {
+        val lines = File("src/main/resources/year2021/day3/input").readLines()
+        val oxygenGeneratorRating = calculateOxygenGeneratorRating(lines)
+        val co2ScrubberRating = calculateCO2ScrubberRating(lines)
+        val lifeSupportRating = calculateLifeSupportRating(lines)
+        assertEquals(1371, oxygenGeneratorRating)
+        assertEquals(3264, co2ScrubberRating)
+        assertEquals(4474944, lifeSupportRating)
+    }
 }
