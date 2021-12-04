@@ -144,8 +144,9 @@ internal class Day4Test {
         val moves = readMoves(lines)
         val boards = readBoards(lines)
 
-        val score = playBingo(moves, boards)
-        assertEquals(4512, score)
+        val wonBoards = playBingo(moves, boards)
+        assertEquals(4512, wonBoards.first().score)
+        assertEquals(1924, wonBoards.last().score)
     }
 
     @Test
@@ -154,7 +155,8 @@ internal class Day4Test {
         val moves = readMoves(lines)
         val boards = readBoards(lines)
 
-        val score = playBingo(moves, boards)
-        assertEquals(87456, score)
+        val wonBoards = playBingo(moves, boards)
+        assertEquals(87456, wonBoards.first().score)
+        assertEquals(15561, wonBoards.last().score)
     }
 }

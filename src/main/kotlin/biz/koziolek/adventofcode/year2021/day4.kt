@@ -8,29 +8,26 @@ fun main() {
     val moves = readMoves(lines)
     val boards = readBoards(lines)
 
-    val score = playBingo(moves, boards)
-    println("Bingo score: $score")
+    val wonBoards = playBingo(moves, boards)
+    println("First won board score: ${wonBoards.first().score}")
+    println("Last won board score: ${wonBoards.last().score}")
 }
 
-fun playBingo(moves: List<Int>, boards: List<Board>): Int? {
-    val initial = Pair<List<Board>, Int?>(boards, null)
-    return moves.fold(initial) { (currentBoards, score), move ->  
-        if (score != null) {
-            Pair(currentBoards, score)
-        } else {
-            val updatedBoards = currentBoards.map { it.mark(move) }
-            val winningBoards = updatedBoards.filter { it.getFullyMarkedRowsOrColumns().isNotEmpty() }
-            
-            when (winningBoards.size) {
-                0 -> Pair(updatedBoards, null)
-                1 -> Pair(updatedBoards, winningBoards[0].score(move))
-                else -> throw IllegalStateException("Multiple winning boards - don't know what to do!")
-            }
-        }
+fun playBingo(moves: List<Int>, boards: List<Board>): List<WonBoard> {
+    val initial = Pair<List<Board>, List<WonBoard>>(boards, emptyList())
+
+    return moves.fold(initial) { (currentBoards, winningBoards), move ->
+        val updatedBoards = currentBoards.map { it.mark(move) }
+        val (boardsInProgress, boardsThatWon) = updatedBoards.partition { it.getFullyMarkedRowsOrColumns().isEmpty() }
+
+        Pair(boardsInProgress, winningBoards + boardsThatWon.map { WonBoard(it, it.score(move)) })
     }.second
 }
 
 fun readMoves(lines: List<String>): List<Int> = lines[0].split(',').map { it.toInt() }
+
+data class WonBoard(val board: Board,
+                    val score: Int)
 
 data class Board(val size: Int,
                  val rows: List<BoardCells>) {
