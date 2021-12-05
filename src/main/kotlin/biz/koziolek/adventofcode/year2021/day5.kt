@@ -75,8 +75,6 @@ data class Map(val width: Int = 0,
             return this
         }
 
-        println("Adding line: $line")
-
         val newWidth = maxOf(width, line.x1 + 1, line.x2 + 1)
         val newHeight = maxOf(height, line.y1 + 1, line.y2 + 1)
 
