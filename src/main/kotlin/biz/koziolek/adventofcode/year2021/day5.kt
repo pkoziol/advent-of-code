@@ -1,33 +1,42 @@
 package biz.koziolek.adventofcode.year2021
 
 import java.io.File
+import kotlin.math.abs
 
 fun main() {
     val inputFile = File("src/main/resources/year2021/day5/input")
     val strLines = inputFile.bufferedReader().readLines()
     val lines = parseLines(strLines)
-    val map = createMap(lines)
-    
-    println(map)
-    println(">= 2: ${map.countGreaterOrEqual(2)}")
+
+    val map1 = createMap(lines.filter { it.isHorizontal || it.isVertical })
+    println(map1)
+    println(">= 2: ${map1.countGreaterOrEqual(2)}")
+
+    val map2 = createMap(lines)
+    println(map2)
+    println(">= 2: ${map2.countGreaterOrEqual(2)}")
 }
 
 data class Line(val x1: Int, val y1: Int, val x2: Int, val y2: Int) {
     val isHorizontal = y1 == y2
     val isVertical = x1 == x2
+    val isDiagonal = abs(x1 - x2) == abs(y1 - y2)
 
     fun getCoveredPoints(): List<Pair<Int, Int>> {
-        val minX = minOf(x1, x2)
-        val maxX = maxOf(x1, x2)
-        val minY = minOf(y1, y2)
-        val maxY = maxOf(y1, y2)
-
         return when {
-            isHorizontal -> (minX..maxX).map { Pair(it, y1) }
-            isVertical -> (minY..maxY).map { Pair(x1, it) }
-            else -> throw IllegalArgumentException("Only horizontal and vertical lines are supported")
+            isHorizontal -> range(x1, x2).map { Pair(it, y1) }
+            isVertical -> range(y1, y2).map { Pair(x1, it) }
+            isDiagonal -> range(x1, x2) zip range(y1, y2)
+            else -> throw IllegalArgumentException("Only horizontal, vertical and diagonal lines are supported")
         }
     }
+
+    private fun range(start: Int, end: Int): IntProgression =
+            if (start < end) {
+                start..end
+            } else {
+                start downTo end
+            }
 }
 
 fun parseLines(strLines: List<String>): List<Line> =
@@ -48,7 +57,7 @@ data class Map(val width: Int = 0,
                private val points: List<List<Int>> = emptyList()) {
 
     fun addLine(line: Line): Map {
-        if (!line.isHorizontal && !line.isVertical) {
+        if (!line.isHorizontal && !line.isVertical && !line.isDiagonal) {
             return this
         }
 
@@ -56,7 +65,7 @@ data class Map(val width: Int = 0,
         if (coveredPoints.isEmpty()) {
             return this
         }
-        
+
         println("Adding line: $line")
 
         val newWidth = maxOf(width, line.x1 + 1, line.x2 + 1)
@@ -76,7 +85,7 @@ data class Map(val width: Int = 0,
     fun countGreaterOrEqual(value: Int): Int {
         return points.sumOf { row -> row.count { it >= value } }
     }
-    
+
     override fun toString(): String {
         val maxValue = points.maxOf { row -> row.maxOf { it } }
         val strLen = maxValue.toString().length
