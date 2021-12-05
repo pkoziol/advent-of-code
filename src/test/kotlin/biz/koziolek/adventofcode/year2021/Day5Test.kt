@@ -20,6 +20,18 @@ internal class Day5Test {
         """.trimIndent()
 
     @Test
+    fun testConvertingLinesToStringAndBack() {
+        val lineString = "9,4 -> 3,4"
+        val line = Line.fromString(lineString)
+        
+        assertEquals(9, line.x1)
+        assertEquals(4, line.y1)
+        assertEquals(3, line.x2)
+        assertEquals(4, line.y2)
+        assertEquals(lineString, line.toString())
+    }
+
+    @Test
     fun testParsingSampleInput() {
         val strLines = sampleInput.split("\n")
 
@@ -46,6 +58,27 @@ internal class Day5Test {
         assertEquals(8, lines[8].y2)
         assertFalse(lines[8].isHorizontal)
         assertFalse(lines[8].isVertical)
+    }
+
+    @Test
+    fun testCoveredPoints() {
+        val strLines = sampleInput.split("\n")
+        val lines = parseLines(strLines)
+
+        // 9,4 -> 3,4
+        assertTrue(lines[2].isHorizontal)
+        val expectedPoints = listOf(Pair(9, 4), Pair(8, 4), Pair(7, 4), Pair(6, 4), Pair(5, 4), Pair(4, 4), Pair(3, 4))
+        assertEquals(expectedPoints, lines[2].getCoveredPoints())
+
+        // 7,0 -> 7,4
+        assertTrue(lines[4].isVertical)
+        val expectedPoints2 = listOf(Pair(7, 0), Pair(7, 1), Pair(7, 2), Pair(7, 3), Pair(7, 4))
+        assertEquals(expectedPoints2, lines[4].getCoveredPoints())
+
+        // 6,4 -> 2,0
+        assertTrue(lines[5].isDiagonal)
+        val expectedPoints3 = listOf(Pair(6, 4), Pair(5, 3), Pair(4, 2), Pair(3, 1), Pair(2, 0))
+        assertEquals(expectedPoints3, lines[5].getCoveredPoints())
     }
 
     @Test
