@@ -37,20 +37,29 @@ data class Line(val x1: Int, val y1: Int, val x2: Int, val y2: Int) {
             } else {
                 start downTo end
             }
+
+    override fun toString(): String {
+        return "$x1,$y1 -> $x2,$y2"
+    }
+
+    companion object {
+        fun fromString(str: String): Line {
+            return str.split(',', ' ').let {
+                Line(
+                        x1 = it[0].toInt(),
+                        y1 = it[1].toInt(),
+                        x2 = it[3].toInt(),
+                        y2 = it[4].toInt()
+                )
+            }
+        }
+    }
 }
 
 fun parseLines(strLines: List<String>): List<Line> =
         strLines
                 .filter { it.isNotBlank() }
-                .map { it.split(',', ' ') }
-                .map {
-                    Line(
-                            x1 = it[0].toInt(),
-                            y1 = it[1].toInt(),
-                            x2 = it[3].toInt(),
-                            y2 = it[4].toInt()
-                    )
-                }
+                .map { Line.fromString(it) }
 
 data class Map(val width: Int = 0,
                val height: Int = 0,
