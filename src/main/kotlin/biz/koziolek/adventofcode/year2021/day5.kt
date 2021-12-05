@@ -86,8 +86,21 @@ data class Map(val width: Int = 0,
                 points = (0 until newHeight).map { y ->
                     val pointsForRow = coveredPoints.filter { it.second == y }
 
-                    (0 until newWidth).map { x ->
-                        points.getOrElse(y) { emptyList() }.getOrElse(x) { 0 } + pointsForRow.count { it.first == x }
+                    if (pointsForRow.isEmpty()) {
+                        if (y >= height) {
+                            // Add new row
+                            List(newWidth) { 0 }
+                        } else if (newWidth == width) {
+                            // Reuse existing row
+                            points[y]
+                        } else {
+                            // Add new columns
+                            points[y] + List(newWidth - width) { 0 }
+                        }
+                    } else {
+                        (0 until newWidth).map { x ->
+                            points.getOrElse(y) { emptyList() }.getOrElse(x) { 0 } + pointsForRow.count { it.first == x }
+                        }
                     }
                 }
         )
