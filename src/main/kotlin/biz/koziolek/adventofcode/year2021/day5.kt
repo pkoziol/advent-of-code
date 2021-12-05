@@ -83,9 +83,11 @@ data class Map(val width: Int = 0,
         return copy(
                 width = newWidth,
                 height = newHeight,
-                points = (0 until newHeight).map { i ->
-                    (0 until newWidth).map { j ->
-                        points.getOrElse(i) { emptyList() }.getOrElse(j) { 0 } + coveredPoints.count { it.first == j && it.second == i }
+                points = (0 until newHeight).map { y ->
+                    val pointsForRow = coveredPoints.filter { it.second == y }
+
+                    (0 until newWidth).map { x ->
+                        points.getOrElse(y) { emptyList() }.getOrElse(x) { 0 } + pointsForRow.count { it.first == x }
                     }
                 }
         )
@@ -99,11 +101,11 @@ data class Map(val width: Int = 0,
         val maxValue = points.maxOf { row -> row.maxOf { it } }
         val strLen = maxValue.toString().length
 
-        return (0 until height).joinToString(separator = "\n") { i ->
-            (0 until width).joinToString(separator = "") { j ->
-                when (points[i][j]) {
+        return (0 until height).joinToString(separator = "\n") { y ->
+            (0 until width).joinToString(separator = "") { x ->
+                when (points[y][x]) {
                     0 -> ".".repeat(strLen)
-                    else -> points[i][j].toString().padStart(strLen, ' ')
+                    else -> points[y][x].toString().padStart(strLen, ' ')
                 }
             }
         }
