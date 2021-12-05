@@ -16,3 +16,8 @@ jobs:
           cache: 'maven'
       - name: Build and test
         run: mvn --batch-mode --update-snapshots verify
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@v2
+        if: always()
+        with:
+          report_paths: 'target/surefire-reports/TEST-*.xml'
