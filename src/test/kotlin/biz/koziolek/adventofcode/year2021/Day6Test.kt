@@ -33,18 +33,46 @@ internal class Day6Test {
         val initialFish = createFish(sampleInput)
         assertEquals(5, initialFish.size)
 
-        val fishAfter18Days = (1..18).fold(initialFish) { acc, day -> simulateDay(acc) }
+        val fishAfter18Days = (1..18).fold(initialFish) { acc, _ -> simulateDay(acc) }
         assertEquals(26, fishAfter18Days.size)
 
-        val fishAfter80Days = (1..80).fold(initialFish) { acc, day -> simulateDay(acc) }
+        val fishAfter80Days = (1..80).fold(initialFish) { acc, _ -> simulateDay(acc) }
         assertEquals(5934, fishAfter80Days.size)
+    }
+
+    @Test
+    fun testSimulateSampleDayV2() {
+        val initialFish = convertV1StateToV2(createFish(sampleInput))
+        assertEquals(5, countFish(initialFish))
+
+        val fishAfter18Days = (1..18).fold(initialFish) { acc, _ -> simulateDayV2(acc) }
+        assertEquals(26, countFish(fishAfter18Days))
+
+        val fishAfter80Days = (1..80).fold(initialFish) { acc, _ -> simulateDayV2(acc) }
+        assertEquals(5934, countFish(fishAfter80Days))
+
+        val fishAfter256Days = (1..256).fold(initialFish) { acc, _ -> simulateDayV2(acc) }
+        assertEquals(26984457539, countFish(fishAfter256Days))
     }
 
     @Test
     fun testAnswerPart1() {
         val fullInput = File("src/main/resources/year2021/day6/input").readLines().first()
         val initialFish = createFish(fullInput)
-        val fishAfter80Days = (1..80).fold(initialFish) { acc, day -> simulateDay(acc) }
+
+        val fishAfter80Days = (1..80).fold(initialFish) { acc, _ -> simulateDay(acc) }
         assertEquals(354564, fishAfter80Days.size)
+
+        val fishAfter80DaysV2 = (1..80).fold(convertV1StateToV2(initialFish)) { acc, _ -> simulateDayV2(acc) }
+        assertEquals(354564, countFish(fishAfter80DaysV2))
+    }
+
+    @Test
+    fun testAnswerPart2() {
+        val fullInput = File("src/main/resources/year2021/day6/input").readLines().first()
+        val initialFish = createFish(fullInput)
+
+        val fishAfter80DaysV2 = (1..256).fold(convertV1StateToV2(initialFish)) { acc, _ -> simulateDayV2(acc) }
+        assertEquals(1609058859115, countFish(fishAfter80DaysV2))
     }
 }

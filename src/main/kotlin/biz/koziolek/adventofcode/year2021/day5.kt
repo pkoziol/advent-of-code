@@ -61,11 +61,11 @@ fun parseLines(strLines: List<String>): List<Line> =
                 .filter { it.isNotBlank() }
                 .map { Line.fromString(it) }
 
-data class Map(val width: Int = 0,
-               val height: Int = 0,
-               private val points: List<List<Int>> = emptyList()) {
+data class VentMap(val width: Int = 0,
+                   val height: Int = 0,
+                   private val points: List<List<Int>> = emptyList()) {
 
-    fun addLine(line: Line): Map {
+    fun addLine(line: Line): VentMap {
         if (!line.isHorizontal && !line.isVertical && !line.isDiagonal) {
             return this
         }
@@ -123,4 +123,4 @@ data class Map(val width: Int = 0,
     }
 }
 
-fun createMap(lines: List<Line>): Map = lines.fold(Map(), Map::addLine)
+fun createMap(lines: List<Line>): VentMap = lines.fold(VentMap(), VentMap::addLine)
