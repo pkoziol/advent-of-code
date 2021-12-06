@@ -1,15 +1,17 @@
 package biz.koziolek.adventofcode.year2021
 
 import java.io.File
-import kotlin.math.abs
 
 fun main() {
     val inputFile = File("src/main/resources/year2021/day6/input")
     val line = inputFile.bufferedReader().readLines().first()
     val initialFish = createFish(line)
     
-    val fishAfter80Days = (1..80).fold(initialFish) { acc, day -> simulateDay(acc) }
+    val fishAfter80Days = (1..80).fold(initialFish) { acc, _ -> simulateDay(acc) }
     println("Fish count after 80 days: ${fishAfter80Days.size}")
+
+    val fishAfter256Days = (1..256).fold(convertV1StateToV2(initialFish)) { acc, _ -> simulateDayV2(acc) }
+    println("Fish count after 256 days: ${countFish(fishAfter256Days)}")
 }
 
 data class Fish(val timer: Int)
@@ -27,3 +29,24 @@ fun simulateDay(fish: List<Fish>): List<Fish> {
         }
     }
 }
+
+fun convertV1StateToV2(fish: List<Fish>): Map<Int, Long> {
+    return fish.groupingBy { it.timer }.fold(0L) { acc, _ -> acc.inc() }
+}
+
+fun simulateDayV2(fishGroups: Map<Int, Long>): Map<Int, Long> {
+    return buildMap {
+        fishGroups.forEach {
+            when (it.key) {
+                0 -> {
+                    merge(6, it.value, Long::plus)
+                    merge(8, it.value, Long::plus)
+                }
+                else -> merge(it.key.dec(), it.value, Long::plus)
+            }
+        }
+    }
+}
+
+fun countFish(fishGroups: Map<Int, Long>): Long =
+        fishGroups.values.reduce(Long::plus)
