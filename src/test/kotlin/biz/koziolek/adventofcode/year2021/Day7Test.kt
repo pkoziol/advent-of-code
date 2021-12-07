@@ -36,4 +36,33 @@ internal class Day7Test {
         assertEquals(324, position)
         assertEquals(344535, cost)
     }
+
+    @Test
+    fun testCalculateNonLinearCost() {
+        assertEquals(66, calculateNonLinearCost(16, 5))
+        assertEquals(10, calculateNonLinearCost(1, 5))
+        assertEquals(6, calculateNonLinearCost(2, 5))
+        assertEquals(15, calculateNonLinearCost(0, 5))
+        assertEquals(1, calculateNonLinearCost(4, 5))
+        assertEquals(6, calculateNonLinearCost(2, 5))
+        assertEquals(3, calculateNonLinearCost(7, 5))
+        assertEquals(10, calculateNonLinearCost(1, 5))
+        assertEquals(6, calculateNonLinearCost(2, 5))
+        assertEquals(45, calculateNonLinearCost(14, 5))
+    }
+
+    @Test
+    fun testFindCheapestPositionSamplePart2() {
+        val (position, cost) = findCheapestPosition(sampleInput, ::calculateNonLinearCost)
+        assertEquals(5, position)
+        assertEquals(168, cost)
+    }
+
+    @Test
+    fun testAnswerPart2() {
+        val fullInput = File("src/main/resources/year2021/day7/input").readLines().first()
+        val (position, cost) = findCheapestPosition(fullInput, ::calculateNonLinearCost)
+        assertEquals(472, position)
+        assertEquals(95581659, cost)
+    }
 }
