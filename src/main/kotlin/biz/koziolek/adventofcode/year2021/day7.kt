@@ -6,15 +6,18 @@ import kotlin.math.abs
 fun main() {
     val inputFile = File("src/main/resources/year2021/day7/input")
     val line = inputFile.bufferedReader().readLines().first()
-    val (position, cost) = findCheapestPosition(line, ::calculateLinearCost)
 
-    println("Cheapest position is $position with cost: $cost")
+    val (position, cost) = findCheapestPosition(line, ::calculateLinearCost)
+    println("Cheapest position is $position with linear cost: $cost")
+
+    val (position2, cost2) = findCheapestPosition(line, ::calculateNonLinearCost)
+    println("Cheapest position is $position2 with non-linear cost: $cost2")
 }
 
 fun findCheapestPosition(line: String, costFunction: (Int, Int) -> Int): Pair<Int, Int> {
     val initialPositions = line.split(',')
             .map { it.toInt() }
-    
+
     return (0..initialPositions.maxOf { it })
             .map { dst -> Pair(dst, initialPositions.sumOf { src -> costFunction(src, dst) }) }
             .minByOrNull { it.second }
@@ -23,3 +26,8 @@ fun findCheapestPosition(line: String, costFunction: (Int, Int) -> Int): Pair<In
 
 fun calculateLinearCost(source: Int, destination: Int): Int =
         abs(source - destination)
+
+fun calculateNonLinearCost(source: Int, destination: Int): Int {
+    val n = abs(source - destination)
+    return ((1 + n) / 2.0 * n).toInt()
+}
