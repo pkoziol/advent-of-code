@@ -8,11 +8,11 @@ fun main() {
     val strLines = inputFile.bufferedReader().readLines()
     val lines = parseLines(strLines)
 
-    val map1 = createMap(lines.filter { it.isHorizontal || it.isVertical })
+    val map1 = createVentMap(lines.filter { it.isHorizontal || it.isVertical })
     println(map1)
     println(">= 2: ${map1.countGreaterOrEqual(2)}")
 
-    val map2 = createMap(lines)
+    val map2 = createVentMap(lines)
     println(map2)
     println(">= 2: ${map2.countGreaterOrEqual(2)}")
 }
@@ -123,4 +123,4 @@ data class VentMap(val width: Int = 0,
     }
 }
 
-fun createMap(lines: List<Line>): VentMap = lines.fold(VentMap(), VentMap::addLine)
+fun createVentMap(lines: List<Line>): VentMap = lines.fold(VentMap(), VentMap::addLine)
