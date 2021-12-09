@@ -1,8 +1,7 @@
 package biz.koziolek.adventofcode.year2021
 
+import biz.koziolek.adventofcode.visitAll
 import java.io.File
-import java.util.*
-import kotlin.collections.HashSet
 
 fun main() {
     val inputFile = File("src/main/resources/year2021/day9/input")
@@ -32,22 +31,14 @@ fun findSmokeBasins(smokeMap: Array<IntArray>): Set<Set<Pair<Int, Int>>> {
     return findSmokeLowPoints(smokeMap)
             .map { lowPoint ->
                 buildSet {
-                    val coordsToCheck: Queue<Pair<Int, Int>> = ArrayDeque()
-                    val checkedCoords: MutableSet<Pair<Int, Int>> = HashSet()
-                    var currentCoord: Pair<Int, Int>? = lowPoint
-
-                    while (currentCoord != null) {
-                        if (currentCoord !in checkedCoords) {
-                            checkedCoords.add(currentCoord)
-
-                            val value = smokeMap[currentCoord.second][currentCoord.first]
-                            if (value != 9) {
-                                add(currentCoord)
-                                coordsToCheck.addAll(getAdjacentCoords(currentCoord, smokeMap))
-                            }
+                    visitAll(start = lowPoint) { currentCoord ->
+                        val value = smokeMap[currentCoord.second][currentCoord.first]
+                        if (value != 9) {
+                            add(currentCoord)
+                            getAdjacentCoords(currentCoord, smokeMap)
+                        } else {
+                            emptySet()
                         }
-
-                        currentCoord = coordsToCheck.poll()
                     }
                 }
             }
