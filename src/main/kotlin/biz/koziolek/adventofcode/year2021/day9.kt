@@ -1,6 +1,8 @@
 package biz.koziolek.adventofcode.year2021
 
 import java.io.File
+import java.util.*
+import kotlin.collections.HashSet
 
 fun main() {
     val inputFile = File("src/main/resources/year2021/day9/input")
@@ -8,12 +10,49 @@ fun main() {
     val smokeMap = parseSmokeMap(lines)
 
     println("Low points risk sum is: ${getLowPointsRiskSum(smokeMap)}")
+
+    val basins = findSmokeBasins(smokeMap)
+    println("Product of sizes of the three largest basins is: ${getLargestBasinsSizeProduct(basins, n = 3)}")
 }
 
 fun getLowPointsRiskSum(smokeMap: Array<IntArray>): Int =
         findSmokeLowPoints(smokeMap).let { lowPoints ->
             lowPoints.sumOf { getRiskLevel(it, smokeMap, lowPoints) }
         }
+
+fun getLargestBasinsSizeProduct(basins: Set<Set<Pair<Int, Int>>>, n: Int) =
+        basins.map { it.size }
+                .sorted()
+                .reversed()
+                .take(n)
+                .ifEmpty { return 0 }
+                .fold(1) { acc, size -> acc * size }
+
+fun findSmokeBasins(smokeMap: Array<IntArray>): Set<Set<Pair<Int, Int>>> {
+    return findSmokeLowPoints(smokeMap)
+            .map { lowPoint ->
+                buildSet {
+                    val coordsToCheck: Queue<Pair<Int, Int>> = ArrayDeque()
+                    val checkedCoords: MutableSet<Pair<Int, Int>> = HashSet()
+                    var currentCoord: Pair<Int, Int>? = lowPoint
+
+                    while (currentCoord != null) {
+                        if (currentCoord !in checkedCoords) {
+                            checkedCoords.add(currentCoord)
+
+                            val value = smokeMap[currentCoord.second][currentCoord.first]
+                            if (value != 9) {
+                                add(currentCoord)
+                                coordsToCheck.addAll(getAdjacentCoords(currentCoord, smokeMap))
+                            }
+                        }
+
+                        currentCoord = coordsToCheck.poll()
+                    }
+                }
+            }
+            .toSet()
+}
 
 fun parseSmokeMap(lines: List<String>): Array<IntArray> =
         lines
