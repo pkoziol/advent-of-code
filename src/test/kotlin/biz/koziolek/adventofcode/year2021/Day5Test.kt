@@ -94,7 +94,7 @@ internal class Day5Test {
         val strLines = sampleInput.split("\n")
         val lines = parseLines(strLines).filter { it.isHorizontal || it.isVertical }
 
-        val map = createMap(lines)
+        val map = createVentMap(lines)
 
         assertEquals(10, map.width)
         assertEquals(10, map.height)
@@ -118,7 +118,7 @@ internal class Day5Test {
     fun testAnswerPart1Sample() {
         val strLines = sampleInput.split("\n")
         val lines = parseLines(strLines).filter { it.isHorizontal || it.isVertical }
-        val map = createMap(lines)
+        val map = createVentMap(lines)
 
         assertEquals(5, map.countGreaterOrEqual(2))
     }
@@ -127,7 +127,7 @@ internal class Day5Test {
     fun testAnswerPart1() {
         val strLines = File("src/main/resources/year2021/day5/input").readLines()
         val lines = parseLines(strLines).filter { it.isHorizontal || it.isVertical }
-        val map = createMap(lines)
+        val map = createVentMap(lines)
 
         assertEquals(4993, map.countGreaterOrEqual(2))
     }
@@ -136,7 +136,7 @@ internal class Day5Test {
     fun testMappingPart2Sample() {
         val strLines = sampleInput.split("\n")
         val lines = parseLines(strLines)
-        val map = createMap(lines)
+        val map = createVentMap(lines)
 
         val expectedToString = """
             1.1....11.
@@ -157,7 +157,7 @@ internal class Day5Test {
     fun testAnswerPart2Sample() {
         val strLines = sampleInput.split("\n")
         val lines = parseLines(strLines)
-        val map = createMap(lines)
+        val map = createVentMap(lines)
 
         assertEquals(12, map.countGreaterOrEqual(2))
     }
@@ -166,7 +166,7 @@ internal class Day5Test {
     fun testAnswerPart2() {
         val strLines = File("src/main/resources/year2021/day5/input").readLines()
         val lines = parseLines(strLines)
-        val map = createMap(lines)
+        val map = createVentMap(lines)
 
         assertEquals(21101, map.countGreaterOrEqual(2))
     }
