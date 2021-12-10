@@ -2,6 +2,7 @@ package biz.koziolek.adventofcode.year2021
 
 import java.io.File
 import java.util.*
+import kotlin.reflect.KClass
 
 fun main() {
     val inputFile = File("src/main/resources/year2021/day10/input")
@@ -9,20 +10,34 @@ fun main() {
     val rootChunks = parseChunks(lines)
 
     println("Corrupted chunks score: ${getCorruptedChunksScore(rootChunks)}")
+
+    val containingIncompleteChunks = rootChunks.filter { !it.contains(CorruptedChunk::class) && it.contains(IncompleteChunk::class) }
+    println("Autocomplete score: ${getAutocompleteScore(containingIncompleteChunks)}")
 }
 
 sealed interface Chunk {
     val children: List<Chunk>
     fun addChild(chunk: Chunk): Chunk
     fun asCode(): String
-    fun containsCorrupted(): Boolean = children.any { it.containsCorrupted() }
-    fun getCorrupted(): CorruptedChunk? = children.mapNotNull { it.getCorrupted() }.firstOrNull()
+
+    fun contains(clazz: KClass<out Chunk>): Boolean = clazz.isInstance(this) || children.any { it.contains(clazz) }
+
+    fun <T : Chunk> find(clazz: KClass<T>): T? =
+            if (clazz.isInstance(this)) {
+                this as T
+            } else {
+                children.mapNotNull { it.find(clazz) }.firstOrNull()
+            }
+
+    fun complete(): Chunk
 }
 
 data class RootChunk(override val children: List<Chunk>) : Chunk {
     override fun addChild(chunk: Chunk) = RootChunk(children + chunk)
 
     override fun asCode() = children.joinToString("") { it.asCode() }
+
+    override fun complete() = RootChunk(children.map { it.complete() })
 }
 
 data class IncompleteChunk(
@@ -40,6 +55,12 @@ data class IncompleteChunk(
             IncompleteChunk(open, children + chunk)
 
     override fun asCode(): String = open + children.joinToString("") { it.asCode() }
+
+    override fun complete() = CompleteChunk(
+            open = open,
+            close = openToCloseBracketsMap[open]!!,
+            children = children.map { it.complete() }
+    )
 }
 
 data class CompleteChunk(
@@ -51,6 +72,12 @@ data class CompleteChunk(
             CompleteChunk(open, close, children + chunk)
 
     override fun asCode(): String = open + children.joinToString("") { it.asCode() } + close
+
+    override fun complete() = CompleteChunk(
+            open = open,
+            close = close,
+            children = children.map { it.complete() }
+    )
 }
 
 data class CorruptedChunk(
@@ -65,9 +92,11 @@ data class CorruptedChunk(
     
     fun getErrorMessage() = "Expected ${openToCloseBracketsMap[open]}, but found $close instead."
 
-    override fun containsCorrupted() = true
-
-    override fun getCorrupted() = this
+    override fun complete() = CompleteChunk(
+            open = open,
+            close = openToCloseBracketsMap[open]!!,
+            children = children.map { it.complete() }
+    )
 }
 
 private val openToCloseBracketsMap = mapOf(
@@ -146,15 +175,42 @@ fun printChunks(chunks: List<Chunk>, indent: Int = 0) {
 }
 
 fun getCorruptedChunksScore(rootChunks: List<RootChunk>): Int =
-        rootChunks.filter { it.containsCorrupted() }
-                .map { it.getCorrupted() }
-                .sumOf { getPoints(it!!) }
+        rootChunks.filter { it.contains(CorruptedChunk::class) }
+                .map { it.find(CorruptedChunk::class) }
+                .sumOf { getCorruptedPoints(it!!.close) }
 
-fun getPoints(corruptedChunk: CorruptedChunk): Int =
-        when (corruptedChunk.close) {
+fun getCorruptedPoints(char: Char): Int =
+        when (char) {
             ')' -> 3
             ']' -> 57
             '}' -> 1197
             '>' -> 25137
-            else -> throw IllegalArgumentException("Unexpected close character: ${corruptedChunk.close}")
+            else -> throw IllegalArgumentException("Unexpected close character: $char")
+        }
+
+fun getAutocompleteScore(rootChunks: List<RootChunk>): Long {
+    val scores = rootChunks.map { getAutocompleteScore(it) }.sorted()
+
+    if (scores.size % 2 != 1) {
+        throw IllegalArgumentException("Even number of incomplete chunks passed - this is not supported")
+    }
+
+    return scores[scores.size / 2]
+}
+
+fun getAutocompleteScore(rootChunk: RootChunk): Long {
+    val oldCode = rootChunk.asCode()
+    val newCode = rootChunk.complete().asCode()
+    val diff = newCode.substring(oldCode.length)
+
+    return diff.fold(0) { acc, c -> acc * 5 + getAutocompletePoints(c) }
+}
+
+fun getAutocompletePoints(char: Char): Int =
+        when (char) {
+            ')' -> 1
+            ']' -> 2
+            '}' -> 3
+            '>' -> 4
+            else -> throw IllegalArgumentException("Unexpected close character: $char")
         }
