@@ -171,6 +171,6 @@ internal class Day10Test {
         val fullInput = File("src/main/resources/year2021/day10/input").readLines()
         val rootChunks = fullInput.map { parseChunks(it) }
         val containingIncompleteChunks = rootChunks.filter { !it.contains(CorruptedChunk::class) && it.contains(IncompleteChunk::class) }
-        assertEquals(288957, getAutocompleteScore(containingIncompleteChunks))
+        assertEquals(4330777059, getAutocompleteScore(containingIncompleteChunks))
     }
 }
