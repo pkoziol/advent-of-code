@@ -107,14 +107,16 @@ internal class Day10Test {
     @Test
     fun testGetErrorMessagesFromSample() {
         val rootChunks = sampleInput.map { parseChunks(it) }
-        val containingCorruptedChunks = rootChunks.filter { it.containsCorrupted() }
-        assertEquals(5, containingCorruptedChunks.size)
+        val corruptedChunks = rootChunks
+                .filter { it.contains(CorruptedChunk::class) }
+                .map { it.find(CorruptedChunk::class) }
+        assertEquals(5, corruptedChunks.size)
 
-        assertEquals("Expected ], but found } instead.", containingCorruptedChunks[0].getCorrupted()?.getErrorMessage())
-        assertEquals("Expected ], but found ) instead.", containingCorruptedChunks[1].getCorrupted()?.getErrorMessage())
-        assertEquals("Expected ), but found ] instead.", containingCorruptedChunks[2].getCorrupted()?.getErrorMessage())
-        assertEquals("Expected >, but found ) instead.", containingCorruptedChunks[3].getCorrupted()?.getErrorMessage())
-        assertEquals("Expected ], but found > instead.", containingCorruptedChunks[4].getCorrupted()?.getErrorMessage())
+        assertEquals("Expected ], but found } instead.", corruptedChunks[0]?.getErrorMessage())
+        assertEquals("Expected ], but found ) instead.", corruptedChunks[1]?.getErrorMessage())
+        assertEquals("Expected ), but found ] instead.", corruptedChunks[2]?.getErrorMessage())
+        assertEquals("Expected >, but found ) instead.", corruptedChunks[3]?.getErrorMessage())
+        assertEquals("Expected ], but found > instead.", corruptedChunks[4]?.getErrorMessage())
     }
 
     @Test
@@ -128,5 +130,47 @@ internal class Day10Test {
         val fullInput = File("src/main/resources/year2021/day10/input").readLines()
         val rootChunks = fullInput.map { parseChunks(it) }
         assertEquals(387363, getCorruptedChunksScore(rootChunks))
+    }
+
+    @Test
+    fun testGetIncompleteChunksFromSample() {
+        val rootChunks = sampleInput.map { parseChunks(it) }
+        val containingIncompleteChunks = rootChunks.filter { !it.contains(CorruptedChunk::class) && it.contains(IncompleteChunk::class) }
+        assertEquals(5, containingIncompleteChunks.size)
+
+        assertEquals("[({(<(())[]>[[{[]{<()<>>", containingIncompleteChunks[0].asCode())
+        assertEquals("[(()[<>])]({[<{<<[]>>(", containingIncompleteChunks[1].asCode())
+        assertEquals("(((({<>}<{<{<>}{[]{[]{}", containingIncompleteChunks[2].asCode())
+        assertEquals("{<[[]]>}<{[{[{[]{()[[[]", containingIncompleteChunks[3].asCode())
+        assertEquals("<{([{{}}[<[[[<>{}]]]>[]]", containingIncompleteChunks[4].asCode())
+    }
+
+    @Test
+    fun testAutocompleteChunksFromSample() {
+        val rootChunks = sampleInput.map { parseChunks(it) }
+        val autocompletedChunks = rootChunks.filter { !it.contains(CorruptedChunk::class) && it.contains(IncompleteChunk::class) }
+                .map { it.complete() }
+        assertEquals(5, autocompletedChunks.size)
+
+        assertEquals("[({(<(())[]>[[{[]{<()<>>}}]])})]", autocompletedChunks[0].asCode())
+        assertEquals("[(()[<>])]({[<{<<[]>>()}>]})", autocompletedChunks[1].asCode())
+        assertEquals("(((({<>}<{<{<>}{[]{[]{}}}>}>))))", autocompletedChunks[2].asCode())
+        assertEquals("{<[[]]>}<{[{[{[]{()[[[]]]}}]}]}>", autocompletedChunks[3].asCode())
+        assertEquals("<{([{{}}[<[[[<>{}]]]>[]]])}>", autocompletedChunks[4].asCode())
+    }
+
+    @Test
+    fun testAutocompleteScoreForSample() {
+        val rootChunks = sampleInput.map { parseChunks(it) }
+        val containingIncompleteChunks = rootChunks.filter { !it.contains(CorruptedChunk::class) && it.contains(IncompleteChunk::class) }
+        assertEquals(288957, getAutocompleteScore(containingIncompleteChunks))
+    }
+
+    @Test
+    fun testAnswer2() {
+        val fullInput = File("src/main/resources/year2021/day10/input").readLines()
+        val rootChunks = fullInput.map { parseChunks(it) }
+        val containingIncompleteChunks = rootChunks.filter { !it.contains(CorruptedChunk::class) && it.contains(IncompleteChunk::class) }
+        assertEquals(288957, getAutocompleteScore(containingIncompleteChunks))
     }
 }
