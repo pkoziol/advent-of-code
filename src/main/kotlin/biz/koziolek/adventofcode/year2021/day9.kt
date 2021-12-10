@@ -47,7 +47,7 @@ fun findSmokeBasins(smokeMap: Array<IntArray>): Set<Set<Pair<Int, Int>>> {
 
 fun parseSmokeMap(lines: List<String>): Array<IntArray> =
         lines
-                .map { line -> line.toCharArray().map { char -> char - '0' }.toIntArray() }
+                .map { line -> line.toCharArray().map { it.digitToInt() }.toIntArray() }
                 .toTypedArray()
 
 fun findSmokeLowPoints(smokeMap: Array<IntArray>): Set<Pair<Int, Int>> =
