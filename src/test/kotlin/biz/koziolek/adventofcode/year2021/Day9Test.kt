@@ -1,5 +1,6 @@
 package biz.koziolek.adventofcode.year2021
 
+import biz.koziolek.adventofcode.Coord
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -20,10 +21,10 @@ internal class Day9Test {
         val lowPoints = findSmokeLowPoints(smokeMap)
 
         assertEquals(setOf(
-                Pair(1, 0),
-                Pair(9, 0),
-                Pair(2, 2),
-                Pair(6, 4),
+                Coord(1, 0),
+                Coord(9, 0),
+                Coord(2, 2),
+                Coord(6, 4),
         ), lowPoints)
     }
 
@@ -32,10 +33,10 @@ internal class Day9Test {
         val smokeMap = parseSmokeMap(sampleInput)
         val lowPoints = findSmokeLowPoints(smokeMap)
 
-        assertEquals(2, getRiskLevel(Pair(1, 0), smokeMap, lowPoints))
-        assertEquals(1, getRiskLevel(Pair(9, 0), smokeMap, lowPoints))
-        assertEquals(6, getRiskLevel(Pair(2, 2), smokeMap, lowPoints))
-        assertEquals(6, getRiskLevel(Pair(6, 4), smokeMap, lowPoints))
+        assertEquals(2, getRiskLevel(Coord(1, 0), smokeMap, lowPoints))
+        assertEquals(1, getRiskLevel(Coord(9, 0), smokeMap, lowPoints))
+        assertEquals(6, getRiskLevel(Coord(2, 2), smokeMap, lowPoints))
+        assertEquals(6, getRiskLevel(Coord(6, 4), smokeMap, lowPoints))
     }
 
     @Test
@@ -60,16 +61,16 @@ internal class Day9Test {
         val basins = findSmokeBasins(smokeMap)
         assertEquals(4, basins.size)
 
-        val topLeftBasin = basins.single { Pair(1, 0) in it }
+        val topLeftBasin = basins.single { Coord(1, 0) in it }
         assertEquals(3, topLeftBasin.size)
 
-        val topRightBasin = basins.single { Pair(9, 0) in it }
+        val topRightBasin = basins.single { Coord(9, 0) in it }
         assertEquals(9, topRightBasin.size)
 
-        val middleBasin = basins.single { Pair(2, 2) in it }
+        val middleBasin = basins.single { Coord(2, 2) in it }
         assertEquals(14, middleBasin.size)
 
-        val middleRightBasin = basins.single { Pair(6, 4) in it }
+        val middleRightBasin = basins.single { Coord(6, 4) in it }
         assertEquals(9, middleRightBasin.size)
     }
 

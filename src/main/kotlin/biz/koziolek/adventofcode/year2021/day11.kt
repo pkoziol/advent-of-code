@@ -13,12 +13,6 @@ fun main() {
     println("First step all flash: ${nextTimeAllFlash(map)}")
 }
 
-data class Coord(val x: Int, val y: Int) {
-    operator fun plus(other: Coord) = Coord(x + other.x, y + other.y)
-    operator fun minus(other: Coord) = Coord(x - other.x, y - other.y)
-    operator fun unaryMinus() = Coord(-x, -y)
-}
-
 data class Octopus(val energy: Int, val flashed: Boolean = false) {
     fun increaseEnergy(): Octopus {
         if (flashed) {
@@ -38,7 +32,7 @@ data class Octopus(val energy: Int, val flashed: Boolean = false) {
 fun parseOctopusMap(lines: List<String>): Map<Coord, Octopus> =
     lines.flatMapIndexed { y, line ->
         line.mapIndexed { x, char ->
-            Pair(Coord(x, y), Octopus(char.digitToInt()))
+            Coord(x, y) to Octopus(char.digitToInt())
         }
     }.toMap()
 
@@ -65,7 +59,7 @@ fun calculateNextStep(map: Map<Coord, Octopus>): Map<Coord, Octopus> {
             computeIfPresent(currentCoord) { coord, octopus ->
                 val newOctopus = octopus.increaseEnergy()
                 if (!octopus.flashed && newOctopus.flashed) {
-                    toVisit.addAll(getAdjacentCoords(coord, this))
+                    toVisit.addAll(this.getAdjacentCoords(coord, includeDiagonal = true))
                 }
                 newOctopus
             }
@@ -75,29 +69,9 @@ fun calculateNextStep(map: Map<Coord, Octopus>): Map<Coord, Octopus> {
     }
 }
 
-private fun getAdjacentCoords(coord: Coord, map: Map<Coord, Octopus>): Set<Coord> {
-    return listOf(
-        Coord(-1, -1),
-        Coord(0, -1),
-        Coord(1, -1),
-        Coord(-1, 0),
-        Coord(1, 0),
-        Coord(-1, 1),
-        Coord(0, 1),
-        Coord(1, 1),
-    )
-        .map { coord + it }
-        .filter { map[it] != null }
-        .toSet()
-}
-
-fun getWidth(map: Map<Coord, Octopus>) = map.keys.maxOfOrNull { it.x }?.plus(1) ?: 0
-
-fun getHeight(map: Map<Coord, Octopus>) = map.keys.maxOfOrNull { it.y }?.plus(1) ?: 0
-
 fun toString(map: Map<Coord, Octopus>, color: Boolean = true): String {
-    val width = getWidth(map)
-    val height = getHeight(map)
+    val width = map.getWidth()
+    val height = map.getHeight()
 
     return buildString {
         for (y in 0 until height) {
