@@ -1,8 +1,8 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day4
 
+import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
 internal class Day4Test {
 
@@ -49,7 +49,7 @@ internal class Day4Test {
 
     @Test
     fun testParsingFullInput() {
-        val lines = File("src/main/resources/year2021/day4/input").readLines()
+        val lines = findInput(object {}).readLines()
 
         val moves = readMoves(lines)
         assertEquals(100, moves.size)
@@ -151,7 +151,7 @@ internal class Day4Test {
 
     @Test
     fun testPlayRealBingo() {
-        val lines = File("src/main/resources/year2021/day4/input").readLines()
+        val lines = findInput(object {}).readLines()
         val moves = readMoves(lines)
         val boards = readBoards(lines)
 

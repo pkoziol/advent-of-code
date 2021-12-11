@@ -1,8 +1,8 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day6
 
+import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
 internal class Day6Test {
 
@@ -22,7 +22,7 @@ internal class Day6Test {
 
     @Test
     fun testParseFullInput() {
-        val fullInput = File("src/main/resources/year2021/day6/input").readLines().first()
+        val fullInput = findInput(object {}).readLines().first()
         val fish = createFish(fullInput)
 
         assertEquals(300, fish.size)
@@ -57,7 +57,7 @@ internal class Day6Test {
 
     @Test
     fun testAnswerPart1() {
-        val fullInput = File("src/main/resources/year2021/day6/input").readLines().first()
+        val fullInput = findInput(object {}).readLines().first()
         val initialFish = createFish(fullInput)
 
         val fishAfter80Days = (1..80).fold(initialFish) { acc, _ -> simulateDay(acc) }
@@ -69,7 +69,7 @@ internal class Day6Test {
 
     @Test
     fun testAnswerPart2() {
-        val fullInput = File("src/main/resources/year2021/day6/input").readLines().first()
+        val fullInput = findInput(object {}).readLines().first()
         val initialFish = createFish(fullInput)
 
         val fishAfter80DaysV2 = (1..256).fold(convertV1StateToV2(initialFish)) { acc, _ -> simulateDayV2(acc) }

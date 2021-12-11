@@ -1,10 +1,10 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day3
 
+import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
-internal class Day3KtTest {
+internal class Day3Test {
 
     private val sampleInput = """
             00100
@@ -45,7 +45,7 @@ internal class Day3KtTest {
 
     @Test
     fun testFullInput() {
-        val lines = File("src/main/resources/year2021/day3/input").readLines()
+        val lines = findInput(object {}).readLines()
         val gammaRate = calculateGammaRate(lines)
         val epsilonRate = calculateEpsilonRate(lines)
         val powerConsumption = calculatePowerConsumption(lines)
@@ -67,7 +67,7 @@ internal class Day3KtTest {
 
     @Test
     fun testFullInputPart2() {
-        val lines = File("src/main/resources/year2021/day3/input").readLines()
+        val lines = findInput(object {}).readLines()
         val oxygenGeneratorRating = calculateOxygenGeneratorRating(lines)
         val co2ScrubberRating = calculateCO2ScrubberRating(lines)
         val lifeSupportRating = calculateLifeSupportRating(lines)

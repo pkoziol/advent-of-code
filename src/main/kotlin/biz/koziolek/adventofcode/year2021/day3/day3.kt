@@ -1,9 +1,9 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day3
 
-import java.io.File
+import biz.koziolek.adventofcode.findInput
 
 fun main() {
-    val inputFile = File("src/main/resources/year2021/day3/input")
+    val inputFile = findInput(object {})
     val lines = inputFile.bufferedReader().readLines()
 
     val gammaRate = calculateGammaRate(lines)

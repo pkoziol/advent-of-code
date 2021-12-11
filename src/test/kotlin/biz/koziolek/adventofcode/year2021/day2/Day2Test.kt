@@ -1,10 +1,10 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day2
 
+import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
-internal class Day2KtTest {
+internal class Day2Test {
 
     private val sampleInput = """
             forward 5
@@ -31,7 +31,7 @@ internal class Day2KtTest {
 
     @Test
     fun testFullInput() {
-        val position = File("src/main/resources/year2021/day2/input").useLines {
+        val position = findInput(object {}).useLines {
             calculatePosition(it)
         }
         assertEquals(1991, position.horizontal)
@@ -40,7 +40,7 @@ internal class Day2KtTest {
 
     @Test
     fun testFullInputWithAim() {
-        val position = File("src/main/resources/year2021/day2/input").useLines {
+        val position = findInput(object {}).useLines {
             calculatePositionWithAim(it)
         }
         assertEquals(1991, position.horizontal)

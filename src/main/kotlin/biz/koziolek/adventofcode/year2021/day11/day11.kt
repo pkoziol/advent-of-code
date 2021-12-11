@@ -1,14 +1,13 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day11
 
 import biz.koziolek.adventofcode.*
-import java.io.File
 import java.util.*
 
 fun main() {
-    val inputFile = File("src/main/resources/year2021/day11/input")
+    val inputFile = findInput(object {})
     val lines = inputFile.bufferedReader().readLines()
     val map = parseOctopusMap(lines)
-    
+
     println("Flashes after 100 steps: ${countFlashes(map, maxStep = 100)}")
     println("First step all flash: ${nextTimeAllFlash(map)}")
 }

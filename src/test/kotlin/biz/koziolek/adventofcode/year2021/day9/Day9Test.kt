@@ -1,9 +1,9 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day9
 
 import biz.koziolek.adventofcode.Coord
+import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
 internal class Day9Test {
 
@@ -48,7 +48,7 @@ internal class Day9Test {
 
     @Test
     fun testAnswerPart1() {
-        val fullInput = File("src/main/resources/year2021/day9/input").readLines()
+        val fullInput = findInput(object {}).readLines()
         val smokeMap = parseSmokeMap(fullInput)
         val lowPointsRiskSum = getLowPointsRiskSum(smokeMap)
         assertEquals(580, lowPointsRiskSum)
@@ -84,7 +84,7 @@ internal class Day9Test {
 
     @Test
     fun testAnswerPart2() {
-        val fullInput = File("src/main/resources/year2021/day9/input").readLines()
+        val fullInput = findInput(object {}).readLines()
         val smokeMap = parseSmokeMap(fullInput)
         val basins = findSmokeBasins(smokeMap)
         val largestBasinsSizeProduct = getLargestBasinsSizeProduct(basins, n = 3)

@@ -1,9 +1,9 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day11
 
 import biz.koziolek.adventofcode.Coord
+import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
 internal class Day11Test {
 
@@ -349,7 +349,7 @@ internal class Day11Test {
 
     @Test
     fun testAnswer1() {
-        val fullInput = File("src/main/resources/year2021/day11/input").readLines()
+        val fullInput = findInput(object {}).readLines()
         val map0 = parseOctopusMap(fullInput)
         
         assertEquals(1741, countFlashes(map0, maxStep = 100))
@@ -364,7 +364,7 @@ internal class Day11Test {
 
     @Test
     fun testAnswer2() {
-        val fullInput = File("src/main/resources/year2021/day11/input").readLines()
+        val fullInput = findInput(object {}).readLines()
         val map0 = parseOctopusMap(fullInput)
 
         assertEquals(440, nextTimeAllFlash(map0))

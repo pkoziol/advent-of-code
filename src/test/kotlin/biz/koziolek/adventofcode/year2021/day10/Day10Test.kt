@@ -1,8 +1,8 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day10
 
+import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
 internal class Day10Test {
 
@@ -127,7 +127,7 @@ internal class Day10Test {
 
     @Test
     fun testAnswerPart1() {
-        val fullInput = File("src/main/resources/year2021/day10/input").readLines()
+        val fullInput = findInput(object {}).readLines()
         val rootChunks = fullInput.map { parseChunks(it) }
         assertEquals(387363, getCorruptedChunksScore(rootChunks))
     }
@@ -168,7 +168,7 @@ internal class Day10Test {
 
     @Test
     fun testAnswer2() {
-        val fullInput = File("src/main/resources/year2021/day10/input").readLines()
+        val fullInput = findInput(object {}).readLines()
         val rootChunks = fullInput.map { parseChunks(it) }
         val containingIncompleteChunks = rootChunks.filter { !it.contains(CorruptedChunk::class) && it.contains(IncompleteChunk::class) }
         assertEquals(4330777059, getAutocompleteScore(containingIncompleteChunks))

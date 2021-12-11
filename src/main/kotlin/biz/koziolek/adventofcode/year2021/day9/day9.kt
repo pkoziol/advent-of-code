@@ -1,12 +1,12 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day9
 
 import biz.koziolek.adventofcode.Coord
+import biz.koziolek.adventofcode.findInput
 import biz.koziolek.adventofcode.getAdjacentCoords
 import biz.koziolek.adventofcode.visitAll
-import java.io.File
 
 fun main() {
-    val inputFile = File("src/main/resources/year2021/day9/input")
+    val inputFile = findInput(object {})
     val lines = inputFile.bufferedReader().readLines()
     val smokeMap = parseSmokeMap(lines)
 

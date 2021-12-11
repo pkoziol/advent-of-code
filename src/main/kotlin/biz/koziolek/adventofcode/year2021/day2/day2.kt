@@ -1,9 +1,9 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day2
 
-import java.io.File
+import biz.koziolek.adventofcode.findInput
 
 fun main() {
-    val inputFile = File("src/main/resources/year2021/day2/input")
+    val inputFile = findInput(object {})
     val position = calculatePosition(inputFile.bufferedReader().lineSequence())
     println("Position: $position")
     println("Answer 1: ${position.horizontal * position.depth}")

@@ -1,10 +1,10 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day1
 
+import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
-internal class Day1KtTest {
+internal class Day1Test {
 
     private val sampleInput = """
             199
@@ -39,7 +39,7 @@ internal class Day1KtTest {
 
     @Test
     fun testFullInput() {
-        val increases = File("src/main/resources/year2021/day1/input").useLines {
+        val increases = findInput(object {}).useLines {
             countIncreases(it)
         }
         assertEquals(1665, increases)
@@ -47,7 +47,7 @@ internal class Day1KtTest {
 
     @Test
     fun testFullInputWindow3() {
-        val increases = File("src/main/resources/year2021/day1/input").useLines {
+        val increases = findInput(object {}).useLines {
             countIncreasesSlidingWindow(it, windowSize = 3)
         }
         assertEquals(1702, increases)
@@ -55,7 +55,7 @@ internal class Day1KtTest {
 
     @Test
     fun testFullInputWindow1() {
-        val increases = File("src/main/resources/year2021/day1/input").useLines {
+        val increases = findInput(object {}).useLines {
             countIncreasesSlidingWindow(it, windowSize = 1)
         }
         assertEquals(1665, increases)

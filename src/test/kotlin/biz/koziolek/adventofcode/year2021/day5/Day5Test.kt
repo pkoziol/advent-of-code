@@ -1,8 +1,8 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day5
 
+import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
 internal class Day5Test {
 
@@ -83,7 +83,7 @@ internal class Day5Test {
 
     @Test
     fun testParsingFullInput() {
-        val strLines = File("src/main/resources/year2021/day5/input").readLines()
+        val strLines = findInput(object {}).readLines()
 
         val lines = parseLines(strLines)
         assertEquals(500, lines.size)
@@ -125,7 +125,7 @@ internal class Day5Test {
 
     @Test
     fun testAnswerPart1() {
-        val strLines = File("src/main/resources/year2021/day5/input").readLines()
+        val strLines = findInput(object {}).readLines()
         val lines = parseLines(strLines).filter { it.isHorizontal || it.isVertical }
         val map = createVentMap(lines)
 
@@ -164,7 +164,7 @@ internal class Day5Test {
 
     @Test
     fun testAnswerPart2() {
-        val strLines = File("src/main/resources/year2021/day5/input").readLines()
+        val strLines = findInput(object {}).readLines()
         val lines = parseLines(strLines)
         val map = createVentMap(lines)
 

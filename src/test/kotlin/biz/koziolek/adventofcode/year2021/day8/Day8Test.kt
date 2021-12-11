@@ -1,8 +1,8 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day8
 
+import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
 internal class Day8Test {
 
@@ -29,7 +29,7 @@ internal class Day8Test {
 
     @Test
     fun testAnswer() {
-        val fullInput = File("src/main/resources/year2021/day8/input").readLines()
+        val fullInput = findInput(object {}).readLines()
         val count = countEasyDigitsInOutput(fullInput)
         assertEquals(352, count)
     }
@@ -101,7 +101,7 @@ internal class Day8Test {
 
     @Test
     fun testAnswer2() {
-        val fullInput = File("src/main/resources/year2021/day8/input").readLines()
+        val fullInput = findInput(object {}).readLines()
         val notes = parseNotes(fullInput)
         val answer = notes.sumOf { decodeNumber(it.output, solveWireConnections(it)) }
 

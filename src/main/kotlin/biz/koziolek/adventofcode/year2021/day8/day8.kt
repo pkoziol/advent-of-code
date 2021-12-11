@@ -1,9 +1,9 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day8
 
-import java.io.File
+import biz.koziolek.adventofcode.findInput
 
 fun main() {
-    val inputFile = File("src/main/resources/year2021/day8/input")
+    val inputFile = findInput(object {})
     val lines = inputFile.bufferedReader().readLines()
 
     println("There are ${countEasyDigitsInOutput(lines)} digits 1,4,7,8 in output")

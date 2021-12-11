@@ -1,10 +1,10 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day5
 
-import java.io.File
+import biz.koziolek.adventofcode.findInput
 import kotlin.math.abs
 
 fun main() {
-    val inputFile = File("src/main/resources/year2021/day5/input")
+    val inputFile = findInput(object {})
     val strLines = inputFile.bufferedReader().readLines()
     val lines = parseLines(strLines)
 

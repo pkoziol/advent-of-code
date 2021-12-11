@@ -1,9 +1,9 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day1
 
-import java.io.File
+import biz.koziolek.adventofcode.findInput
 
 fun main() {
-    val inputFile = File("src/main/resources/year2021/day1/input")
+    val inputFile = findInput(object {})
     println("Simple increases: ${countIncreases(inputFile.bufferedReader().lineSequence())}")
     println("Windowed increases: ${countIncreasesSlidingWindow(inputFile.bufferedReader().lineSequence(), windowSize = 3)}")
 }

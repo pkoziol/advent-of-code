@@ -1,9 +1,9 @@
-package biz.koziolek.adventofcode.year2021
+package biz.koziolek.adventofcode.year2021.day6
 
-import java.io.File
+import biz.koziolek.adventofcode.findInput
 
 fun main() {
-    val inputFile = File("src/main/resources/year2021/day6/input")
+    val inputFile = findInput(object {})
     val line = inputFile.bufferedReader().readLines().first()
     val initialFish = createFish(line)
     
