@@ -1,7 +1,14 @@
 package biz.koziolek.adventofcode
 
+import java.io.File
 import java.util.*
 import kotlin.collections.HashSet
+
+fun findInput(obj: Any): File =
+    obj.javaClass.getResource("input")
+        ?.toURI()
+        ?.let { File(it) }
+        ?: throw IllegalArgumentException("Could not find input file for: ${obj.javaClass.packageName}")
 
 fun <T> visitAll(start: T, visitor: (T) -> Iterable<T>) {
     val toVisit: Queue<T> = ArrayDeque()
