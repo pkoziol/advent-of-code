@@ -21,7 +21,8 @@ fun <T> visitAll(start: T, visitor: (T) -> Iterable<T>) {
 
 private val ESC = Char(27)
 
-enum class AsciiColor(val code: Int) {
+@Suppress("unused")
+enum class AsciiColor(private val code: Int) {
     BLACK(30),
     RED(31),
     GREEN(32),
