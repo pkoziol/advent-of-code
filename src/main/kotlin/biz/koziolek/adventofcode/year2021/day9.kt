@@ -1,5 +1,7 @@
 package biz.koziolek.adventofcode.year2021
 
+import biz.koziolek.adventofcode.Coord
+import biz.koziolek.adventofcode.getAdjacentCoords
 import biz.koziolek.adventofcode.visitAll
 import java.io.File
 
@@ -14,12 +16,12 @@ fun main() {
     println("Product of sizes of the three largest basins is: ${getLargestBasinsSizeProduct(basins, n = 3)}")
 }
 
-fun getLowPointsRiskSum(smokeMap: Array<IntArray>): Int =
+fun getLowPointsRiskSum(smokeMap: Map<Coord, Int>): Int =
         findSmokeLowPoints(smokeMap).let { lowPoints ->
             lowPoints.sumOf { getRiskLevel(it, smokeMap, lowPoints) }
         }
 
-fun getLargestBasinsSizeProduct(basins: Set<Set<Pair<Int, Int>>>, n: Int) =
+fun getLargestBasinsSizeProduct(basins: Collection<Set<Coord>>, n: Int) =
         basins.map { it.size }
                 .sorted()
                 .reversed()
@@ -27,15 +29,15 @@ fun getLargestBasinsSizeProduct(basins: Set<Set<Pair<Int, Int>>>, n: Int) =
                 .ifEmpty { return 0 }
                 .fold(1) { acc, size -> acc * size }
 
-fun findSmokeBasins(smokeMap: Array<IntArray>): Set<Set<Pair<Int, Int>>> {
+fun findSmokeBasins(smokeMap: Map<Coord, Int>): Collection<Set<Coord>> {
     return findSmokeLowPoints(smokeMap)
             .map { lowPoint ->
                 buildSet {
                     visitAll(start = lowPoint) { currentCoord ->
-                        val value = smokeMap[currentCoord.second][currentCoord.first]
+                        val value = smokeMap[currentCoord] ?: 0
                         if (value != 9) {
                             add(currentCoord)
-                            getAdjacentCoords(currentCoord, smokeMap)
+                            smokeMap.getAdjacentCoords(currentCoord, includeDiagonal = false)
                         } else {
                             emptySet()
                         }
@@ -45,51 +47,28 @@ fun findSmokeBasins(smokeMap: Array<IntArray>): Set<Set<Pair<Int, Int>>> {
             .toSet()
 }
 
-fun parseSmokeMap(lines: List<String>): Array<IntArray> =
-        lines
-                .map { line -> line.toCharArray().map { it.digitToInt() }.toIntArray() }
-                .toTypedArray()
+fun parseSmokeMap(lines: List<String>): Map<Coord, Int> =
+    lines.flatMapIndexed { y, line ->
+        line.mapIndexed { x, char ->
+            Coord(x, y) to char.digitToInt()
+        }
+    }.toMap()
 
-fun findSmokeLowPoints(smokeMap: Array<IntArray>): Set<Pair<Int, Int>> =
-        smokeMap.indices.flatMap { y ->
-            smokeMap[y].indices.flatMap { x ->
-                val coord = Pair(x, y)
-                val currentHeight = smokeMap[y][x]
-                getAdjacentCoords(coord, smokeMap)
-                        .map { smokeMap[it.second][it.first] }
-                        .all { it > currentHeight }
-                        .let {
-                            when (it) {
-                                true -> setOf(coord)
-                                false -> emptySet()
-                            }
+fun findSmokeLowPoints(smokeMap: Map<Coord, Int>): Set<Coord> =
+        smokeMap.flatMap { (coord, currentHeight) ->
+            smokeMap.getAdjacentCoords(coord, includeDiagonal = false)
+                    .map { smokeMap[it] ?: 0 }
+                    .all { it > currentHeight }
+                    .let {
+                        when (it) {
+                            true -> setOf(coord)
+                            false -> emptySet()
                         }
-            }
+                    }
         }.toSet()
 
-private fun getAdjacentCoords(coord: Pair<Int, Int>, smokeMap: Array<IntArray>): Set<Pair<Int, Int>> {
-    return buildSet {
-        if (coord.first > 0) {
-            // Left
-            add(Pair(coord.first - 1, coord.second))
-        }
-        if (coord.second > 0) {
-            // Up
-            add(Pair(coord.first, coord.second - 1))
-        }
-        if (coord.first < smokeMap[0].size - 1) {
-            // Right
-            add(Pair(coord.first + 1, coord.second))
-        }
-        if (coord.second < smokeMap.size - 1) {
-            // Down
-            add(Pair(coord.first, coord.second + 1))
-        }
-    }
-}
-
-fun getRiskLevel(coords: Pair<Int, Int>, smokeMap: Array<IntArray>, lowPoints: Set<Pair<Int, Int>>) =
-        when (coords) {
-            in lowPoints -> smokeMap[coords.second][coords.first] + 1
-            else -> throw IllegalArgumentException("Unsupported coordinates: $coords")
+fun getRiskLevel(coord: Coord, smokeMap: Map<Coord, Int>, lowPoints: Set<Coord>) =
+        when (coord) {
+            in lowPoints -> (smokeMap[coord] ?: 0) + 1
+            else -> throw IllegalArgumentException("Unsupported coordinates: $coord")
         }

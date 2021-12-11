@@ -1,5 +1,6 @@
 package biz.koziolek.adventofcode.year2021
 
+import biz.koziolek.adventofcode.Coord
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.io.File
