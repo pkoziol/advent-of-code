@@ -10,6 +10,7 @@ fun main() {
     val map = parseOctopusMap(lines)
     
     println("Flashes after 100 steps: ${countFlashes(map, maxStep = 100)}")
+    println("First step all flash: ${nextTimeAllFlash(map)}")
 }
 
 data class Coord(val x: Int, val y: Int) {
@@ -32,6 +33,11 @@ fun countFlashes(map0: Map<Coord, Octopus>, maxStep: Int): Int =
         val nextMap = calculateNextStep(map)
         Pair(nextMap, flashes + nextMap.count { it.value.flashed })
     }.second
+
+fun nextTimeAllFlash(map0: Map<Coord, Octopus>): Int =
+    generateSequence(map0) { map -> calculateNextStep(map) }
+        .takeWhile { map -> !map.all { (_, octopus) -> octopus.flashed } }
+        .count()
 
 fun calculateNextStep(map: Map<Coord, Octopus>): Map<Coord, Octopus> {
     return buildMap {
