@@ -19,7 +19,21 @@ data class Coord(val x: Int, val y: Int) {
     operator fun unaryMinus() = Coord(-x, -y)
 }
 
-data class Octopus(val energy: Int, val flashed: Boolean = false)
+data class Octopus(val energy: Int, val flashed: Boolean = false) {
+    fun increaseEnergy(): Octopus {
+        if (flashed) {
+            return this
+        }
+
+        val newEnergy = energy.inc()
+        val flashed = (newEnergy > 9)
+
+        return copy(
+            energy = if (flashed) 0 else newEnergy,
+            flashed = flashed
+        )
+    }
+}
 
 fun parseOctopusMap(lines: List<String>): Map<Coord, Octopus> =
     lines.flatMapIndexed { y, line ->
@@ -48,17 +62,12 @@ fun calculateNextStep(map: Map<Coord, Octopus>): Map<Coord, Octopus> {
         var currentCoord: Coord? = toVisit.remove()
 
         while (currentCoord != null) {
-            val octopus = this[currentCoord]
-            if (octopus != null && !octopus.flashed) {
-                val energy = octopus.energy.inc()
-                val flashed = (energy > 9)
-
-                if (flashed) {
-                    this[currentCoord] = octopus.copy(energy = 0, flashed = flashed)
-                    toVisit.addAll(getAdjacentCoords(currentCoord, this))
-                } else {
-                    this[currentCoord] = octopus.copy(energy = energy)
+            computeIfPresent(currentCoord) { coord, octopus ->
+                val newOctopus = octopus.increaseEnergy()
+                if (!octopus.flashed && newOctopus.flashed) {
+                    toVisit.addAll(getAdjacentCoords(coord, this))
                 }
+                newOctopus
             }
 
             currentCoord = toVisit.poll()
