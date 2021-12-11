@@ -3,29 +3,23 @@ package biz.koziolek.adventofcode
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 
 internal class Coords2dTest {
 
-    private lateinit var map: Map<Coord, Int>
-
-    @BeforeEach
-    internal fun setUp() {
-        map = mapOf(
-            Coord(0, 0) to 1,
-            Coord(1, 0) to 2,
-            Coord(2, 0) to 3,
-            Coord(0, 1) to 4,
-            Coord(1, 1) to 5,
-            Coord(2, 1) to 6,
-            Coord(0, 2) to 7,
-            Coord(1, 2) to 8,
-            Coord(2, 2) to 9,
-            Coord(0, 3) to 10,
-            Coord(1, 3) to 11,
-            Coord(2, 3) to 12,
-        )
-    }
+    private val map = mapOf(
+        Coord(0, 0) to 1,
+        Coord(1, 0) to 2,
+        Coord(2, 0) to 3,
+        Coord(0, 1) to 4,
+        Coord(1, 1) to 5,
+        Coord(2, 1) to 6,
+        Coord(0, 2) to 7,
+        Coord(1, 2) to 8,
+        Coord(2, 2) to 9,
+        Coord(0, 3) to 10,
+        Coord(1, 3) to 11,
+        Coord(2, 3) to 12,
+    )
 
     @Test
     fun testCoordPlus() {
