@@ -8,8 +8,12 @@ fun main() {
     val lines = inputFile.bufferedReader().readLines()
 
     val graph = parseCavesGraph(lines)
-    val paths = findAllPaths(graph)
-    println("There is ${paths.size} possible paths")
+
+    val paths1 = findAllPaths(graph, ::visitSmallCavesOnlyOnce)
+    println("There is ${paths1.size} possible paths when visiting small caves only once")
+
+    val paths2 = findAllPaths(graph, ::visitAtMostOneSmallCaveTwice)
+    println("There is ${paths2.size} possible paths when visiting at most one small cave twice")
 }
 
 data class Graph<T : GraphNode>(val edges: Set<GraphEdge<T>> = emptySet(),
@@ -95,7 +99,7 @@ private fun createNode(id: String): CaveNode =
         else -> throw IllegalArgumentException("Unknown cave ID: $id")
     }
 
-fun findAllPaths(graph: Graph<CaveNode>): Set<List<CaveNode>> {
+fun findAllPaths(graph: Graph<CaveNode>, smallCaveVisitDecider: (SmallCave, List<CaveNode>) -> Boolean): Set<List<CaveNode>> {
     return buildSet {
         var incompletePaths: List<List<CaveNode>> = listOf(listOf(StartCave))
 
@@ -110,10 +114,29 @@ fun findAllPaths(graph: Graph<CaveNode>): Set<List<CaveNode>> {
                                 emptySet()
                             }
                             is BigCave -> setOf(path + node)
-                            is SmallCave -> if (node !in path) setOf(path + node) else emptySet()
+                            is SmallCave -> {
+                                if (smallCaveVisitDecider(node, path)) {
+                                    setOf(path + node)
+                                } else {
+                                    emptySet()
+                                }
+                            }
                         }
                     }
             }
         }
     }
+}
+
+fun visitSmallCavesOnlyOnce(cave: SmallCave, path: List<CaveNode>) = cave !in path
+
+fun visitAtMostOneSmallCaveTwice(cave: SmallCave, path: List<CaveNode>): Boolean {
+    val eachCount = path.filterIsInstance<SmallCave>()
+        .groupingBy { it }
+        .eachCount()
+    val thisCaveVisits = eachCount.getOrDefault(cave, 0)
+    val anyCaveVisitedTwice = eachCount.any { it.value == 2 }
+
+    return (thisCaveVisits == 0)
+            || (!anyCaveVisitedTwice && thisCaveVisits < 2)
 }
