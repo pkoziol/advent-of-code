@@ -18,6 +18,14 @@ fun main() {
 
 data class Graph<T : GraphNode>(val edges: Set<GraphEdge<T>> = emptySet(),
                                 val nodes: Set<T> = emptySet()) {
+    private val nodeNeighbors by lazy {
+        nodes.associateWith { node ->
+            edges.filter { edge -> edge.node1 == node || edge.node2 == node }
+                .map { edge -> if (edge.node1 == node) edge.node2 else edge.node1 }
+                .toSet()
+        }
+    }
+
     fun addEdge(edge: GraphEdge<T>) =
         copy(
             edges = edges + edge,
@@ -34,11 +42,7 @@ data class Graph<T : GraphNode>(val edges: Set<GraphEdge<T>> = emptySet(),
             separator = "\n"
         ) { "    ${it.node1.id} -- ${it.node2.id}" }
 
-    fun getAdjacentNodes(node: T): Set<T> =
-        edges.filter { it.node1 == node || it.node2 == node }
-            .flatMap { setOf(it.node1, it.node2) }
-            .filter { it != node }
-            .toSet()
+    fun getAdjacentNodes(node: T): Set<T> = nodeNeighbors[node] ?: emptySet()
 }
 
 data class GraphEdge<T>(val node1: T, val node2: T) {
