@@ -2,7 +2,6 @@ package biz.koziolek.adventofcode.year2021.day12
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class Day12Test {
