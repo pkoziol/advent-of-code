@@ -11,6 +11,10 @@ fun main() {
 
     val foldedOnce = fold(dotsMap, foldInstructions.take(1))
     println("Visible dots after folding once: ${foldedOnce.size}")
+
+    val fullyFolded = fold(dotsMap, foldInstructions)
+    println("Paper after fully folding:")
+    println(toString(fullyFolded))
 }
 
 fun parseTransparentPaper(lines: List<String>): Map<Coord, Boolean> =

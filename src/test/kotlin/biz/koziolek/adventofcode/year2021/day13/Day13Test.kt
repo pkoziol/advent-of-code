@@ -101,4 +101,22 @@ internal class Day13Test {
 
         assertEquals(701, foldedOnce.size)
     }
+
+    @Test
+    fun testAnswer2() {
+        val fullInput = findInput(object {}).readLines()
+        val dotsMap = parseTransparentPaper(fullInput)
+        val foldInstructions = parseFoldInstructions(fullInput)
+        val fullyFolded = fold(dotsMap, foldInstructions)
+
+        val expectedStr = """
+            ####.###..####.#..#.###..####...##.#...
+            #....#..#.#....#.#..#..#.#.......#.#...
+            ###..#..#.###..##...###..###.....#.#...
+            #....###..#....#.#..#..#.#.......#.#...
+            #....#....#....#.#..#..#.#....#..#.#...
+            #....#....####.#..#.###..####..##..####
+        """.trimIndent()
+        assertEquals(expectedStr, toString(fullyFolded))
+    }
 }
