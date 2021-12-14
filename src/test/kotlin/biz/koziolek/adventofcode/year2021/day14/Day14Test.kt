@@ -85,43 +85,46 @@ internal class Day14Test {
     }
 
     @Test
-    fun testExpandBigPolymer() {
+    fun testExpandLongPolymer() {
         val polymerTemplate = parsePolymerTemplate(sampleInput)
         val insertionRules = parsePolymerInsertionRules(sampleInput)
 
-        val bigPolymer = convertPolymerToBigPolymer(polymerTemplate)
-        val expectedBigPolymer = mapOf(
-            Pair('N', 'N') to 1L,
-            Pair('N', 'C') to 1L,
-            Pair('C', 'B') to 1L,
+        val longPolymer = LongPolymer.fromString(polymerTemplate)
+        val expectedLongPolymer = LongPolymer(
+            firstChar = 'N',
+            pairStats = mapOf(
+                Pair('N', 'N') to 1L,
+                Pair('N', 'C') to 1L,
+                Pair('C', 'B') to 1L,
+            )
         )
-        assertEquals(expectedBigPolymer, bigPolymer)
+        assertEquals(expectedLongPolymer, longPolymer)
 
-        val afterStep1 = expandBigPolymer(bigPolymer, insertionRules)
-        assertEquals(convertPolymerToBigPolymer("NCNBCHB"), afterStep1)
+        val afterStep1 = longPolymer.expand(insertionRules)
+        assertEquals(LongPolymer.fromString("NCNBCHB"), afterStep1)
 
-        val afterStep2 = expandBigPolymer(afterStep1, insertionRules)
-        assertEquals(convertPolymerToBigPolymer("NBCCNBBBCBHCB"), afterStep2)
+        val afterStep2 = afterStep1.expand(insertionRules)
+        assertEquals(LongPolymer.fromString("NBCCNBBBCBHCB"), afterStep2)
 
-        val afterStep3 = expandBigPolymer(afterStep2, insertionRules)
-        assertEquals(convertPolymerToBigPolymer("NBBBCNCCNBBNBNBBCHBHHBCHB"), afterStep3)
+        val afterStep3 = afterStep2.expand(insertionRules)
+        assertEquals(LongPolymer.fromString("NBBBCNCCNBBNBNBBCHBHHBCHB"), afterStep3)
 
-        val afterStep4 = expandBigPolymer(afterStep3, insertionRules)
-        assertEquals(convertPolymerToBigPolymer("NBBNBNBBCCNBCNCCNBBNBBNBBBNBBNBBCBHCBHHNHCBBCBHCB"), afterStep4)
+        val afterStep4 = afterStep3.expand(insertionRules)
+        assertEquals(LongPolymer.fromString("NBBNBNBBCCNBCNCCNBBNBBNBBBNBBNBBCBHCBHHNHCBBCBHCB"), afterStep4)
 
-        val afterStep5 = expandBigPolymer(afterStep4, insertionRules)
-        assertEquals(97, getLength(afterStep5))
+        val afterStep5 = afterStep4.expand(insertionRules)
+        assertEquals(97, afterStep5.length)
 
-        val afterStep6 = expandBigPolymer(afterStep5, insertionRules)
-        val afterStep7 = expandBigPolymer(afterStep6, insertionRules)
-        val afterStep8 = expandBigPolymer(afterStep7, insertionRules)
-        val afterStep9 = expandBigPolymer(afterStep8, insertionRules)
-        val afterStep10 = expandBigPolymer(afterStep9, insertionRules)
-        assertEquals(3073, getLength(afterStep10))
-        assertEquals(1749, countOccurrences(polymerTemplate, afterStep10, 'B'))
-        assertEquals(298, countOccurrences(polymerTemplate, afterStep10, 'C'))
-        assertEquals(161, countOccurrences(polymerTemplate, afterStep10, 'H'))
-        assertEquals(865, countOccurrences(polymerTemplate, afterStep10, 'N'))
+        val afterStep6 = afterStep5.expand(insertionRules)
+        val afterStep7 = afterStep6.expand(insertionRules)
+        val afterStep8 = afterStep7.expand(insertionRules)
+        val afterStep9 = afterStep8.expand(insertionRules)
+        val afterStep10 = afterStep9.expand(insertionRules)
+        assertEquals(3073, afterStep10.length)
+        assertEquals(1749, afterStep10.countOccurrences('B'))
+        assertEquals(298, afterStep10.countOccurrences('C'))
+        assertEquals(161, afterStep10.countOccurrences('H'))
+        assertEquals(865, afterStep10.countOccurrences('N'))
     }
 
     @Test
@@ -136,15 +139,15 @@ internal class Day14Test {
     }
 
     @Test
-    fun testSubtractLeastCommonFromMostCommonBigPolymer() {
+    fun testSubtractLeastCommonFromMostCommonLongPolymer() {
         val polymerTemplate = parsePolymerTemplate(sampleInput)
         val insertionRules = parsePolymerInsertionRules(sampleInput)
-        val bigPolymer = convertPolymerToBigPolymer(polymerTemplate)
-        val afterStep10 = generateSequence(bigPolymer) { expandBigPolymer(it, insertionRules) }
+        val longPolymer = LongPolymer.fromString(polymerTemplate)
+        val afterStep10 = generateSequence(longPolymer) { it.expand(insertionRules) }
             .drop(10)
             .first()
-        assertEquals(3073, getLength(afterStep10))
-        assertEquals(1588, subtractLeastCommonFromMostCommon(polymerTemplate, afterStep10))
+        assertEquals(3073, afterStep10.length)
+        assertEquals(1588, afterStep10.subtractLeastCommonFromMostCommon())
     }
 
     @Test
@@ -163,10 +166,10 @@ internal class Day14Test {
         val fullInput = findInput(object {}).readLines()
         val polymerTemplate = parsePolymerTemplate(fullInput)
         val insertionRules = parsePolymerInsertionRules(fullInput)
-        val bigPolymer = convertPolymerToBigPolymer(polymerTemplate)
-        val afterStep40 = generateSequence(bigPolymer) { expandBigPolymer(it, insertionRules) }
+        val longPolymer = LongPolymer.fromString(polymerTemplate)
+        val afterStep40 = generateSequence(longPolymer) { it.expand(insertionRules) }
             .drop(40)
             .first()
-        assertEquals(3711743744429, subtractLeastCommonFromMostCommon(polymerTemplate, afterStep40))
+        assertEquals(3711743744429, afterStep40.subtractLeastCommonFromMostCommon())
     }
 }
