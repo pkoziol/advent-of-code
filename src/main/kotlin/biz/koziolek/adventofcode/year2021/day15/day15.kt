@@ -1,7 +1,6 @@
 package biz.koziolek.adventofcode.year2021.day15
 
 import biz.koziolek.adventofcode.*
-import java.util.*
 
 fun main() {
     val inputFile = findInput(object {})
@@ -53,36 +52,10 @@ fun expandMap(riskMap: Map<Coord, Int>, expandWidth: Int, expandHeight: Int): Ma
     }
 }
 
-fun findLowestRiskPath(riskMap: Map<Coord, Int>, start: Coord, end: Coord): List<Coord> {
-    val cumulativeRiskMap: MutableMap<Coord, Int> = riskMap.mapValues { Int.MAX_VALUE }.toMutableMap()
-    val toVisit: Queue<Coord> = PriorityQueue(Comparator.comparing { coord -> cumulativeRiskMap[coord]!! })
-    var current: Coord? = end
-    cumulativeRiskMap[current!!] = riskMap[current]!!
-
-    while (current != null) {
-        if (current == start) {
-            break
-        }
-
-        riskMap.getAdjacentCoords(current, includeDiagonal = false)
-            .filter { cumulativeRiskMap[current]!! + riskMap[it]!! < cumulativeRiskMap[it]!! }
-            .forEach {
-                cumulativeRiskMap[it] = cumulativeRiskMap[current]!! + riskMap[it]!!
-                toVisit.add(it)
-            }
-
-        current = toVisit.poll()
-    }
-
-    return generateSequence(start) { coord ->
-        if (coord == end) {
-            null
-        } else {
-            riskMap.getAdjacentCoords(coord, includeDiagonal = false)
-                .minByOrNull { adjCoord -> cumulativeRiskMap[adjCoord] ?: Int.MAX_VALUE }
-        }
-    }.toList()
-}
+fun findLowestRiskPath(riskMap: Map<Coord, Int>, start: Coord, end: Coord): List<Coord> =
+    riskMap.toGraph(includeDiagonal = false)
+        .findShortestPath(start.toGraphNode(), end.toGraphNode())
+        .map { it.coord }
 
 fun getTotalRisk(riskMap: Map<Coord, Int>, path: List<Coord>): Int =
     path.drop(1).sumOf { riskMap[it] ?: 0 }
