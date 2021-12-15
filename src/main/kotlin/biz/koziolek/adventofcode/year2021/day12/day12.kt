@@ -1,7 +1,9 @@
 package biz.koziolek.adventofcode.year2021.day12
 
+import biz.koziolek.adventofcode.Graph
+import biz.koziolek.adventofcode.GraphEdge
+import biz.koziolek.adventofcode.GraphNode
 import biz.koziolek.adventofcode.findInput
-import java.util.*
 
 fun main() {
     val inputFile = findInput(object {})
@@ -14,54 +16,6 @@ fun main() {
 
     val paths2 = findAllPaths(graph, ::visitAtMostOneSmallCaveTwice)
     println("There is ${paths2.size} possible paths when visiting at most one small cave twice")
-}
-
-data class Graph<T : GraphNode>(val edges: Set<GraphEdge<T>> = emptySet(),
-                                val nodes: Set<T> = emptySet()) {
-    private val nodeNeighbors by lazy {
-        nodes.associateWith { node ->
-            edges.filter { edge -> edge.node1 == node || edge.node2 == node }
-                .map { edge -> if (edge.node1 == node) edge.node2 else edge.node1 }
-                .toSet()
-        }
-    }
-
-    fun addEdge(edge: GraphEdge<T>) =
-        copy(
-            edges = edges + edge,
-            nodes = nodes + edge.node1 + edge.node2,
-        )
-
-    fun toGraphvizString() =
-        edges.joinToString(
-            prefix = """
-                graph G {
-                    rankdir=LR
-            """.trimIndent() + nodes.joinToString(prefix = "\n    ", postfix = "\n", separator = "\n    ") { it.toGraphvizString() },
-            postfix = "\n}",
-            separator = "\n"
-        ) { "    ${it.node1.id} -- ${it.node2.id}" }
-
-    fun getAdjacentNodes(node: T): Set<T> = nodeNeighbors[node] ?: emptySet()
-}
-
-data class GraphEdge<T>(val node1: T, val node2: T) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as GraphEdge<*>
-
-        return (node1 == other.node1 && node2 == other.node2)
-                || (node1 == other.node2 && node2 == other.node1)
-    }
-
-    override fun hashCode() = Objects.hash(node1, node2)
-}
-
-interface GraphNode {
-    val id: String
-    fun toGraphvizString(): String
 }
 
 sealed interface CaveNode : GraphNode
