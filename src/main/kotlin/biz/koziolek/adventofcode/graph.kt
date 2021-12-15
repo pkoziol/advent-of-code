@@ -2,6 +2,13 @@ package biz.koziolek.adventofcode
 
 import java.util.*
 
+fun <N : GraphNode, E : GraphEdge<N>> buildGraph(code: MutableSet<E>.() -> Unit): Graph<N, E> {
+    val edges = mutableSetOf<E>()
+    code(edges)
+    val nodes = edges.flatMap { setOf(it.node1, it.node2) }.toSet()
+    return Graph(edges, nodes)
+}
+
 data class Graph<N : GraphNode, E : GraphEdge<N>>(
     val edges: Set<E> = emptySet(),
     val nodes: Set<N> = emptySet()
@@ -10,18 +17,29 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
         edges.any { it is UniDirectionalGraphEdge<*> }
     }
 
-    private val nodeEdges by lazy {
-        nodes.associateWith { node ->
-            edges.filter { edge -> edge.startsWith(node) }
-                .toSet()
+    private val nodeEdges: Map<N, Set<E>> by lazy {
+        buildMap {
+            for (edge in edges) {
+                if (edge.startsWith(edge.node1)) {
+                    merge(edge.node1, mutableSetOf(edge)) { a, b -> a + b }
+                }
+                if (edge.startsWith(edge.node2)) {
+                    merge(edge.node2, mutableSetOf(edge)) { a, b -> a + b }
+                }
+            }
         }
     }
 
-    private val nodeNeighbors by lazy {
-        nodes.associateWith { node ->
-            edges.filter { edge -> edge.startsWith(node) }
-                .map { edge -> edge.getOther(node) }
-                .toSet()
+    private val nodeNeighbors: Map<N, Set<N>> by lazy {
+        buildMap {
+            for (edge in edges) {
+                if (edge.startsWith(edge.node1)) {
+                    merge(edge.node1, setOf(edge.node2)) { a, b -> a + b }
+                }
+                if (edge.startsWith(edge.node2)) {
+                    merge(edge.node2, setOf(edge.node1)) { a, b -> a + b }
+                }
+            }
         }
     }
 

@@ -30,18 +30,19 @@ fun <T> Map<Coord, T>.getAdjacentCoords(coord: Coord, includeDiagonal: Boolean):
 }
 
 fun Map<Coord, Int>.toGraph(includeDiagonal: Boolean): Graph<CoordNode, UniDirectionalGraphEdge<CoordNode>> =
-    entries.fold(Graph()) { graph, (coord, value) ->
-        val node2 = coord.toGraphNode()
+    buildGraph {
+        this@toGraph.forEach { (coord, value) ->
+            val node2 = coord.toGraphNode()
 
-        getAdjacentCoords(coord, includeDiagonal)
-            .fold(graph) { subgraph, adjCoord ->
-                subgraph.addEdge(
-                    UniDirectionalGraphEdge(
+            getAdjacentCoords(coord, includeDiagonal)
+                .forEach { adjCoord ->
+                    add(UniDirectionalGraphEdge(
                         node1 = adjCoord.toGraphNode(),
                         node2 = node2,
                         weight = value,
                     ))
-            }
+                }
+        }
     }
 
 fun Coord.toGraphNode() = CoordNode(this)
