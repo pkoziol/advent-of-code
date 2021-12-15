@@ -7,13 +7,21 @@ fun main() {
     val inputFile = findInput(object {})
     val lines = inputFile.bufferedReader().readLines()
     val riskMap = parseRiskMap(lines)
+
     val lowestRiskPath = findLowestRiskPath(riskMap,
         start = Coord(0, 0),
         end = Coord(riskMap.getWidth() - 1, riskMap.getHeight() - 1)
     )
-
     println(toString(riskMap, lowestRiskPath))
     println("Lowest total risk of any path: ${getTotalRisk(riskMap, lowestRiskPath)}")
+
+    val expandedMap = expandMap(riskMap, expandWidth = 4, expandHeight = 4)
+    val lowestRiskPath5x5 = findLowestRiskPath(expandedMap,
+        start = Coord(0, 0),
+        end = Coord(expandedMap.getWidth() - 1, expandedMap.getHeight() - 1)
+    )
+    println(toString(expandedMap, lowestRiskPath5x5))
+    println("Lowest total risk of any path: ${getTotalRisk(expandedMap, lowestRiskPath5x5)}")
 }
 
 fun parseRiskMap(lines: List<String>): Map<Coord, Int> =
@@ -22,6 +30,28 @@ fun parseRiskMap(lines: List<String>): Map<Coord, Int> =
             Coord(x, y) to char.digitToInt()
         }
     }.toMap()
+
+fun expandMap(riskMap: Map<Coord, Int>, expandWidth: Int, expandHeight: Int): Map<Coord, Int> {
+    val width = riskMap.getWidth()
+    val height = riskMap.getHeight()
+    
+    return buildMap {
+        for (j in 0..expandHeight) {
+            for (i in 0..expandWidth) {
+                val delta = Coord(i * width, j * height)
+                for ((coord, risk) in riskMap) {
+                    val newCoord = coord + delta
+                    var newRisk = risk + i + j
+                    while (newRisk > 9) {
+                        newRisk -= 9
+                    }
+
+                    put(newCoord, newRisk)
+                }
+            }
+        }
+    }
+}
 
 fun findLowestRiskPath(riskMap: Map<Coord, Int>, start: Coord, end: Coord): List<Coord> {
     val toVisit: Queue<Coord> = ArrayDeque()
