@@ -42,6 +42,38 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
         ) { "    ${it.toGraphvizString()}" }
 
     fun getAdjacentNodes(node: N): Set<N> = nodeNeighbors[node] ?: emptySet()
+
+    fun findShortestPath(start: N, end: N): List<N> {
+        val cumulativeDistance: MutableMap<N, Int> = nodes.associateWith { Int.MAX_VALUE }.toMutableMap()
+        val toVisit: Queue<N> = PriorityQueue(Comparator.comparing { node -> cumulativeDistance[node]!! })
+        var current: N? = end
+        cumulativeDistance[current!!] = 0
+
+        while (current != null) {
+            if (current == start) {
+                break
+            }
+
+            nodeEdges[current]!!
+                .map { edge -> edge.getOther(current!!) to edge.weight }
+                .filter { (otherNode, weight) -> cumulativeDistance[current]!! + weight < cumulativeDistance[otherNode]!! }
+                .forEach { (otherNode, weight) ->
+                    cumulativeDistance[otherNode] = cumulativeDistance[current]!! + weight
+                    toVisit.add(otherNode)
+                }
+
+            current = toVisit.poll()
+        }
+
+        return generateSequence(start) { node ->
+            if (node == end) {
+                null
+            } else {
+                getAdjacentNodes(node)
+                    .minByOrNull { adjNode -> cumulativeDistance[adjNode] ?: Int.MAX_VALUE }
+            }
+        }.toList()
+    }
 }
 
 sealed interface GraphEdge<N : GraphNode> {
