@@ -5,7 +5,6 @@ import biz.koziolek.adventofcode.findInput
 import biz.koziolek.adventofcode.getHeight
 import biz.koziolek.adventofcode.getWidth
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class Day15Test {
@@ -152,7 +151,6 @@ internal class Day15Test {
         assertEquals(expectedExpandedMap5By5, toString(expandedMap5By5, path = emptyList()))
     }
 
-    @Disabled("Does not finish in reasonable time due to ineffectiveness of building a Graph")
     @Test
     fun testAnswer2() {
         val fullInput = findInput(object {}).readLines()
