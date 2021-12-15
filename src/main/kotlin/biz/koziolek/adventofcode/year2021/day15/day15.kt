@@ -54,12 +54,16 @@ fun expandMap(riskMap: Map<Coord, Int>, expandWidth: Int, expandHeight: Int): Ma
 }
 
 fun findLowestRiskPath(riskMap: Map<Coord, Int>, start: Coord, end: Coord): List<Coord> {
-    val toVisit: Queue<Coord> = ArrayDeque()
     val cumulativeRiskMap: MutableMap<Coord, Int> = riskMap.mapValues { Int.MAX_VALUE }.toMutableMap()
+    val toVisit: Queue<Coord> = PriorityQueue(Comparator.comparing { coord -> cumulativeRiskMap[coord]!! })
     var current: Coord? = end
     cumulativeRiskMap[current!!] = riskMap[current]!!
 
     while (current != null) {
+        if (current == start) {
+            break
+        }
+
         riskMap.getAdjacentCoords(current, includeDiagonal = false)
             .filter { cumulativeRiskMap[current]!! + riskMap[it]!! < cumulativeRiskMap[it]!! }
             .forEach {
