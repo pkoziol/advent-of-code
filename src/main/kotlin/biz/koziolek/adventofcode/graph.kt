@@ -30,19 +30,6 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
         }
     }
 
-    private val nodeNeighbors: Map<N, Set<N>> by lazy {
-        buildMap {
-            for (edge in edges) {
-                if (edge.startsWith(edge.node1)) {
-                    merge(edge.node1, setOf(edge.node2)) { a, b -> a + b }
-                }
-                if (edge.startsWith(edge.node2)) {
-                    merge(edge.node2, setOf(edge.node1)) { a, b -> a + b }
-                }
-            }
-        }
-    }
-
     fun addEdge(edge: E) =
         copy(
             edges = edges + edge,
@@ -59,7 +46,11 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
             separator = "\n"
         ) { "    ${it.toGraphvizString()}" }
 
-    fun getAdjacentNodes(node: N): Set<N> = nodeNeighbors[node] ?: emptySet()
+    fun getAdjacentNodes(node: N): Set<N> =
+        nodeEdges[node]
+            ?.map { it.getOther(node) }
+            ?.toSet()
+            ?: emptySet()
 
     fun findShortestPath(start: N, end: N): List<N> {
         val cumulativeDistance: MutableMap<N, Int> = nodes.associateWith { Int.MAX_VALUE }.toMutableMap()
