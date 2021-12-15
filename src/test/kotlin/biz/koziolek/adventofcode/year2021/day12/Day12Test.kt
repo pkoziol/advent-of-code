@@ -51,13 +51,6 @@ internal class Day12Test {
     """.trimIndent().split("\n")
 
     @Test
-    fun testEdgeEquality() {
-        val a = SmallCave("a")
-        val b = SmallCave("b")
-        assertEquals(GraphEdge(a, b), GraphEdge(b, a))
-    }
-
-    @Test
     fun testParseGraphs() {
         val graph1 = parseCavesGraph(sampleInput1)
         println(graph1.toGraphvizString())
