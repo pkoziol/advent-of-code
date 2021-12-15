@@ -1,6 +1,7 @@
 package biz.koziolek.adventofcode
 
 import java.util.*
+import kotlin.collections.HashMap
 
 fun <N : GraphNode, E : GraphEdge<N>> buildGraph(code: MutableSet<E>.() -> Unit): Graph<N, E> {
     val edges = mutableSetOf<E>()
@@ -53,25 +54,30 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
             ?: emptySet()
 
     fun findShortestPath(start: N, end: N): List<N> {
-        val cumulativeDistance: MutableMap<N, Int> = nodes.associateWith { Int.MAX_VALUE }.toMutableMap()
-        val toVisit: Queue<N> = PriorityQueue(Comparator.comparing { node -> cumulativeDistance[node]!! })
+        val cumulativeDistance: MutableMap<N, Int> = HashMap()
+        val toVisit: Queue<Pair<N, Int>> = PriorityQueue(Comparator.comparing { (_, distance) -> distance })
         var current: N? = end
-        cumulativeDistance[current!!] = 0
+        cumulativeDistance[end] = 0
 
         while (current != null) {
             if (current == start) {
                 break
             }
 
-            nodeEdges[current]!!
-                .map { edge -> edge.getOther(current!!) to edge.weight }
-                .filter { (otherNode, weight) -> cumulativeDistance[current]!! + weight < cumulativeDistance[otherNode]!! }
-                .forEach { (otherNode, weight) ->
-                    cumulativeDistance[otherNode] = cumulativeDistance[current]!! + weight
-                    toVisit.add(otherNode)
-                }
+            val currentNodeDistance = cumulativeDistance[current] ?: Int.MAX_VALUE
 
-            current = toVisit.poll()
+            for (edge in nodeEdges[current]!!) {
+                val otherNode = edge.getOther(current)
+                val otherNodeDistance = cumulativeDistance[otherNode] ?: Int.MAX_VALUE
+                val newDistance = currentNodeDistance + edge.weight
+
+                if (newDistance < otherNodeDistance) {
+                    cumulativeDistance[otherNode] = newDistance
+                    toVisit.add(Pair(otherNode, newDistance))
+                }
+            }
+            
+            current = toVisit.poll()?.first
         }
 
         return generateSequence(start) { node ->
