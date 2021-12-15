@@ -1,9 +1,6 @@
 package biz.koziolek.adventofcode.year2021.day12
 
-import biz.koziolek.adventofcode.Graph
-import biz.koziolek.adventofcode.GraphEdge
-import biz.koziolek.adventofcode.GraphNode
-import biz.koziolek.adventofcode.findInput
+import biz.koziolek.adventofcode.*
 
 fun main() {
     val inputFile = findInput(object {})
@@ -40,10 +37,10 @@ data class SmallCave(override val id: String) : CaveNode {
     override fun toGraphvizString() = "node [shape=circle]; $id;"
 }
 
-fun parseCavesGraph(lines: List<String>): Graph<CaveNode> {
+fun parseCavesGraph(lines: List<String>): Graph<CaveNode, BiDirectionalGraphEdge<CaveNode>> {
     return lines.fold(Graph()) { graph, line ->
         val (node1Id, node2Id) = line.split('-', limit = 2)
-        val edge = GraphEdge(createNode(node1Id), createNode(node2Id))
+        val edge = BiDirectionalGraphEdge(createNode(node1Id), createNode(node2Id))
         graph.addEdge(edge)
     }
 }
@@ -57,7 +54,7 @@ private fun createNode(id: String): CaveNode =
         else -> throw IllegalArgumentException("Unknown cave ID: $id")
     }
 
-fun findAllPaths(graph: Graph<CaveNode>, smallCaveVisitDecider: (SmallCave, List<CaveNode>) -> Boolean): Set<List<CaveNode>> {
+fun findAllPaths(graph: Graph<CaveNode, BiDirectionalGraphEdge<CaveNode>>, smallCaveVisitDecider: (SmallCave, List<CaveNode>) -> Boolean): Set<List<CaveNode>> {
     return buildSet {
         var incompletePaths: List<List<CaveNode>> = listOf(listOf(StartCave))
 
