@@ -15,6 +15,7 @@ sealed interface Packet {
     val version: Int
     val type: Int
     fun evaluate(): Long
+    fun toString(evaluate: Boolean, indent: Int = 0): String
 }
 
 data class LiteralValuePacket(
@@ -23,10 +24,31 @@ data class LiteralValuePacket(
     val value: Long
 ) : Packet {
     override fun evaluate() = value
+
+    override fun toString(evaluate: Boolean, indent: Int) =
+        buildString {
+            append(" ".repeat(indent))
+            append("$value (v$version)")
+        }
 }
 
 sealed interface OperatorPacket : Packet {
     val children: List<Packet>
+
+    override fun toString(evaluate: Boolean, indent: Int) =
+        buildString {
+            append(" ".repeat(indent))
+            append(this@OperatorPacket.javaClass.simpleName.replace("OperatorPacket", ""))
+            append(" (v$version)")
+
+            if (evaluate) {
+                append(" = ${evaluate()}")
+            }
+
+            append(children.joinToString(prefix = "\n", separator = "\n") {
+                it.toString(evaluate, indent + 2)
+            })
+        }
 }
 
 data class SumOperatorPacket(
