@@ -151,4 +151,83 @@ internal class Day16Test {
         val packet = parseBitsPacket(fullInput[0])
         assertEquals(955, sumAllVersions(packet))
     }
+
+    @Test
+    fun testEvaluateSum() {
+        val packet = parseBitsPacket("C200B40A82")
+
+        val sumOp = assertInstanceOf(SumOperatorPacket::class.java, packet)
+        assertEquals(2, sumOp.children.size)
+        assertEquals(3, sumOp.evaluate())
+    }
+
+    @Test
+    fun testEvaluateProduct() {
+        val packet = parseBitsPacket("04005AC33890")
+
+        val productOp = assertInstanceOf(ProductOperatorPacket::class.java, packet)
+        assertEquals(2, productOp.children.size)
+        assertEquals(54, productOp.evaluate())
+    }
+
+    @Test
+    fun testEvaluateMinimum() {
+        val packet = parseBitsPacket("880086C3E88112")
+
+        val minOp = assertInstanceOf(MinimumOperatorPacket::class.java, packet)
+        assertEquals(3, minOp.children.size)
+        assertEquals(7, minOp.evaluate())
+    }
+
+    @Test
+    fun testEvaluateMaximum() {
+        val packet = parseBitsPacket("CE00C43D881120")
+
+        val maxOp = assertInstanceOf(MaximumOperatorPacket::class.java, packet)
+        assertEquals(3, maxOp.children.size)
+        assertEquals(9, maxOp.evaluate())
+    }
+
+    @Test
+    fun testEvaluateLessThan() {
+        val packet = parseBitsPacket("D8005AC2A8F0")
+
+        val lessThanOp = assertInstanceOf(LessThanOperatorPacket::class.java, packet)
+        assertEquals(2, lessThanOp.children.size)
+        assertEquals(1, lessThanOp.evaluate())
+    }
+
+    @Test
+    fun testEvaluateGreaterThan() {
+        val packet = parseBitsPacket("F600BC2D8F")
+
+        val greaterThanOp = assertInstanceOf(GreaterThanOperatorPacket::class.java, packet)
+        assertEquals(2, greaterThanOp.children.size)
+        assertEquals(0, greaterThanOp.evaluate())
+    }
+
+    @Test
+    fun testEvaluateEqualTo() {
+        val packet = parseBitsPacket("9C005AC2F8F0")
+
+        val equalToOp = assertInstanceOf(EqualToOperatorPacket::class.java, packet)
+        assertEquals(2, equalToOp.children.size)
+        assertEquals(0, equalToOp.evaluate())
+    }
+
+    @Test
+    fun testEvaluateSumEqualToProduct() {
+        val packet = parseBitsPacket("9C0141080250320F1802104A08")
+
+        val equalToOp = assertInstanceOf(EqualToOperatorPacket::class.java, packet)
+        assertEquals(2, equalToOp.children.size)
+        assertEquals(1, equalToOp.evaluate())
+    }
+
+    @Test
+    fun testAnswer2() {
+        val fullInput = findInput(object {}).readLines()
+        val packet = parseBitsPacket(fullInput[0])
+        assertEquals(158135423448, packet.evaluate())
+    }
 }
