@@ -193,7 +193,7 @@ private class BitsParser(hexString: String) {
     }
 
     private fun readRawInt(bits: Int): Int {
-        val int = bitSet.get(index, index + bits).toBinaryString(bits).toInt(2)
+        val int = bitSet.toInt(index, index + bits)
         index += bits
         return int
     }

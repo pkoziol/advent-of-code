@@ -54,23 +54,27 @@ fun String.hexStringToBitSet(): BitSet {
     val bitSet = BitSet(length)
 
     map { char -> char.digitToInt(16) }
-        .joinToString(separator = "") { int -> int.toString(2).padStart(4, '0') }
-        .forEachIndexed { index, char ->
-            if (char == '1') {
-                bitSet.set(index)
-            }
+        .forEachIndexed { index, int ->
+            if (int and 0b1000 == 0b1000) bitSet.set(index * 4 + 0)
+            if (int and 0b0100 == 0b0100) bitSet.set(index * 4 + 1)
+            if (int and 0b0010 == 0b0010) bitSet.set(index * 4 + 2)
+            if (int and 0b0001 == 0b0001) bitSet.set(index * 4 + 3)
         }
 
     return bitSet
 }
 
-fun BitSet.toBinaryString(n: Int = this.length()) =
-    buildString {
-        for (i in 0 until n) {
-            if (this@toBinaryString.get(i)) {
-                append('1')
-            } else {
-                append('0')
-            }
-        }
-    }
+fun BitSet.toBinaryString(n: Int = length()) =
+    (0 until n)
+        .map { if (this[it]) '1' else '0' }
+        .joinToString(separator = "")
+
+fun BitSet.toInt(n: Int = length()): Int = toInt(0, n)
+
+fun BitSet.toInt(fromIndex: Int, toIndex: Int): Int =
+    (fromIndex until toIndex).fold(0) { int, index -> int * 2 + if (this[index]) 1 else 0 }
+
+fun BitSet.toLong(n: Int = length()): Long = toLong(0, n)
+
+fun BitSet.toLong(fromIndex: Int, toIndex: Int): Long =
+    (fromIndex until toIndex).fold(0L) { long, index -> long * 2 + if (this[index]) 1 else 0 }
