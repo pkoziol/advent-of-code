@@ -49,3 +49,28 @@ enum class AsciiColor(private val code: Int) {
 
     fun format(obj: Any?) = "$ESC[${code}m$obj$ESC[0m"
 }
+
+fun String.hexStringToBitSet(): BitSet {
+    val bitSet = BitSet(length)
+
+    map { char -> char.digitToInt(16) }
+        .joinToString(separator = "") { int -> int.toString(2).padStart(4, '0') }
+        .forEachIndexed { index, char ->
+            if (char == '1') {
+                bitSet.set(index)
+            }
+        }
+
+    return bitSet
+}
+
+fun BitSet.toBinaryString(n: Int = this.length()) =
+    buildString {
+        for (i in 0 until n) {
+            if (this@toBinaryString.get(i)) {
+                append('1')
+            } else {
+                append('0')
+            }
+        }
+    }
