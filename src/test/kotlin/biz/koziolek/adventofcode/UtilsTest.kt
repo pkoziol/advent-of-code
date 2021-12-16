@@ -3,6 +3,7 @@ package biz.koziolek.adventofcode
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
+import java.util.*
 
 internal class UtilsTest {
 
@@ -16,5 +17,34 @@ internal class UtilsTest {
 
         assertEquals("111011100000000011010100000011001000001000110000011", "EE00D40C823060".hexStringToBitSet().toBinaryString())
         assertEquals("11101110000000001101010000001100100000100011000001100000", "EE00D40C823060".hexStringToBitSet().toBinaryString(56))
+    }
+
+    @Test
+    fun testBitSetToIntOrLong() {
+        val bitSet = BitSet()
+        bitSet.set(1)
+        bitSet.set(2)
+        bitSet.set(5)
+        bitSet.set(8)
+        bitSet.set(13)
+        bitSet.set(21)
+        bitSet.set(35)
+
+        assertEquals("011001001000010000000100000000000001", bitSet.toBinaryString())
+        assertEquals("01100100", bitSet.toBinaryString(8))
+        assertEquals(4 + 32 + 64, bitSet.toInt(8))
+        assertEquals(4 + 32 + 64L, bitSet.toLong(8))
+        assertEquals(1686373376, bitSet.toInt(32))
+        assertEquals(26981974017, bitSet.toLong())
+
+        val cutBitSet = bitSet.get(2, 9)
+        assertEquals("1001001", cutBitSet.toBinaryString(7))
+        assertEquals(1 + 8 + 64, cutBitSet.toInt(7))
+        assertEquals(1 + 8 + 64, cutBitSet.toLong(7))
+        assertEquals(1 + 8 + 64, bitSet.toInt(2, 9))
+        assertEquals(1 + 8 + 64, bitSet.toLong(2, 9))
+        assertEquals(26981974017, bitSet.toLong(0, 36))
+        assertEquals(26981974017, bitSet.toLong(1, 36))
+        assertEquals(53963948034, bitSet.toLong(1, 37))
     }
 }
