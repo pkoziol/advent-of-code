@@ -8,25 +8,83 @@ fun main() {
     val line = inputFile.bufferedReader().readLine()
 
     val packet = parseBitsPacket(line)
-    println("Sum: ${sumAllVersions(packet)}")
+    println("Version numbers sum: ${sumAllVersions(packet)}")
+    println("Packet value: ${packet.evaluate()}")
 }
 
 sealed interface Packet {
     val version: Int
     val type: Int
+    fun evaluate(): Long
 }
 
 data class LiteralValuePacket(
     override val version: Int,
     override val type: Int,
-    val value: Int
-) : Packet
+    val value: Long
+) : Packet {
+    override fun evaluate() = value
+}
 
-data class OperatorPacket(
+sealed interface OperatorPacket : Packet {
+    val children: List<Packet>
+}
+
+data class SumOperatorPacket(
     override val version: Int,
     override val type: Int,
-    val children: List<Packet>
-) : Packet
+    override val children: List<Packet>
+) : OperatorPacket {
+    override fun evaluate() = children.sumOf { it.evaluate() }
+}
+
+data class ProductOperatorPacket(
+    override val version: Int,
+    override val type: Int,
+    override val children: List<Packet>
+) : OperatorPacket {
+    override fun evaluate() = children.fold(1L) { product, packet -> product * packet.evaluate() }
+}
+
+data class MinimumOperatorPacket(
+    override val version: Int,
+    override val type: Int,
+    override val children: List<Packet>
+) : OperatorPacket {
+    override fun evaluate() = children.minOf { it.evaluate() }
+}
+
+data class MaximumOperatorPacket(
+    override val version: Int,
+    override val type: Int,
+    override val children: List<Packet>
+) : OperatorPacket {
+    override fun evaluate() = children.maxOf { it.evaluate() }
+}
+
+data class GreaterThanOperatorPacket(
+    override val version: Int,
+    override val type: Int,
+    override val children: List<Packet>
+) : OperatorPacket {
+    override fun evaluate() = if (children[0].evaluate() > children[1].evaluate()) 1L else 0L
+}
+
+data class LessThanOperatorPacket(
+    override val version: Int,
+    override val type: Int,
+    override val children: List<Packet>
+) : OperatorPacket {
+    override fun evaluate() = if (children[0].evaluate() < children[1].evaluate()) 1L else 0L
+}
+
+data class EqualToOperatorPacket(
+    override val version: Int,
+    override val type: Int,
+    override val children: List<Packet>
+) : OperatorPacket {
+    override fun evaluate() = if (children[0].evaluate() == children[1].evaluate()) 1L else 0L
+}
 
 fun parseBitsPacket(hexString: String): Packet {
     val bitSet = hexString.hexStringToBitSet()
@@ -40,9 +98,8 @@ private class BitsParser(private val bitSet: BitSet) {
 
     fun readNextPacket(): Packet {
         val version = readVersion()
-        val type = readType()
 
-        return when (type) {
+        return when (val type = readType()) {
             4 -> readLiteralValuePacket(version, type)
             else -> readOperatorPacket(version, type)
         }
@@ -61,9 +118,9 @@ private class BitsParser(private val bitSet: BitSet) {
         return LiteralValuePacket(version, type, value)
     }
 
-    private fun readLiteralValue(): Int {
+    private fun readLiteralValue(): Long {
         var isNotLastGroup = true
-        var value = 0
+        var value = 0L
 
         while (isNotLastGroup) {
             isNotLastGroup = bitSet.get(index)
@@ -77,6 +134,21 @@ private class BitsParser(private val bitSet: BitSet) {
     }
 
     private fun readOperatorPacket(version: Int, type: Int): Packet {
+        val children = readChildren()
+
+        return when (type) {
+            0 -> SumOperatorPacket(version, type, children)
+            1 -> ProductOperatorPacket(version, type, children)
+            2 -> MinimumOperatorPacket(version, type, children)
+            3 -> MaximumOperatorPacket(version, type, children)
+            5 -> GreaterThanOperatorPacket(version, type, children)
+            6 -> LessThanOperatorPacket(version, type, children)
+            7 -> EqualToOperatorPacket(version, type, children)
+            else -> throw IllegalArgumentException("Unknown type: $type")
+        }
+    }
+
+    private fun readChildren(): List<Packet> {
         val lengthTypeId = readRawInt(1)
         val children = mutableListOf<Packet>()
 
@@ -98,8 +170,8 @@ private class BitsParser(private val bitSet: BitSet) {
             }
             else -> throw IllegalArgumentException("Unknown length type ID: $lengthTypeId")
         }
-        
-        return OperatorPacket(version, type, children)
+
+        return children
     }
 
     private fun readRawInt(bits: Int): Int {
