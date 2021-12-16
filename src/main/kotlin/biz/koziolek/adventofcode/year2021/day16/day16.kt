@@ -1,7 +1,6 @@
 package biz.koziolek.adventofcode.year2021.day16
 
 import biz.koziolek.adventofcode.*
-import java.util.*
 
 fun main() {
     val inputFile = findInput(object {})
@@ -87,13 +86,12 @@ data class EqualToOperatorPacket(
 }
 
 fun parseBitsPacket(hexString: String): Packet {
-    val bitSet = hexString.hexStringToBitSet()
-    val parser = BitsParser(bitSet)
-    return parser.readNextPacket()
+    return BitsParser(hexString).readNextPacket()
 }
 
-private class BitsParser(private val bitSet: BitSet) {
+private class BitsParser(hexString: String) {
 
+    private val bitSet = hexString.hexStringToBitSet()
     private var index = 0
 
     fun readNextPacket(): Packet {
@@ -123,9 +121,7 @@ private class BitsParser(private val bitSet: BitSet) {
         var value = 0L
 
         while (isNotLastGroup) {
-            isNotLastGroup = bitSet.get(index)
-            index += 1
-
+            isNotLastGroup = (readRawInt(1) == 1)
             val groupValue = readRawInt(4)
             value = value * 16 + groupValue
         }
