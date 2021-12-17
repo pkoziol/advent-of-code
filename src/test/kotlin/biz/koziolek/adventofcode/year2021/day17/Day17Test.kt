@@ -150,4 +150,21 @@ internal class Day17Test {
 
         assertEquals(Coord(23, 102) to 5253, bestVelocityAndMaxHeight)
     }
+
+    @Test
+    fun testFindAllVelocitiesThatHitTarget() {
+        val targetArea = Coord(20, -5) to Coord(30, -10)
+        val allVelocitiesThatHitTarget = findAllVelocitiesThatHitTarget(targetArea)
+
+        assertEquals(112, allVelocitiesThatHitTarget.size)
+    }
+
+    @Test
+    fun testAnswer2() {
+        val fullInput = findInput(object {}).readLines()
+        val targetArea = parseTargetArea(fullInput.single())
+        val allVelocitiesThatHitTarget = findAllVelocitiesThatHitTarget(targetArea)
+
+        assertEquals(1770, allVelocitiesThatHitTarget.size)
+    }
 }
