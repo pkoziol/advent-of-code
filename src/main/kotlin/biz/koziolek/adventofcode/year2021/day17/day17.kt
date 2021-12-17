@@ -1,6 +1,7 @@
 package biz.koziolek.adventofcode.year2021.day17
 
 import biz.koziolek.adventofcode.*
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -30,7 +31,7 @@ fun parseTargetArea(line: String): Pair<Coord, Coord> =
         ?: throw IllegalArgumentException("Could not parse target area: $line")
 
 fun findVelocityWithMostStyle(targetArea: Pair<Coord, Coord>): Pair<Coord, Int> =
-    generateVelocities(0, 1000, 0, 1000)
+    generateVelocities(0, targetArea.second.x, 0, abs(targetArea.second.y))
         .map { velocity -> velocity to calculateTrajectory(velocity, targetArea) }
         .filter { (_, trajectory) -> trajectory.last() in targetArea }
         .map { (velocity, trajectory) -> velocity to trajectory.maxOf { it.y } }
@@ -38,7 +39,7 @@ fun findVelocityWithMostStyle(targetArea: Pair<Coord, Coord>): Pair<Coord, Int> 
         .first()
 
 fun findAllVelocitiesThatHitTarget(targetArea: Pair<Coord, Coord>): Set<Coord> =
-    generateVelocities(0, 1000, -1000, 1000)
+    generateVelocities(0, targetArea.second.x, targetArea.second.y, abs(targetArea.second.y))
         .map { velocity -> velocity to calculateTrajectory(velocity, targetArea) }
         .filter { (_, trajectory) -> trajectory.last() in targetArea }
         .map { (velocity, _) -> velocity }
