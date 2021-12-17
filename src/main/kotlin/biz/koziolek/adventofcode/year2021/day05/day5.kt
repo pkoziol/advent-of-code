@@ -1,5 +1,6 @@
 package biz.koziolek.adventofcode.year2021.day05
 
+import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
 import kotlin.math.abs
 
@@ -10,11 +11,11 @@ fun main() {
 
     val map1 = createVentMap(lines.filter { it.isHorizontal || it.isVertical })
     println(map1)
-    println(">= 2: ${map1.countGreaterOrEqual(2)}")
+    println(">= 2: ${countGreaterOrEqual(map1, 2)}")
 
     val map2 = createVentMap(lines)
     println(map2)
-    println(">= 2: ${map2.countGreaterOrEqual(2)}")
+    println(">= 2: ${countGreaterOrEqual(map2, 2)}")
 }
 
 data class Line(val x1: Int, val y1: Int, val x2: Int, val y2: Int) {
@@ -22,11 +23,11 @@ data class Line(val x1: Int, val y1: Int, val x2: Int, val y2: Int) {
     val isVertical = x1 == x2
     val isDiagonal = abs(x1 - x2) == abs(y1 - y2)
 
-    fun getCoveredPoints(): List<Pair<Int, Int>> {
+    fun getCoveredPoints(): List<Coord> {
         return when {
-            isHorizontal -> range(x1, x2).map { Pair(it, y1) }
-            isVertical -> range(y1, y2).map { Pair(x1, it) }
-            isDiagonal -> range(x1, x2) zip range(y1, y2)
+            isHorizontal -> range(x1, x2).map { Coord(it, y1) }
+            isVertical -> range(y1, y2).map { Coord(x1, it) }
+            isDiagonal -> range(x1, x2).zip(range(y1, y2), ::Coord)
             else -> throw IllegalArgumentException("Only horizontal, vertical and diagonal lines are supported")
         }
     }
@@ -61,66 +62,26 @@ fun parseLines(strLines: List<String>): List<Line> =
                 .filter { it.isNotBlank() }
                 .map { Line.fromString(it) }
 
-data class VentMap(val width: Int = 0,
-                   val height: Int = 0,
-                   private val points: List<List<Int>> = emptyList()) {
+fun createVentMap(lines: List<Line>): Map<Coord, Int> =
+    lines.flatMap { it.getCoveredPoints() }
+        .groupingBy { it }
+        .eachCount()
 
-    fun addLine(line: Line): VentMap {
-        if (!line.isHorizontal && !line.isVertical && !line.isDiagonal) {
-            return this
-        }
+fun countGreaterOrEqual(ventMap: Map<Coord, Int>, value: Int): Int =
+    ventMap.values.count { it >= value }
 
-        val coveredPoints = line.getCoveredPoints()
-        if (coveredPoints.isEmpty()) {
-            return this
-        }
+fun ventMapToString(ventMap: Map<Coord, Int>): String {
+    val width = ventMap.keys.maxOf { it.x } + 1
+    val height = ventMap.keys.maxOf { it.y } + 1
+    val maxValue = ventMap.values.maxOf { it }
+    val strLen = maxValue.toString().length
 
-        val newWidth = maxOf(width, line.x1 + 1, line.x2 + 1)
-        val newHeight = maxOf(height, line.y1 + 1, line.y2 + 1)
-
-        return copy(
-                width = newWidth,
-                height = newHeight,
-                points = (0 until newHeight).map { y ->
-                    val pointsForRow = coveredPoints.filter { it.second == y }
-
-                    if (pointsForRow.isEmpty()) {
-                        if (y >= height) {
-                            // Add new row
-                            List(newWidth) { 0 }
-                        } else if (newWidth == width) {
-                            // Reuse existing row
-                            points[y]
-                        } else {
-                            // Add new columns
-                            points[y] + List(newWidth - width) { 0 }
-                        }
-                    } else {
-                        (0 until newWidth).map { x ->
-                            points.getOrElse(y) { emptyList() }.getOrElse(x) { 0 } + pointsForRow.count { it.first == x }
-                        }
-                    }
-                }
-        )
-    }
-
-    fun countGreaterOrEqual(value: Int): Int {
-        return points.sumOf { row -> row.count { it >= value } }
-    }
-
-    override fun toString(): String {
-        val maxValue = points.maxOf { row -> row.maxOf { it } }
-        val strLen = maxValue.toString().length
-
-        return (0 until height).joinToString(separator = "\n") { y ->
-            (0 until width).joinToString(separator = "") { x ->
-                when (points[y][x]) {
-                    0 -> ".".repeat(strLen)
-                    else -> points[y][x].toString().padStart(strLen, ' ')
-                }
-            }
+    return (0 until height).joinToString(separator = "\n") { y ->
+        (0 until width).joinToString(separator = "") { x ->
+            ventMap[Coord(x, y)]
+                ?.toString()
+                ?.padStart(strLen, ' ')
+                ?: ".".repeat(strLen)
         }
     }
 }
-
-fun createVentMap(lines: List<Line>): VentMap = lines.fold(VentMap(), VentMap::addLine)

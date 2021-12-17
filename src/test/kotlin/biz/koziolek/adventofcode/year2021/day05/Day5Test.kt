@@ -1,5 +1,6 @@
 package biz.koziolek.adventofcode.year2021.day05
 
+import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -67,17 +68,17 @@ internal class Day5Test {
 
         // 9,4 -> 3,4
         assertTrue(lines[2].isHorizontal)
-        val expectedPoints = listOf(Pair(9, 4), Pair(8, 4), Pair(7, 4), Pair(6, 4), Pair(5, 4), Pair(4, 4), Pair(3, 4))
+        val expectedPoints = listOf(Coord(9, 4), Coord(8, 4), Coord(7, 4), Coord(6, 4), Coord(5, 4), Coord(4, 4), Coord(3, 4))
         assertEquals(expectedPoints, lines[2].getCoveredPoints())
 
         // 7,0 -> 7,4
         assertTrue(lines[4].isVertical)
-        val expectedPoints2 = listOf(Pair(7, 0), Pair(7, 1), Pair(7, 2), Pair(7, 3), Pair(7, 4))
+        val expectedPoints2 = listOf(Coord(7, 0), Coord(7, 1), Coord(7, 2), Coord(7, 3), Coord(7, 4))
         assertEquals(expectedPoints2, lines[4].getCoveredPoints())
 
         // 6,4 -> 2,0
         assertTrue(lines[5].isDiagonal)
-        val expectedPoints3 = listOf(Pair(6, 4), Pair(5, 3), Pair(4, 2), Pair(3, 1), Pair(2, 0))
+        val expectedPoints3 = listOf(Coord(6, 4), Coord(5, 3), Coord(4, 2), Coord(3, 1), Coord(2, 0))
         assertEquals(expectedPoints3, lines[5].getCoveredPoints())
     }
 
@@ -96,9 +97,6 @@ internal class Day5Test {
 
         val map = createVentMap(lines)
 
-        assertEquals(10, map.width)
-        assertEquals(10, map.height)
-
         val expectedToString = """
             .......1..
             ..1....1..
@@ -111,7 +109,7 @@ internal class Day5Test {
             ..........
             222111....
         """.trimIndent()
-        assertEquals(expectedToString, map.toString())
+        assertEquals(expectedToString, ventMapToString(map))
     }
 
     @Test
@@ -120,7 +118,7 @@ internal class Day5Test {
         val lines = parseLines(strLines).filter { it.isHorizontal || it.isVertical }
         val map = createVentMap(lines)
 
-        assertEquals(5, map.countGreaterOrEqual(2))
+        assertEquals(5, countGreaterOrEqual(map, 2))
     }
 
     @Test
@@ -129,7 +127,7 @@ internal class Day5Test {
         val lines = parseLines(strLines).filter { it.isHorizontal || it.isVertical }
         val map = createVentMap(lines)
 
-        assertEquals(4993, map.countGreaterOrEqual(2))
+        assertEquals(4993, countGreaterOrEqual(map, 2))
     }
 
     @Test
@@ -150,7 +148,7 @@ internal class Day5Test {
             1.......1.
             222111....
         """.trimIndent()
-        assertEquals(expectedToString, map.toString())
+        assertEquals(expectedToString, ventMapToString(map))
     }
 
     @Test
@@ -159,7 +157,7 @@ internal class Day5Test {
         val lines = parseLines(strLines)
         val map = createVentMap(lines)
 
-        assertEquals(12, map.countGreaterOrEqual(2))
+        assertEquals(12, countGreaterOrEqual(map, 2))
     }
 
     @Test
@@ -168,6 +166,6 @@ internal class Day5Test {
         val lines = parseLines(strLines)
         val map = createVentMap(lines)
 
-        assertEquals(21101, map.countGreaterOrEqual(2))
+        assertEquals(21101, countGreaterOrEqual(map, 2))
     }
 }
