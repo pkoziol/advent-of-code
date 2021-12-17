@@ -37,6 +37,17 @@ internal class Coords2dTest {
     }
 
     @Test
+    fun testZipAsCoord() {
+        val coords = (1..4).zipAsCoord(7 downTo 4)
+
+        assertEquals(4, coords.size)
+        assertEquals(Coord(1, 7), coords[0])
+        assertEquals(Coord(2, 6), coords[1])
+        assertEquals(Coord(3, 5), coords[2])
+        assertEquals(Coord(4, 4), coords[3])
+    }
+
+    @Test
     fun testMapGetWidth() {
         assertEquals(3, map.getWidth())
     }
