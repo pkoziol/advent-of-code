@@ -4,7 +4,17 @@ data class Coord(val x: Int, val y: Int) {
     operator fun plus(other: Coord) = Coord(x + other.x, y + other.y)
     operator fun minus(other: Coord) = Coord(x - other.x, y - other.y)
     operator fun unaryMinus() = Coord(-x, -y)
+    override fun toString() = "$x,$y"
+
+    companion object {
+        fun fromString(str: String): Coord =
+            str.split(',')
+                .map { it.toInt() }
+                .let { Coord(x = it[0], y = it[1]) }
+    }
 }
+
+fun IntProgression.zipAsCoord(ys: IntProgression) = zip(ys) { x, y -> Coord(x, y) }
 
 fun <T> Map<Coord, T>.getWidth() = keys.maxOfOrNull { it.x }?.plus(1) ?: 0
 
