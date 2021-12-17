@@ -2,6 +2,8 @@ package biz.koziolek.adventofcode.year2021.day05
 
 import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
+import biz.koziolek.adventofcode.getHeight
+import biz.koziolek.adventofcode.getWidth
 import kotlin.math.abs
 
 fun main() {
@@ -63,7 +65,9 @@ fun parseLines(strLines: List<String>): List<Line> =
                 .map { Line.fromString(it) }
 
 fun createVentMap(lines: List<Line>): Map<Coord, Int> =
-    lines.flatMap { it.getCoveredPoints() }
+    lines
+        .filter { it.isHorizontal || it.isVertical || it.isDiagonal }
+        .flatMap { it.getCoveredPoints() }
         .groupingBy { it }
         .eachCount()
 
@@ -71,13 +75,11 @@ fun countGreaterOrEqual(ventMap: Map<Coord, Int>, value: Int): Int =
     ventMap.values.count { it >= value }
 
 fun ventMapToString(ventMap: Map<Coord, Int>): String {
-    val width = ventMap.keys.maxOf { it.x } + 1
-    val height = ventMap.keys.maxOf { it.y } + 1
     val maxValue = ventMap.values.maxOf { it }
     val strLen = maxValue.toString().length
 
-    return (0 until height).joinToString(separator = "\n") { y ->
-        (0 until width).joinToString(separator = "") { x ->
+    return (0 until ventMap.getHeight()).joinToString(separator = "\n") { y ->
+        (0 until ventMap.getWidth()).joinToString(separator = "") { x ->
             ventMap[Coord(x, y)]
                 ?.toString()
                 ?.padStart(strLen, ' ')
