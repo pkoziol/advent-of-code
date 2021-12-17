@@ -8,9 +8,12 @@ fun main() {
     val inputFile = findInput(object {})
     val line = inputFile.bufferedReader().readLine()
     val targetArea = parseTargetArea(line)
-    val (bestVelocity, maxHeight) = findVelocityWithMostStyle(targetArea)
 
+    val (bestVelocity, maxHeight) = findVelocityWithMostStyle(targetArea)
     println("Best velocity is: $bestVelocity that gives max height: $maxHeight")
+
+    val allVelocitiesThatHitTarget = findAllVelocitiesThatHitTarget(targetArea)
+    println("There is ${allVelocitiesThatHitTarget.size} velocities that hit target")
 }
 
 fun parseTargetArea(line: String): Pair<Coord, Coord> =
@@ -33,6 +36,13 @@ fun findVelocityWithMostStyle(targetArea: Pair<Coord, Coord>): Pair<Coord, Int> 
         .map { (velocity, trajectory) -> velocity to trajectory.maxOf { it.y } }
         .sortedByDescending { (_, maxHeight) -> maxHeight }
         .first()
+
+fun findAllVelocitiesThatHitTarget(targetArea: Pair<Coord, Coord>): Set<Coord> =
+    generateVelocities(0, 1000, -1000, 1000)
+        .map { velocity -> velocity to calculateTrajectory(velocity, targetArea) }
+        .filter { (_, trajectory) -> trajectory.last() in targetArea }
+        .map { (velocity, _) -> velocity }
+        .toSet()
 
 private fun generateVelocities(minX: Int, maxX: Int, minY: Int, maxY: Int): Sequence<Coord> =
     sequence {
