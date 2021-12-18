@@ -8,10 +8,13 @@ import kotlin.math.floor
 fun main() {
     val inputFile = findInput(object {})
     val lines = inputFile.bufferedReader().readLines()
-
     val numbers = parseSnailfishNumbers(lines)
+
     val sum = addAndReduceAll(numbers)
     println("Sum magnitude is: ${sum.magnitude}")
+
+    val (_, _, maxMagnitude) = findMaxPossibleMagnitudeOfTwo(numbers)
+    println("Max possible magnitude of sum of two numbers is: $maxMagnitude")
 }
 
 sealed interface SnailfishNumber {
@@ -357,3 +360,17 @@ fun parseSnailfishNumber(line: String): SnailfishPair {
 
 fun addAndReduceAll(numbers: Iterable<SnailfishPair>): SnailfishPair =
     numbers.reduce { a, b -> (a + b).reduce() }
+
+fun findMaxPossibleMagnitudeOfTwo(numbers: Iterable<SnailfishPair>): Triple<SnailfishPair, SnailfishPair, Int> =
+    sequence {
+        for (a in numbers) {
+            for (b in numbers) {
+                if (a != b) {
+                    yield(a to b)
+                }
+            }
+        }
+    }
+        .map { (a, b) -> Triple(a, b, (a + b).reduce().magnitude) }
+        .sortedByDescending { it.third }
+        .first()
