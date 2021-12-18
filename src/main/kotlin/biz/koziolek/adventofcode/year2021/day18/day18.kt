@@ -79,7 +79,7 @@ data class SnailfishPair(
             is NoExplosion -> this
             is LeftAndRight -> throw IllegalStateException("Not consumed left nor right should never happen (I think?)")
             is OnlyLeft -> explosionResult.number
-            is OnlyRight -> explosionResult.number
+            is OnlyRight -> explosionResult.number as SnailfishPair
             is ExplosionComplete -> explosionResult.number as SnailfishPair
         }
     }
@@ -106,44 +106,41 @@ data class SnailfishPair(
 
                             when (rightResult) {
                                 is NoExplosion -> NoExplosion
-                                is LeftAndRight -> when (left) {
-                                    is SnailfishRegular -> {
-                                        OnlyRight(right = rightResult.right, number = copy(
-                                            left = left.copy(value = left.value + rightResult.left),
+                                is LeftAndRight -> {
+                                    val leftResult2 = when (left) {
+                                        is SnailfishRegular -> OnlyRight(rightResult.right, left.copy(value = left.value + rightResult.left))
+
+                                        // BTW, this is impossible and won't work if called.
+                                        // 1) Left cannot be a pair and not be exploded at the same time when right was exploded.
+                                        //    They are at the same level, so left or something inside it must have been exploded.
+                                        // 2) Left receives LeftAndRight as argument, which is not supported by outer-most when.
+                                        is SnailfishPair -> left.explodeInternal(rightResult)
+                                    }
+                                    when (leftResult2) {
+                                        is NoExplosion -> throw IllegalStateException("Impossible")
+                                        is ExplosionComplete -> throw IllegalStateException("Impossible")
+                                        is LeftAndRight -> throw IllegalStateException("Impossible")
+                                        is OnlyLeft -> throw IllegalStateException("Impossible")
+                                        is OnlyRight -> OnlyRight(right = rightResult.right, number = copy(
+                                            left = leftResult2.number,
                                             right = rightResult.number,
                                         ))
-                                    }
-                                    is SnailfishPair -> {
-                                        when (val leftResult2 = left.explodeInternal(rightResult)) {
-                                            is NoExplosion -> throw IllegalStateException("Impossible")
-                                            is ExplosionComplete -> throw IllegalStateException("Impossible")
-                                            is LeftAndRight -> throw IllegalStateException("Impossible")
-                                            is OnlyLeft -> throw IllegalStateException("Impossible")
-                                            is OnlyRight -> OnlyRight(right = rightResult.right, number = copy(
-                                                left = leftResult2.number,
-                                                right = rightResult.number,
-                                            ))
-                                        }
                                     }
                                 }
-                                is OnlyLeft -> when (left) {
-                                    is SnailfishRegular -> {
-                                        ExplosionComplete(number = copy(
-                                            left = left.copy(value = left.value + rightResult.left),
+                                is OnlyLeft -> {
+                                    val leftResult2 = when (left) {
+                                        is SnailfishRegular -> ExplosionComplete(left.copy(value = left.value + rightResult.left))
+                                        is SnailfishPair -> left.explodeInternal(rightResult)
+                                    }
+                                    when (leftResult2) {
+                                        is NoExplosion -> throw IllegalStateException("Impossible")
+                                        is ExplosionComplete -> ExplosionComplete(number = copy(
+                                            left = leftResult2.number,
                                             right = rightResult.number,
                                         ))
-                                    }
-                                    is SnailfishPair -> {
-                                        when (val leftResult2 = left.explodeInternal(rightResult)) {
-                                            is NoExplosion -> throw IllegalStateException("Impossible")
-                                            is ExplosionComplete -> ExplosionComplete(number = copy(
-                                                left = leftResult2.number,
-                                                right = rightResult.number,
-                                            ))
-                                            is LeftAndRight -> throw IllegalStateException("Impossible")
-                                            is OnlyLeft -> throw IllegalStateException("Impossible")
-                                            is OnlyRight -> throw IllegalStateException("Impossible")
-                                        }
+                                        is LeftAndRight -> throw IllegalStateException("Impossible")
+                                        is OnlyLeft -> throw IllegalStateException("Impossible")
+                                        is OnlyRight -> throw IllegalStateException("Impossible")
                                     }
                                 }
                                 is OnlyRight -> rightResult.copy(number = copy(
@@ -154,24 +151,20 @@ data class SnailfishPair(
                                 ))
                             }
                         }
-                        is LeftAndRight -> when (right) {
-                            is SnailfishRegular -> {
-                                OnlyLeft(left = leftResult.left, number = copy(
-                                    left = leftResult.number,
-                                    right = right.copy(value = right.value + leftResult.right),
-                                ))
+                        is LeftAndRight -> {
+                            val rightResult = when (right) {
+                                is SnailfishRegular -> ExplosionComplete(right.copy(value = right.value + leftResult.right))
+                                is SnailfishPair -> right.explodeInternal(OnlyRight(right = leftResult.right, number = this))
                             }
-                            is SnailfishPair -> {
-                                when (val rightResult = right.explodeInternal(OnlyRight(right = leftResult.right, number = this))) {
-                                    is NoExplosion -> throw IllegalStateException("Impossible")
-                                    is ExplosionComplete -> OnlyLeft(left = leftResult.left, number = copy(
-                                        left = leftResult.number,
-                                        right = rightResult.number,
-                                    ))
-                                    is LeftAndRight -> throw IllegalStateException("Impossible")
-                                    is OnlyLeft -> throw IllegalStateException("Impossible")
-                                    is OnlyRight -> throw IllegalStateException("Impossible")
-                                }
+                            when (rightResult) {
+                                is NoExplosion -> throw IllegalStateException("Impossible")
+                                is ExplosionComplete -> OnlyLeft(left = leftResult.left, number = copy(
+                                    left = leftResult.number,
+                                    right = rightResult.number,
+                                ))
+                                is LeftAndRight -> throw IllegalStateException("Impossible")
+                                is OnlyLeft -> throw IllegalStateException("Impossible")
+                                is OnlyRight -> throw IllegalStateException("Impossible")
                             }
                         }
                         is ExplosionComplete -> leftResult.copy(number = copy(
@@ -180,64 +173,54 @@ data class SnailfishPair(
                         is OnlyLeft -> leftResult.copy(number = copy(
                             left = leftResult.number,
                         ))
-                        is OnlyRight -> when (right) {
-                            is SnailfishRegular -> {
-                                ExplosionComplete(number = copy(
-                                    left = leftResult.number,
-                                    right = right.copy(value = right.value + leftResult.right),
-                                ))
+                        is OnlyRight -> {
+                            val rightResult = when (right) {
+                                is SnailfishRegular -> ExplosionComplete(right.copy(value = right.value + leftResult.right))
+                                is SnailfishPair -> right.explodeInternal(leftResult)
                             }
-                            is SnailfishPair -> {
-                                when (val rightResult = right.explodeInternal(leftResult)) {
-                                    is NoExplosion -> throw IllegalStateException("Impossible")
-                                    is ExplosionComplete -> ExplosionComplete(copy(
-                                        left = leftResult.number,
-                                        right = rightResult.number,
-                                    ))
-                                    is LeftAndRight -> throw IllegalStateException("Impossible")
-                                    is OnlyLeft -> throw IllegalStateException("Impossible")
-                                    is OnlyRight -> throw IllegalStateException("Impossible")
-                                }
+                            when (rightResult) {
+                                is NoExplosion -> throw IllegalStateException("Impossible")
+                                is ExplosionComplete -> ExplosionComplete(copy(
+                                    left = leftResult.number,
+                                    right = rightResult.number,
+                                ))
+                                is LeftAndRight -> throw IllegalStateException("Impossible")
+                                is OnlyLeft -> throw IllegalStateException("Impossible")
+                                is OnlyRight -> throw IllegalStateException("Impossible")
                             }
                         }
                     }
                 }
             }
             is LeftAndRight -> throw IllegalStateException("Don't know what to do - please do not pass me that")
-            is OnlyLeft -> when (right) {
-                is SnailfishRegular -> {
-                    ExplosionComplete(number = copy(
-                        right = right.copy(value = right.value + result.left),
-                    ))
+            is OnlyLeft -> {
+                val rightResult = when (right) {
+                    is SnailfishRegular -> ExplosionComplete(right.copy(value = right.value + result.left))
+                    is SnailfishPair -> right.explodeInternal(result)
                 }
-                is SnailfishPair -> {
-                    when (val rightResult = right.explodeInternal(result)) {
-                        is NoExplosion -> throw IllegalStateException("Impossible")
-                        is ExplosionComplete -> rightResult.copy(number = copy(
-                            right = rightResult.number,
-                        ))
-                        is LeftAndRight -> throw IllegalStateException("Impossible")
-                        is OnlyLeft -> throw IllegalStateException("Impossible")
-                        is OnlyRight -> throw IllegalStateException("Impossible")
-                    }
+                when (rightResult) {
+                    is NoExplosion -> throw IllegalStateException("Impossible")
+                    is ExplosionComplete -> rightResult.copy(number = copy(
+                        right = rightResult.number,
+                    ))
+                    is LeftAndRight -> throw IllegalStateException("Impossible")
+                    is OnlyLeft -> throw IllegalStateException("Impossible")
+                    is OnlyRight -> throw IllegalStateException("Impossible")
                 }
             }
-            is OnlyRight -> when (left) {
-                is SnailfishRegular -> {
-                    ExplosionComplete(number = copy(
-                        left = left.copy(value = left.value + result.right),
-                    ))
+            is OnlyRight -> {
+                val leftResult = when (left) {
+                    is SnailfishRegular -> ExplosionComplete(left.copy(value = left.value + result.right))
+                    is SnailfishPair -> left.explodeInternal(result)
                 }
-                is SnailfishPair -> {
-                    when (val leftResult = left.explodeInternal(result)) {
-                        is NoExplosion -> throw IllegalStateException("Impossible")
-                        is ExplosionComplete -> leftResult.copy(number = copy(
-                            left = leftResult.number,
-                        ))
-                        is LeftAndRight -> throw IllegalStateException("Impossible")
-                        is OnlyLeft -> throw IllegalStateException("Impossible")
-                        is OnlyRight -> throw IllegalStateException("Impossible")
-                    }
+                when (leftResult) {
+                    is NoExplosion -> throw IllegalStateException("Impossible")
+                    is ExplosionComplete -> leftResult.copy(number = copy(
+                        left = leftResult.number,
+                    ))
+                    is LeftAndRight -> throw IllegalStateException("Impossible")
+                    is OnlyLeft -> throw IllegalStateException("Impossible")
+                    is OnlyRight -> throw IllegalStateException("Impossible")
                 }
             }
             is ExplosionComplete -> throw IllegalStateException("Impossible")
@@ -265,7 +248,7 @@ data class SnailfishPair(
 
     private data class OnlyLeft(val left: Int, val number: SnailfishPair) : ExplosionResult
 
-    private data class OnlyRight(val right: Int, val number: SnailfishPair) : ExplosionResult
+    private data class OnlyRight(val right: Int, val number: SnailfishNumber) : ExplosionResult
 
     private data class ExplosionComplete(val number: SnailfishNumber) : ExplosionResult
 }
