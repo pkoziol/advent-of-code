@@ -75,7 +75,7 @@ data class SnailfishPair(
     }
 
     override fun explode(): SnailfishPair {
-        return when (val explosionResult = explodeInternal(NoExplosion(this))) {
+        return when (val explosionResult = explodeInternal(NoExplosion)) {
             is NoExplosion -> this
             is LeftAndRight -> throw IllegalStateException("Not consumed left nor right should never happen (I think?)")
             is OnlyLeft -> explosionResult.number
@@ -93,7 +93,7 @@ data class SnailfishPair(
                     val leftResult = if (left is SnailfishPair) {
                         left.explodeInternal(result)
                     } else {
-                        NoExplosion(number = left)
+                        NoExplosion
                     }
 
                     when (leftResult) {
@@ -101,11 +101,11 @@ data class SnailfishPair(
                             val rightResult = if (right is SnailfishPair) {
                                 right.explodeInternal(leftResult)
                             } else {
-                                NoExplosion(number = right)
+                                NoExplosion
                             }
 
                             when (rightResult) {
-                                is NoExplosion -> NoExplosion(this)
+                                is NoExplosion -> NoExplosion
                                 is LeftAndRight -> when (left) {
                                     is SnailfishRegular -> {
                                         OnlyRight(right = rightResult.right, number = copy(
@@ -147,11 +147,9 @@ data class SnailfishPair(
                                     }
                                 }
                                 is OnlyRight -> rightResult.copy(number = copy(
-                                    left = leftResult.number,
                                     right = rightResult.number,
                                 ))
                                 is ExplosionComplete -> rightResult.copy(number = copy(
-                                    left = leftResult.number,
                                     right = rightResult.number,
                                 ))
                             }
@@ -259,19 +257,17 @@ data class SnailfishPair(
         return this
     }
 
-    private sealed interface ExplosionResult {
-        val number: SnailfishNumber
-    }
+    private sealed interface ExplosionResult
 
-    private data class NoExplosion(override val number: SnailfishNumber) : ExplosionResult
+    private object NoExplosion : ExplosionResult
 
-    private data class LeftAndRight(val left: Int, val right: Int, override val number: SnailfishNumber) : ExplosionResult
+    private data class LeftAndRight(val left: Int, val right: Int, val number: SnailfishNumber) : ExplosionResult
 
-    private data class OnlyLeft(val left: Int, override val number: SnailfishPair) : ExplosionResult
+    private data class OnlyLeft(val left: Int, val number: SnailfishPair) : ExplosionResult
 
-    private data class OnlyRight(val right: Int, override val number: SnailfishPair) : ExplosionResult
+    private data class OnlyRight(val right: Int, val number: SnailfishPair) : ExplosionResult
 
-    private data class ExplosionComplete(override val number: SnailfishNumber) : ExplosionResult
+    private data class ExplosionComplete(val number: SnailfishNumber) : ExplosionResult
 }
 
 data class SnailfishRegular(
