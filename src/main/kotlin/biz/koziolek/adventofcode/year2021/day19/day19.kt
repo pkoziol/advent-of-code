@@ -8,18 +8,22 @@ fun main() {
     val lines = inputFile.bufferedReader().readLines()
 
     val scanners = parseScannerReport(lines)
+
     val allBeacons = findAllBeaconsRelativeTo0(scanners)
     println("There are ${allBeacons.size} beacons")
+
+    val maxDistance = findMaxScannerDistance(scanners)
+    println("Max distance between two scanners is: $maxDistance")
 }
 
-fun parseScannerReport(lines: Iterable<String>): List<Scanner> =
+fun parseScannerReport(lines: Iterable<String>): List<RandomScanner> =
     buildList {
         var beacons: MutableSet<Coord3d>? = null
 
         for (line in lines) {
             if (line.startsWith("--- scanner")) {
                 if (beacons != null) {
-                    add(Scanner(beacons))
+                    add(RandomScanner(beacons))
                 }
                 beacons = mutableSetOf()
             } else if (line.isNotBlank()) {
@@ -28,22 +32,49 @@ fun parseScannerReport(lines: Iterable<String>): List<Scanner> =
         }
 
         if (beacons != null) {
-            add(Scanner(beacons))
+            add(RandomScanner(beacons))
         }
     }
 
-data class Scanner(val beacons: Set<Coord3d>) {
+interface Scanner {
+    val beacons: Set<Coord3d>
+
     fun distanceToAllBeacons(from: Coord3d): Set<Double> =
         beacons.map { from.distanceTo(it) }.toSet()
+}
 
-    fun normalize(scannerRotation: Rotation, scannerCoord: Coord3d): Scanner {
-        return copy(beacons = beacons.map { it.rotate(scannerRotation) + scannerCoord }.toSet())
+data class RandomScanner(override val beacons: Set<Coord3d>) : Scanner {
+
+    fun normalize(scannerRotation: Rotation, scannerCoord: Coord3d): NormalizedScanner {
+        return NormalizedScanner(
+            position = scannerCoord,
+            beacons = beacons.map { it.rotate(scannerRotation) + scannerCoord }.toSet(),
+        )
     }
 }
 
-fun findAllBeaconsRelativeTo0(scanners: List<Scanner>): Set<Coord3d> {
-    val normalizedScanners: MutableList<Scanner?> = scanners.map { null }.toMutableList()
-    normalizedScanners[0] = scanners[0]
+data class NormalizedScanner(val position: Coord3d, override val beacons: Set<Coord3d>) : Scanner
+
+fun findMaxScannerDistance(scanners: List<RandomScanner>): Int {
+    val normalizedScanners = matchScanners(scanners)
+    
+    return sequence {
+        for (scannerA in normalizedScanners) {
+            for (scannerB in normalizedScanners) {
+                yield(scannerA to scannerB)
+            }
+        }
+    }.maxOf { it.first.position.manhattanDistanceTo(it.second.position) }
+}
+
+fun findAllBeaconsRelativeTo0(scanners: List<RandomScanner>): Set<Coord3d> =
+    matchScanners(scanners)
+        .flatMap { it.beacons }
+        .toSet()
+
+fun matchScanners(scanners: List<RandomScanner>): List<NormalizedScanner> {
+    val normalizedScanners: MutableList<NormalizedScanner?> = scanners.map { null }.toMutableList()
+    normalizedScanners[0] = scanners[0].normalize(Rotation("+x", "+y", "+z"), Coord3d(0, 0, 0))
 
     while (normalizedScanners.any { it == null }) {
         var matchedAnythingThisIteration = false
@@ -79,10 +110,7 @@ fun findAllBeaconsRelativeTo0(scanners: List<Scanner>): Set<Coord3d> {
         }
     }
 
-    return normalizedScanners
-        .filterNotNull()
-        .flatMap { it.beacons }
-        .toSet()
+    return normalizedScanners.filterNotNull()
 }
 
 fun findSameCoords(scannerA: Scanner, scannerB: Scanner, minInCommon: Int = 12): Map<Coord3d, Coord3d> {

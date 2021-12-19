@@ -378,5 +378,19 @@ internal class Day19Test {
         val allBeacons = findAllBeaconsRelativeTo0(scanners)
         assertEquals(367, allBeacons.size)
     }
-}
 
+    @Test
+    fun testFindMaxDistance() {
+        val scanners = parseScannerReport(sampleReport)
+        val maxDistance = findMaxScannerDistance(scanners)
+        assertEquals(3621, maxDistance)
+    }
+
+    @Test
+    fun testAnswer2() {
+        val fullInput = findInput(object {}).readLines()
+        val scanners = parseScannerReport(fullInput)
+        val maxDistance = findMaxScannerDistance(scanners)
+        assertEquals(11925, maxDistance)
+    }
+}

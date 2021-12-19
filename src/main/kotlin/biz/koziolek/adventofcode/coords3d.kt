@@ -1,5 +1,6 @@
 package biz.koziolek.adventofcode
 
+import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -14,6 +15,9 @@ data class Coord3d(val x: Int, val y: Int, val z: Int) {
             + (y - other.y).toDouble().pow(2)
             + (z - other.z).toDouble().pow(2)
     )
+
+    infix fun manhattanDistanceTo(other: Coord3d): Int =
+        abs(x - other.x) + abs(y - other.y) + abs(z - other.z)
 
     companion object {
         fun fromString(str: String): Coord3d =
