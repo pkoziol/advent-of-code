@@ -8,10 +8,12 @@ fun main() {
 
     val lookupTable = parseLookupTable(lines)
     val image0 = parseInputImage(lines)
-    val image1 = image0.enhance(lookupTable)
-    val image2 = image1.enhance(lookupTable)
 
+    val image2 = enhanceNTimes(image0, lookupTable, n = 2)
     println("Lit pixels on 2nd image: ${image2.countLitPixels()}")
+
+    val image50 = enhanceNTimes(image0, lookupTable, n = 50)
+    println("Lit pixels on 50th image: ${image50.countLitPixels()}")
 }
 
 data class InfiniteImage(
@@ -108,3 +110,6 @@ fun parseInputImage(lines: Iterable<String>): InfiniteImage =
             }.toMap(),
         infinitePixels = false,
     )
+
+fun enhanceNTimes(image: InfiniteImage, lookupTable: BooleanArray, n: Int) =
+    (1..n).fold(image) { img, _ -> img.enhance(lookupTable) }
