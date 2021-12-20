@@ -138,9 +138,27 @@ internal class Day20Test {
         val fullInput = findInput(object {}).readLines()
         val lookupTable = parseLookupTable(fullInput)
         val image0 = parseInputImage(fullInput)
-        val image1 = image0.enhance(lookupTable)
-        val image2 = image1.enhance(lookupTable)
+        val image2 = enhanceNTimes(image0, lookupTable, n = 2)
 
         assertEquals(4917, image2.countLitPixels())
+    }
+
+    @Test
+    fun testEnhance50Times() {
+        val lookupTable = parseLookupTable(sampleInput)
+        val image0 = parseInputImage(sampleInput)
+        val image50 = enhanceNTimes(image0, lookupTable, n = 50)
+
+        assertEquals(3351, image50.countLitPixels())
+    }
+
+    @Test
+    fun testAnswer2() {
+        val fullInput = findInput(object {}).readLines()
+        val lookupTable = parseLookupTable(fullInput)
+        val image0 = parseInputImage(fullInput)
+        val image50 = enhanceNTimes(image0, lookupTable, n = 50)
+
+        assertEquals(16389, image50.countLitPixels())
     }
 }
