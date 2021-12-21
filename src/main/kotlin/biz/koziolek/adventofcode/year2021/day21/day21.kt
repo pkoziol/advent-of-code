@@ -127,7 +127,7 @@ fun playQuantum(game: DiracDiceGame): Pair<Long, Long> {
     return Pair(player1Wins, player2Wins)
 }
 
-fun countWinsPerTurn(position: Int, score: Int, turn: Int, diceSides: Int = 3): Pair<LongArray, LongArray> {
+fun countWinsPerTurn(position: Int, score: Int, turn: Int, diceSides: Int = 3, multiplier: Long = 1): Pair<LongArray, LongArray> {
     val arraySize = 11
     val winningScore = 21
 
@@ -135,32 +135,39 @@ fun countWinsPerTurn(position: Int, score: Int, turn: Int, diceSides: Int = 3): 
     val notYetWinsPerTurn = LongArray(arraySize)
     val newTurn = turn + 1
 
-    for (roll1 in 1..diceSides) {
-        for (roll2 in 1..diceSides) {
-            for (roll3 in 1..diceSides) {
-                val rolled = roll1 + roll2 + roll3
-                val newPosition = (position + rolled - 1) % 10 + 1
-                val newScore = score + newPosition
-
-                if (newScore >= winningScore) {
-                    winsPerTurn[newTurn] += 1L
-                } else {
-                    notYetWinsPerTurn[newTurn] += 1L
-
-                    val (otherWinsPerTurn, otherNotYetWinsPerTurn) = countWinsPerTurn(
-                        position = newPosition,
-                        score = newScore,
-                        turn = newTurn,
-                        diceSides = diceSides,
-                    )
-
-                    for (i in 0 until arraySize) {
-                        winsPerTurn[i] += otherWinsPerTurn[i]
-                    }
-                    for (i in 0 until arraySize) {
-                        notYetWinsPerTurn[i] += otherNotYetWinsPerTurn[i]
-                    }
+    val rollRepeats = buildMap<Int, Int> {
+        for (roll1 in 1..diceSides) {
+            for (roll2 in 1..diceSides) {
+                for (roll3 in 1..diceSides) {
+                    val rolled = roll1 + roll2 + roll3
+                    merge(rolled, 1) { a, b -> a + b }
                 }
+            }
+        }
+    }
+
+    for ((rolled, repeats) in rollRepeats) {
+        val newPosition = (position + rolled - 1) % 10 + 1
+        val newScore = score + newPosition
+
+        if (newScore >= winningScore) {
+            winsPerTurn[newTurn] += multiplier * repeats
+        } else {
+            notYetWinsPerTurn[newTurn] += multiplier * repeats
+
+            val (otherWinsPerTurn, otherNotYetWinsPerTurn) = countWinsPerTurn(
+                position = newPosition,
+                score = newScore,
+                turn = newTurn,
+                diceSides = diceSides,
+                multiplier = multiplier * repeats,
+            )
+
+            for (i in 0 until arraySize) {
+                winsPerTurn[i] += otherWinsPerTurn[i]
+            }
+            for (i in 0 until arraySize) {
+                notYetWinsPerTurn[i] += otherNotYetWinsPerTurn[i]
             }
         }
     }
