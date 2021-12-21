@@ -49,4 +49,23 @@ internal class Day21Test {
         val wonGame = play(DiracDiceGame(player1, player2, dice))
         assertEquals(893700, answerPart1(wonGame))
     }
+
+    @Test
+    fun testPlayQuantumSample() {
+        val (player1, player2) = parseDiracDiceStartingPositions(sampleInput)
+        val dice = QuantumDice(sides = 3)
+        val (player1Wins, player2Wins) = playQuantum(DiracDiceGame(player1, player2, dice))
+        assertEquals(444_356_092_776_315, player1Wins)
+        assertEquals(341_960_390_180_808, player2Wins)
+    }
+
+    @Test
+    fun testAnswer2() {
+        val fullInput = findInput(object {}).readLines()
+        val (player1, player2) = parseDiracDiceStartingPositions(fullInput)
+        val dice = QuantumDice(sides = 3)
+        val (player1Wins, player2Wins) = playQuantum(DiracDiceGame(player1, player2, dice))
+        assertEquals(568_867_175_661_958, player1Wins)
+        assertEquals(408_746_284_676_519, player2Wins)
+    }
 }
