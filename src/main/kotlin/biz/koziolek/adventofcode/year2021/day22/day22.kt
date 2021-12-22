@@ -90,6 +90,45 @@ data class Cuboid(val from: Coord3d, val to: Coord3d, private val excluded: List
                 && from.y <= coord3d.y && coord3d.y <= to.y
                 && from.z <= coord3d.z && coord3d.z <= to.z
 
+    fun cutOut(other: Cuboid): Set<Cuboid> =
+        buildSet {
+            val xSplits = split(from.x, to.x, other.from.x, other.to.x)
+            val ySplits = split(from.y, to.y, other.from.y, other.to.y)
+            val zSplits = split(from.z, to.z, other.from.z, other.to.z)
+            for ((x1, x2) in xSplits) {
+                for ((y1, y2) in ySplits) {
+                    for ((z1, z2) in zSplits) {
+                        val cuboid = Cuboid(
+                            from = Coord3d(x = x1, y = y1, z = z1),
+                            to = Coord3d(x = x2, y = y2, z = z2),
+                        )
+
+                        if (!cuboid.intersects(other)) {
+                            add(cuboid)
+                        }
+                    }
+                }          
+            }
+        }
+
+    private fun split(start: Int, end: Int, cut1: Int, cut2: Int): List<Pair<Int, Int>> {
+        return buildList {
+            if (start < cut1 && cut2 < end) {
+                add(start to cut1 - 1)
+                add(cut1 to cut2)
+                add(cut2 + 1 to end)
+            } else if (start < cut1 && cut1 <= end) {
+                add(start to cut1 - 1)
+                add(cut1 to end)
+            } else if (start <= cut2 && cut2 < end) {
+                add(start to cut2)
+                add(cut2 + 1 to end)
+            } else {
+                add(start to end)
+            }
+        }
+    }
+
     override fun toString(): String {
         return toString(indent = 0)
     }
