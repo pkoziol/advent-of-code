@@ -2,8 +2,10 @@ package biz.koziolek.adventofcode.year2021.day12
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day12Test {
 
     private val sampleInput1 = """
@@ -164,6 +166,7 @@ internal class Day12Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer1() {
         val fullInput = findInput(object {}).readLines()
         val graph = parseCavesGraph(fullInput)
@@ -225,6 +228,7 @@ internal class Day12Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val fullInput = findInput(object {}).readLines()
         val graph = parseCavesGraph(fullInput)

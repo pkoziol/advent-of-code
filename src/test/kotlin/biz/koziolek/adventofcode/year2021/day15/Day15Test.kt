@@ -5,8 +5,10 @@ import biz.koziolek.adventofcode.findInput
 import biz.koziolek.adventofcode.getHeight
 import biz.koziolek.adventofcode.getWidth
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day15Test {
 
     private val sampleInput = """
@@ -45,6 +47,7 @@ internal class Day15Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer1() {
         val fullInput = findInput(object {}).readLines()
         val riskMap = parseRiskMap(fullInput)
@@ -152,6 +155,7 @@ internal class Day15Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val fullInput = findInput(object {}).readLines()
         val riskMap = parseRiskMap(fullInput)

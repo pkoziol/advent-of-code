@@ -2,8 +2,10 @@ package biz.koziolek.adventofcode.year2021.day06
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day6Test {
 
     private val sampleInput = "3,4,3,1,2"
@@ -56,7 +58,8 @@ internal class Day6Test {
     }
 
     @Test
-    fun testAnswerPart1() {
+    @Tag("answer")
+    fun testAnswer1() {
         val fullInput = findInput(object {}).readLines().first()
         val initialFish = createFish(fullInput)
 
@@ -68,7 +71,8 @@ internal class Day6Test {
     }
 
     @Test
-    fun testAnswerPart2() {
+    @Tag("answer")
+    fun testAnswer2() {
         val fullInput = findInput(object {}).readLines().first()
         val initialFish = createFish(fullInput)
 

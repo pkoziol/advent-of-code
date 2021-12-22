@@ -2,8 +2,10 @@ package biz.koziolek.adventofcode.year2021.day07
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day7Test {
 
     private val sampleInput = "16,1,2,0,4,2,7,1,2,14"
@@ -30,7 +32,8 @@ internal class Day7Test {
     }
 
     @Test
-    fun testAnswerPart1() {
+    @Tag("answer")
+    fun testAnswer1() {
         val fullInput = findInput(object {}).readLines().first()
         val (position, cost) = findCheapestPosition(fullInput, ::calculateLinearCost)
         assertEquals(324, position)
@@ -59,7 +62,8 @@ internal class Day7Test {
     }
 
     @Test
-    fun testAnswerPart2() {
+    @Tag("answer")
+    fun testAnswer2() {
         val fullInput = findInput(object {}).readLines().first()
         val (position, cost) = findCheapestPosition(fullInput, ::calculateNonLinearCost)
         assertEquals(472, position)

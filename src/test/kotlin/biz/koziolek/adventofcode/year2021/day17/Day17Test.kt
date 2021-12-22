@@ -3,8 +3,10 @@ package biz.koziolek.adventofcode.year2021.day17
 import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day17Test {
 
     private val sampleInput = "target area: x=20..30, y=-10..-5"
@@ -143,6 +145,7 @@ internal class Day17Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer1() {
         val fullInput = findInput(object {}).readLines()
         val targetArea = parseTargetArea(fullInput.single())
@@ -160,6 +163,7 @@ internal class Day17Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val fullInput = findInput(object {}).readLines()
         val targetArea = parseTargetArea(fullInput.single())
