@@ -3,8 +3,10 @@ package biz.koziolek.adventofcode.year2021.day11
 import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day11Test {
 
     private val sampleInput1 = """
@@ -348,6 +350,7 @@ internal class Day11Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer1() {
         val fullInput = findInput(object {}).readLines()
         val map0 = parseOctopusMap(fullInput)
@@ -363,6 +366,7 @@ internal class Day11Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val fullInput = findInput(object {}).readLines()
         val map0 = parseOctopusMap(fullInput)

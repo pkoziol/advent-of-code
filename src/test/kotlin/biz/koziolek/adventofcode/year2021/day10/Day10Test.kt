@@ -2,8 +2,10 @@ package biz.koziolek.adventofcode.year2021.day10
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day10Test {
 
     private val sampleInput = """
@@ -126,7 +128,8 @@ internal class Day10Test {
     }
 
     @Test
-    fun testAnswerPart1() {
+    @Tag("answer")
+    fun testAnswer1() {
         val fullInput = findInput(object {}).readLines()
         val rootChunks = fullInput.map { parseChunks(it) }
         assertEquals(387363, getCorruptedChunksScore(rootChunks))
@@ -167,6 +170,7 @@ internal class Day10Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val fullInput = findInput(object {}).readLines()
         val rootChunks = fullInput.map { parseChunks(it) }

@@ -3,8 +3,10 @@ package biz.koziolek.adventofcode.year2021.day16
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day16Test {
 
     @Test
@@ -153,6 +155,7 @@ internal class Day16Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer1() {
         val fullInput = findInput(object {}).readLines()
         val packet = parseBitsPacket(fullInput[0])
@@ -242,6 +245,7 @@ internal class Day16Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val fullInput = findInput(object {}).readLines()
         val packet = parseBitsPacket(fullInput[0])

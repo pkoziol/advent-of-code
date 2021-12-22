@@ -2,8 +2,10 @@ package biz.koziolek.adventofcode.year2021.day03
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day3Test {
 
     private val sampleInput = """
@@ -44,7 +46,8 @@ internal class Day3Test {
     }
 
     @Test
-    fun testFullInput() {
+    @Tag("answer")
+    fun testAnswer1() {
         val lines = findInput(object {}).readLines()
         val gammaRate = calculateGammaRate(lines)
         val epsilonRate = calculateEpsilonRate(lines)
@@ -66,7 +69,8 @@ internal class Day3Test {
     }
 
     @Test
-    fun testFullInputPart2() {
+    @Tag("answer")
+    fun testAnswer2() {
         val lines = findInput(object {}).readLines()
         val oxygenGeneratorRating = calculateOxygenGeneratorRating(lines)
         val co2ScrubberRating = calculateCO2ScrubberRating(lines)

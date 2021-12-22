@@ -3,9 +3,11 @@ package biz.koziolek.adventofcode.year2021.day19
 import biz.koziolek.adventofcode.Coord3d
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import kotlin.test.assertContains
 
+@Tag("2021")
 internal class Day19Test {
 
     private val sampleReport2d = """
@@ -372,6 +374,7 @@ internal class Day19Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer1() {
         val fullInput = findInput(object {}).readLines()
         val scanners = parseScannerReport(fullInput)
@@ -387,6 +390,7 @@ internal class Day19Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val fullInput = findInput(object {}).readLines()
         val scanners = parseScannerReport(fullInput)

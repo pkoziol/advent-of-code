@@ -2,8 +2,10 @@ package biz.koziolek.adventofcode.year2021.day04
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day4Test {
 
     private val sampleInput = """
@@ -150,13 +152,24 @@ internal class Day4Test {
     }
 
     @Test
-    fun testPlayRealBingo() {
+    @Tag("answer")
+    fun testAnswer1() {
         val lines = findInput(object {}).readLines()
         val moves = readMoves(lines)
         val boards = readBoards(lines)
 
         val wonBoards = playBingo(moves, boards)
         assertEquals(87456, wonBoards.first().score)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val lines = findInput(object {}).readLines()
+        val moves = readMoves(lines)
+        val boards = readBoards(lines)
+
+        val wonBoards = playBingo(moves, boards)
         assertEquals(15561, wonBoards.last().score)
     }
 }

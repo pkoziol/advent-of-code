@@ -2,8 +2,10 @@ package biz.koziolek.adventofcode.year2021.day20
 
 import biz.koziolek.adventofcode.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day20Test {
 
     private val sampleInput = """
@@ -134,6 +136,7 @@ internal class Day20Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer1() {
         val fullInput = findInput(object {}).readLines()
         val lookupTable = parseLookupTable(fullInput)
@@ -153,6 +156,7 @@ internal class Day20Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val fullInput = findInput(object {}).readLines()
         val lookupTable = parseLookupTable(fullInput)

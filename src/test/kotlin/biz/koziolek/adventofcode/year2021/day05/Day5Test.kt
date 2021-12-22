@@ -2,8 +2,10 @@ package biz.koziolek.adventofcode.year2021.day05
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day5Test {
 
     private val sampleInput = """
@@ -67,7 +69,8 @@ internal class Day5Test {
     }
 
     @Test
-    fun testAnswerPart1() {
+    @Tag("answer")
+    fun testAnswer1() {
         val strLines = findInput(object {}).readLines()
         val lines = parseLines(strLines).filter { it.isHorizontal || it.isVertical }
         val map = createVentMap(lines)
@@ -106,7 +109,8 @@ internal class Day5Test {
     }
 
     @Test
-    fun testAnswerPart2() {
+    @Tag("answer")
+    fun testAnswer2() {
         val strLines = findInput(object {}).readLines()
         val lines = parseLines(strLines)
         val map = createVentMap(lines)

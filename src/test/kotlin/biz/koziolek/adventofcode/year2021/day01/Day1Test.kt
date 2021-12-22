@@ -2,8 +2,10 @@ package biz.koziolek.adventofcode.year2021.day01
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day1Test {
 
     private val sampleInput = """
@@ -38,7 +40,8 @@ internal class Day1Test {
     }
 
     @Test
-    fun testFullInput() {
+    @Tag("answer")
+    fun testAnswer1() {
         val increases = findInput(object {}).useLines {
             countIncreases(it)
         }
@@ -46,7 +49,8 @@ internal class Day1Test {
     }
 
     @Test
-    fun testFullInputWindow3() {
+    @Tag("answer")
+    fun testAnswer2() {
         val increases = findInput(object {}).useLines {
             countIncreasesSlidingWindow(it, windowSize = 3)
         }

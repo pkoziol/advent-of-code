@@ -2,8 +2,10 @@ package biz.koziolek.adventofcode.year2021.day08
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("2021")
 internal class Day8Test {
 
     private val sampleInput1 = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
@@ -28,6 +30,7 @@ internal class Day8Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer() {
         val fullInput = findInput(object {}).readLines()
         val count = countEasyDigitsInOutput(fullInput)
@@ -100,6 +103,7 @@ internal class Day8Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val fullInput = findInput(object {}).readLines()
         val notes = parseNotes(fullInput)
