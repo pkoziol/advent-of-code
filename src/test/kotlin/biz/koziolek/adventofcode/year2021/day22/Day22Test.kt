@@ -45,20 +45,20 @@ internal class Day22Test {
         assertEquals(4, rebootSteps.size)
 
         assertEquals(true, rebootSteps[0].turnOn)
-        assertEquals(Coord3d(10, 10, 10), rebootSteps[0].from)
-        assertEquals(Coord3d(12, 12, 12), rebootSteps[0].to)
+        assertEquals(Coord3d(10, 10, 10), rebootSteps[0].cuboid.from)
+        assertEquals(Coord3d(12, 12, 12), rebootSteps[0].cuboid.to)
 
         assertEquals(true, rebootSteps[1].turnOn)
-        assertEquals(Coord3d(11, 11, 11), rebootSteps[1].from)
-        assertEquals(Coord3d(13, 13, 13), rebootSteps[1].to)
+        assertEquals(Coord3d(11, 11, 11), rebootSteps[1].cuboid.from)
+        assertEquals(Coord3d(13, 13, 13), rebootSteps[1].cuboid.to)
 
         assertEquals(false, rebootSteps[2].turnOn)
-        assertEquals(Coord3d(9, 9, 9), rebootSteps[2].from)
-        assertEquals(Coord3d(11, 11, 11), rebootSteps[2].to)
+        assertEquals(Coord3d(9, 9, 9), rebootSteps[2].cuboid.from)
+        assertEquals(Coord3d(11, 11, 11), rebootSteps[2].cuboid.to)
 
         assertEquals(true, rebootSteps[3].turnOn)
-        assertEquals(Coord3d(10, 10, 10), rebootSteps[3].from)
-        assertEquals(Coord3d(10, 10, 10), rebootSteps[3].to)
+        assertEquals(Coord3d(10, 10, 10), rebootSteps[3].cuboid.from)
+        assertEquals(Coord3d(10, 10, 10), rebootSteps[3].cuboid.to)
     }
 
     @Test
@@ -95,7 +95,7 @@ internal class Day22Test {
                 Coord3d(12, 12, 11),
                 Coord3d(12, 12, 12),
             ),
-            rebootSteps[0].getCubes().toSet(),
+            rebootSteps[0].cuboid.getCubes().toSet(),
         )
 
         assertEquals(
@@ -128,7 +128,7 @@ internal class Day22Test {
                 Coord3d(13, 13, 12),
                 Coord3d(13, 13, 13),
             ),
-            rebootSteps[1].getCubes().toSet(),
+            rebootSteps[1].cuboid.getCubes().toSet(),
         )
 
         assertEquals(
@@ -161,14 +161,14 @@ internal class Day22Test {
                 Coord3d(11, 11, 10),
                 Coord3d(11, 11, 11),
             ),
-            rebootSteps[2].getCubes().toSet(),
+            rebootSteps[2].cuboid.getCubes().toSet(),
         )
 
         assertEquals(
             setOf(
                 Coord3d(10, 10, 10),
             ),
-            rebootSteps[3].getCubes().toSet(),
+            rebootSteps[3].cuboid.getCubes().toSet(),
         )
     }
 
