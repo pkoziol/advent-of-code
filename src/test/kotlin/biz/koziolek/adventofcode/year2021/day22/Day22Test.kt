@@ -278,6 +278,61 @@ internal class Day22Test {
     }
 
     @Test
+    fun testCutOutCuboid() {
+        val cuboid = Cuboid(Coord3d(1, 1, 1), Coord3d(10, 10, 10))
+
+        // Overlapping everything
+        assertEquals(emptySet<Cuboid>(), cuboid.cutOut(Cuboid(Coord3d(-10, -10, -10), Coord3d(20, 20, 20))))
+
+        // No overlap
+        assertEquals(setOf(cuboid), cuboid.cutOut(Cuboid(Coord3d(-10, -10, -10), Coord3d(-5, -5, -5))))
+
+        // Cut corner
+        assertEquals(
+            setOf(
+                Cuboid(Coord3d(2, 1, 1), Coord3d(10, 1, 1)),
+                Cuboid(Coord3d(1, 2, 1), Coord3d(1, 10, 1)),
+                Cuboid(Coord3d(1, 1, 2), Coord3d(1, 1, 10)),
+                Cuboid(Coord3d(2, 2, 1), Coord3d(10, 10, 1)),
+                Cuboid(Coord3d(2, 1, 2), Coord3d(10, 1, 10)),
+                Cuboid(Coord3d(1, 2, 2), Coord3d(1, 10, 10)),
+                Cuboid(Coord3d(2, 2, 2), Coord3d(10, 10, 10)),
+            ),
+            cuboid.cutOut(Cuboid(Coord3d(1, 1, 1), Coord3d(1, 1, 1)))
+        )
+        assertEquals(
+            setOf(
+                Cuboid(Coord3d(6, 1, 1), Coord3d(10, 6, 7)),
+                Cuboid(Coord3d(1, 7, 1), Coord3d(5, 10, 7)),
+                Cuboid(Coord3d(1, 1, 8), Coord3d(5, 6, 10)),
+                Cuboid(Coord3d(6, 7, 1), Coord3d(10, 10, 7)),
+                Cuboid(Coord3d(6, 1, 8), Coord3d(10, 6, 10)),
+                Cuboid(Coord3d(1, 7, 8), Coord3d(5, 10, 10)),
+                Cuboid(Coord3d(6, 7, 8), Coord3d(10, 10, 10)),
+            ),
+            cuboid.cutOut(Cuboid(Coord3d(-5, -5, -5), Coord3d(5, 6, 7)))
+        )
+
+        // Cut edge
+        assertEquals(
+            setOf(
+                Cuboid(Coord3d(1, 7, 1), Coord3d(10, 10, 7)),
+                Cuboid(Coord3d(1, 7, 8), Coord3d(10, 10, 10)),
+                Cuboid(Coord3d(1, 1, 8), Coord3d(10, 6, 10)),
+            ),
+            cuboid.cutOut(Cuboid(Coord3d(-5, -5, -5), Coord3d(10, 6, 7)))
+        )
+
+        // Cut half
+        assertEquals(
+            setOf(
+                Cuboid(Coord3d(1, 1, 8), Coord3d(10, 10, 10)),
+            ),
+            cuboid.cutOut(Cuboid(Coord3d(-5, -5, -5), Coord3d(10, 10, 7)))
+        )
+    }
+
+    @Test
     fun testBigSample3() {
         val rebootSteps = parseReactorRebootSteps(sampleInput3)
         val onCubes = executeRebootStepsV2(rebootSteps, min = Int.MIN_VALUE, max = Int.MAX_VALUE)
