@@ -67,12 +67,15 @@ data class AmphipodBurrow(val positions: String, val height: Int = 2) {
 
         private val HALLWAYS = HALLWAY_1..HALLWAY_7
 
+        // height -> room positions
         private val ROOMS = mapOf(
             2 to ROOM_A_1..ROOM_D_2,
             4 to ROOM_A_1..ROOM_D_4,
         )
 
-        private val NODES = (HALLWAYS + ROOMS[4]!!).associateWith { PositionNode(it) }
+        private val HEIGHTS = ROOMS.keys
+
+        private val NODES = (HALLWAYS + ROOMS[HEIGHTS.maxOf { it }]!!).associateWith { PositionNode(it) }
 
         private val GRAPH_HEIGHT_2 = buildGraph<PositionNode, BiDirectionalGraphEdge<PositionNode>> {
             addAll(
@@ -123,22 +126,20 @@ data class AmphipodBurrow(val positions: String, val height: Int = 2) {
             )
         }
 
-        private val GRAPH = mapOf(
+        // height -> graph
+        private val GRAPHS = mapOf(
             2 to GRAPH_HEIGHT_2,
             4 to GRAPH_HEIGHT_4,
         )
 
-        private val ALL_PATHS = mapOf(
-            2 to preGenerateAllPaths(2),
-            4 to preGenerateAllPaths(4),
-        )
-
-        private fun preGenerateAllPaths(height: Int) =
-            NODES.values.filter { node -> node in GRAPH[height]!!.nodes }.associate { srcNode ->
-                srcNode.position to NODES.values.filter { node -> node in GRAPH[height]!!.nodes }.filter { it != srcNode }.associate { dstNode ->
-                    dstNode.position to GRAPH[height]!!.findShortestPath(srcNode, dstNode).map { it.position }
+        // height -> source -> destination -> path
+        private val ALL_PATHS = GRAPHS.mapValues { (_, graph) ->
+            graph.nodes.associate { srcNode ->
+                srcNode.position to graph.nodes.filter { it != srcNode }.associate { dstNode ->
+                    dstNode.position to graph.findShortestPath(srcNode, dstNode).map { it.position }
                 }
             }
+        }
 
         data class PositionNode(val position: Int) : GraphNode {
             override val id = position.toString()
@@ -159,6 +160,15 @@ data class AmphipodBurrow(val positions: String, val height: Int = 2) {
             'C' to getHorizontalPosition(ROOM_C_1),
             'D' to getHorizontalPosition(ROOM_D_1),
         )
+
+        // height -> type -> positions
+        private val ROOMS_BY_TYPE = ROOMS.map { (height, rooms) ->
+            height to TYPE_ROOM_HORIZONTAL_POS.map { (type, desiredRoomPos) ->
+                type to rooms
+                    .filter { getHorizontalPosition(it) == desiredRoomPos }
+                    .sortedBy { getVerticalPosition(it) }
+            }.toMap()
+        }.toMap()
 
         fun fromString(string: String): AmphipodBurrow =
             string.trim().split("\n")
@@ -248,33 +258,27 @@ data class AmphipodBurrow(val positions: String, val height: Int = 2) {
     }
 
     fun generateValidMoves(): List<Move> =
-        buildList {
-            for (src in ROOMS[height]!! + HALLWAYS) {
-                val amphipodType = positions[src]
-
-                if (amphipodType != EMPTY) {
-                    for (dst in findAccessiblePositions(src)) {
-                        if (isMoveAllowed(src, dst, amphipodType)) {
-                            add(move(src, dst))
-                        }
-                    }
-                }
+        (ROOMS[height]!! + HALLWAYS)
+            .filter { src -> positions[src] != EMPTY }
+            .flatMap { src ->
+                findAccessiblePositions(src)
+                    .map { dst -> move(src, dst) }
             }
-        }
 
-    private fun findAccessiblePositions(src: Int): List<Int> =
+    private fun findAccessiblePositions(src: Int): Set<Int> =
         ALL_PATHS[height]
             ?.get(src)
             ?.filterValues { path -> path.all { it == src || positions[it] == EMPTY } }
-            ?.map { (dst, _) -> dst }
-            ?.toList()
-            ?: emptyList()
+            ?.filterKeys { dst -> isMoveAllowed(src, dst) }
+            ?.keys
+            ?: emptySet()
 
-    private fun isMoveAllowed(src: Int, dst: Int, amphipodType: Char): Boolean {
+    private fun isMoveAllowed(src: Int, dst: Int): Boolean {
         val srcIsRoom = isRoom(src)
         val dstIsRoom = isRoom(dst)
         val isRoomToHall = srcIsRoom && !dstIsRoom
         val isHallToRoom = !srcIsRoom && dstIsRoom
+        val amphipodType = positions[src]
 
         return (isRoomToHall
                 || (isHallToRoom && isDesiredRoom(dst, amphipodType) && isRoomEmptyOrMyTypeOnly(amphipodType)))
@@ -323,11 +327,9 @@ data class AmphipodBurrow(val positions: String, val height: Int = 2) {
     }
 
     fun roomContents(type: Char) =
-        ROOMS[height]
-            ?.filter { getHorizontalPosition(it) == TYPE_ROOM_HORIZONTAL_POS[type] }
-            ?.sortedBy { getVerticalPosition(it) }
-            ?.map { positions[it] }
-            ?.joinToString(separator = "")
+        ROOMS_BY_TYPE[height]
+            ?.get(type)
+            ?.joinToString(separator = "") { positions[it].toString() }
             ?: ""
 }
 
