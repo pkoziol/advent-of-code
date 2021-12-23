@@ -24,10 +24,10 @@ internal class Day23Test {
         assertEquals(AmphipodBurrow(".......BCBDADCA"), burrow)
         assertFalse(burrow.isOrganized)
         assertEquals(".......", burrow.hallway)
-        assertEquals("BA", burrow.roomA)
-        assertEquals("CD", burrow.roomB)
-        assertEquals("BC", burrow.roomC)
-        assertEquals("DA", burrow.roomD)
+        assertEquals("BA", burrow.roomContents('A'))
+        assertEquals("CD", burrow.roomContents('B'))
+        assertEquals("BC", burrow.roomContents('C'))
+        assertEquals("DA", burrow.roomContents('D'))
         assertEquals(sampleInput, burrow.toString())
 
         val otherString = """
@@ -39,10 +39,10 @@ internal class Day23Test {
         """.trimIndent()
         val otherBurrow = AmphipodBurrow.fromString(otherString)
         assertEquals("1234567", otherBurrow.hallway)
-        assertEquals("9D", otherBurrow.roomA)
-        assertEquals("AE", otherBurrow.roomB)
-        assertEquals("BF", otherBurrow.roomC)
-        assertEquals("CG", otherBurrow.roomD)
+        assertEquals("9D", otherBurrow.roomContents('A'))
+        assertEquals("AE", otherBurrow.roomContents('B'))
+        assertEquals("BF", otherBurrow.roomContents('C'))
+        assertEquals("CG", otherBurrow.roomContents('D'))
         assertEquals(otherString, otherBurrow.toString())
     }
 
@@ -55,13 +55,15 @@ internal class Day23Test {
         assertContains(
             validMoves,
             Move(
-                AmphipodBurrow.fromString("""
+                AmphipodBurrow.fromString(
+                    """
                     #############
                     #.B.........#
                     ###.#C#B#D###
                       #A#D#C#A#
                       #########
-                """.trimIndent()),
+                """.trimIndent()
+                ),
                 cost = 20,
             )
         )
@@ -69,13 +71,15 @@ internal class Day23Test {
         assertContains(
             validMoves,
             Move(
-                AmphipodBurrow.fromString("""
+                AmphipodBurrow.fromString(
+                    """
                     #############
                     #...C.......#
                     ###B#.#B#D###
                       #A#D#C#A#
                       #########
-                """.trimIndent()),
+                """.trimIndent()
+                ),
                 cost = 200,
             )
         )
@@ -83,20 +87,22 @@ internal class Day23Test {
         assertContains(
             validMoves,
             Move(
-                AmphipodBurrow.fromString("""
+                AmphipodBurrow.fromString(
+                    """
                     #############
                     #..........D#
                     ###B#C#B#.###
                       #A#D#C#A#
                       #########
-                """.trimIndent()),
+                """.trimIndent()
+                ),
                 cost = 3000,
             )
         )
     }
 
     @Test
-    fun testFindCheapestMovesToOrganise() {
+    fun testSampleAnswerPart1() {
         val burrow = AmphipodBurrow.fromString(sampleInput)
         val moves = findCheapestMovesToOrganise(burrow)
         println(toString(moves))
@@ -113,5 +119,45 @@ internal class Day23Test {
         println(toString(moves))
 
         assertEquals(13336, moves.sumOf { it.cost })
+    }
+
+    @Test
+    fun testParseSampleInputPart2() {
+        val burrow = AmphipodBurrow.fromString(unfold(sampleInput))
+        assertFalse(burrow.isOrganized)
+        assertEquals(".......", burrow.hallway)
+        assertEquals("BDDA", burrow.roomContents('A'))
+        assertEquals("CCBD", burrow.roomContents('B'))
+        assertEquals("BBAC", burrow.roomContents('C'))
+        assertEquals("DACA", burrow.roomContents('D'))
+        assertEquals(
+            """
+            #############
+            #...........#
+            ###B#C#B#D###
+              #D#C#B#A#
+              #D#B#A#C#
+              #A#D#C#A#
+              #########
+        """.trimIndent(), burrow.toString()
+        )
+    }
+
+    @Test
+    fun testSampleAnswerPart2() {
+        val burrow = AmphipodBurrow.fromString(unfold(sampleInput))
+        val moves = findCheapestMovesToOrganise(burrow)
+
+        assertEquals(44169, moves.sumOf { it.cost })
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val fullInput = findInput(object {})
+        val burrow = AmphipodBurrow.fromString(unfold(fullInput.readText()))
+        val moves = findCheapestMovesToOrganise(burrow)
+
+        assertEquals(53308, moves.sumOf { it.cost })
     }
 }

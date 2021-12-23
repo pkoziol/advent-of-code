@@ -16,13 +16,14 @@ fun main() {
     println("Total cost: $totalCost")
 }
 
-data class AmphipodBurrow(val positions: String) {
-    val isOrganized = (positions == ".......ABCDABCD")
-    val hallway = positions.substring(0, 7)
-    val roomA = "" + positions[ROOM_A_1] + positions[ROOM_A_2]
-    val roomB = "" + positions[ROOM_B_1] + positions[ROOM_B_2]
-    val roomC = "" + positions[ROOM_C_1] + positions[ROOM_C_2]
-    val roomD = "" + positions[ROOM_D_1] + positions[ROOM_D_2]
+data class AmphipodBurrow(val positions: String, val height: Int = 2) {
+    val isOrganized = when (height) {
+        2 -> positions == ".......ABCDABCD"
+        4 -> positions == ".......ABCDABCDABCDABCD"
+        else -> throw IllegalArgumentException("Height $height is not supported")
+    }
+
+    val hallway by lazy { positions.substring(0, 7) }
 
     override fun toString() =
         buildString {
@@ -30,6 +31,10 @@ data class AmphipodBurrow(val positions: String) {
             append("#${positions[HALLWAY_1]}${positions[HALLWAY_2]}.${positions[HALLWAY_3]}.${positions[HALLWAY_4]}.${positions[HALLWAY_5]}.${positions[HALLWAY_6]}${positions[HALLWAY_7]}#\n")
             append("###${positions[ROOM_A_1]}#${positions[ROOM_B_1]}#${positions[ROOM_C_1]}#${positions[ROOM_D_1]}###\n")
             append("  #${positions[ROOM_A_2]}#${positions[ROOM_B_2]}#${positions[ROOM_C_2]}#${positions[ROOM_D_2]}#\n")
+            if (height >= 4) {
+                append("  #${positions[ROOM_A_3]}#${positions[ROOM_B_3]}#${positions[ROOM_C_3]}#${positions[ROOM_D_3]}#\n")
+                append("  #${positions[ROOM_A_4]}#${positions[ROOM_B_4]}#${positions[ROOM_C_4]}#${positions[ROOM_D_4]}#\n")
+            }
             append("  #########")
         }
 
@@ -51,55 +56,89 @@ data class AmphipodBurrow(val positions: String) {
         private const val ROOM_B_2 = 12
         private const val ROOM_C_2 = 13
         private const val ROOM_D_2 = 14
+        private const val ROOM_A_3 = 15
+        private const val ROOM_B_3 = 16
+        private const val ROOM_C_3 = 17
+        private const val ROOM_D_3 = 18
+        private const val ROOM_A_4 = 19
+        private const val ROOM_B_4 = 20
+        private const val ROOM_C_4 = 21
+        private const val ROOM_D_4 = 22
 
-        private val HALLWAYS = listOf(HALLWAY_1, HALLWAY_2, HALLWAY_3, HALLWAY_4, HALLWAY_5, HALLWAY_6, HALLWAY_7)
-        private val TOP_ROOMS = listOf(ROOM_A_1, ROOM_B_1, ROOM_C_1, ROOM_D_1)
-        private val BOTTOM_ROOMS = listOf(ROOM_A_2, ROOM_B_2, ROOM_C_2, ROOM_D_2)
+        private val HALLWAYS = HALLWAY_1..HALLWAY_7
 
-        private val GRAPH = buildGraph<PositionNode, BiDirectionalGraphEdge<PositionNode>> {
-            val h1 = PositionNode(HALLWAY_1)
-            val h2 = PositionNode(HALLWAY_2)
-            val h3 = PositionNode(HALLWAY_3)
-            val h4 = PositionNode(HALLWAY_4)
-            val h5 = PositionNode(HALLWAY_5)
-            val h6 = PositionNode(HALLWAY_6)
-            val h7 = PositionNode(HALLWAY_7)
-            val a1 = PositionNode(ROOM_A_1)
-            val b1 = PositionNode(ROOM_B_1)
-            val c1 = PositionNode(ROOM_C_1)
-            val d1 = PositionNode(ROOM_D_1)
-            val a2 = PositionNode(ROOM_A_2)
-            val b2 = PositionNode(ROOM_B_2)
-            val c2 = PositionNode(ROOM_C_2)
-            val d2 = PositionNode(ROOM_D_2)
+        private val ROOMS = mapOf(
+            2 to ROOM_A_1..ROOM_D_2,
+            4 to ROOM_A_1..ROOM_D_4,
+        )
 
+        private val NODES = (HALLWAYS + ROOMS[4]!!).associateWith { PositionNode(it) }
+
+        private val GRAPH_HEIGHT_2 = buildGraph<PositionNode, BiDirectionalGraphEdge<PositionNode>> {
             addAll(
                 listOf(
-                    h1 to h2,
-                    h2 to h3,
-                    h3 to h4,
-                    h4 to h5,
-                    h5 to h6,
-                    h6 to h7,
+                    NODES[HALLWAY_1]!! to NODES[HALLWAY_2]!!,
+                    NODES[HALLWAY_2]!! to NODES[HALLWAY_3]!!,
+                    NODES[HALLWAY_3]!! to NODES[HALLWAY_4]!!,
+                    NODES[HALLWAY_4]!! to NODES[HALLWAY_5]!!,
+                    NODES[HALLWAY_5]!! to NODES[HALLWAY_6]!!,
+                    NODES[HALLWAY_6]!! to NODES[HALLWAY_7]!!,
 
-                    a1 to h2,
-                    a1 to h3,
-                    a2 to a1,
+                    NODES[ROOM_A_1]!! to NODES[HALLWAY_2]!!,
+                    NODES[ROOM_A_1]!! to NODES[HALLWAY_3]!!,
+                    NODES[ROOM_A_2]!! to NODES[ROOM_A_1]!!,
 
-                    b1 to h3,
-                    b1 to h4,
-                    b2 to b1,
+                    NODES[ROOM_B_1]!! to NODES[HALLWAY_3]!!,
+                    NODES[ROOM_B_1]!! to NODES[HALLWAY_4]!!,
+                    NODES[ROOM_B_2]!! to NODES[ROOM_B_1]!!,
 
-                    c1 to h4,
-                    c1 to h5,
-                    c2 to c1,
+                    NODES[ROOM_C_1]!! to NODES[HALLWAY_4]!!,
+                    NODES[ROOM_C_1]!! to NODES[HALLWAY_5]!!,
+                    NODES[ROOM_C_2]!! to NODES[ROOM_C_1]!!,
 
-                    d1 to h5,
-                    d1 to h6,
-                    d2 to d1,
+                    NODES[ROOM_D_1]!! to NODES[HALLWAY_5]!!,
+                    NODES[ROOM_D_1]!! to NODES[HALLWAY_6]!!,
+                    NODES[ROOM_D_2]!! to NODES[ROOM_D_1]!!,
                 )
             )
         }
+
+        private val GRAPH_HEIGHT_4 = buildGraph<PositionNode, BiDirectionalGraphEdge<PositionNode>> {
+            addAll(GRAPH_HEIGHT_2.edges)
+
+            addAll(
+                listOf(
+                    NODES[ROOM_A_3]!! to NODES[ROOM_A_2]!!,
+                    NODES[ROOM_A_4]!! to NODES[ROOM_A_3]!!,
+
+                    NODES[ROOM_B_3]!! to NODES[ROOM_B_2]!!,
+                    NODES[ROOM_B_4]!! to NODES[ROOM_B_3]!!,
+
+                    NODES[ROOM_C_3]!! to NODES[ROOM_C_2]!!,
+                    NODES[ROOM_C_4]!! to NODES[ROOM_C_3]!!,
+
+                    NODES[ROOM_D_3]!! to NODES[ROOM_D_2]!!,
+                    NODES[ROOM_D_4]!! to NODES[ROOM_D_3]!!,
+                )
+            )
+        }
+
+        private val GRAPH = mapOf(
+            2 to GRAPH_HEIGHT_2,
+            4 to GRAPH_HEIGHT_4,
+        )
+
+        private val ALL_PATHS = mapOf(
+            2 to preGenerateAllPaths(2),
+            4 to preGenerateAllPaths(4),
+        )
+
+        private fun preGenerateAllPaths(height: Int) =
+            NODES.values.filter { node -> node in GRAPH[height]!!.nodes }.associate { srcNode ->
+                srcNode.position to NODES.values.filter { node -> node in GRAPH[height]!!.nodes }.filter { it != srcNode }.associate { dstNode ->
+                    dstNode.position to GRAPH[height]!!.findShortestPath(srcNode, dstNode).map { it.position }
+                }
+            }
 
         data class PositionNode(val position: Int) : GraphNode {
             override val id = position.toString()
@@ -122,10 +161,11 @@ data class AmphipodBurrow(val positions: String) {
         )
 
         fun fromString(string: String): AmphipodBurrow =
-            string.split("\n")
+            string.trim().split("\n")
                 .let { lines ->
                     AmphipodBurrow(
                         buildString {
+                            // Hallways
                             append(lines[1][1])
                             append(lines[1][2])
                             append(lines[1][4])
@@ -133,15 +173,16 @@ data class AmphipodBurrow(val positions: String) {
                             append(lines[1][8])
                             append(lines[1][10])
                             append(lines[1][11])
-                            append(lines[2][3])
-                            append(lines[2][5])
-                            append(lines[2][7])
-                            append(lines[2][9])
-                            append(lines[3][3])
-                            append(lines[3][5])
-                            append(lines[3][7])
-                            append(lines[3][9])
-                        }
+
+                            // Rooms
+                            for (i in 2 until lines.size - 1) {
+                                append(lines[i][3])
+                                append(lines[i][5])
+                                append(lines[i][7])
+                                append(lines[i][9])
+                            }
+                        },
+                        height = lines.size - 3
                     )
                 }
 
@@ -155,15 +196,23 @@ data class AmphipodBurrow(val positions: String) {
                 HALLWAY_2 -> 1
                 ROOM_A_1 -> 2
                 ROOM_A_2 -> 2
+                ROOM_A_3 -> 2
+                ROOM_A_4 -> 2
                 HALLWAY_3 -> 3
                 ROOM_B_1 -> 4
                 ROOM_B_2 -> 4
+                ROOM_B_3 -> 4
+                ROOM_B_4 -> 4
                 HALLWAY_4 -> 5
                 ROOM_C_1 -> 6
                 ROOM_C_2 -> 6
+                ROOM_C_3 -> 6
+                ROOM_C_4 -> 6
                 HALLWAY_5 -> 7
                 ROOM_D_1 -> 8
                 ROOM_D_2 -> 8
+                ROOM_D_3 -> 8
+                ROOM_D_4 -> 8
                 HALLWAY_6 -> 9
                 HALLWAY_7 -> 10
                 else -> throw IllegalArgumentException("Not a valid position: $position")
@@ -186,23 +235,26 @@ data class AmphipodBurrow(val positions: String) {
                 ROOM_B_2 -> 2
                 ROOM_C_2 -> 2
                 ROOM_D_2 -> 2
+                ROOM_A_3 -> 3
+                ROOM_B_3 -> 3
+                ROOM_C_3 -> 3
+                ROOM_D_3 -> 3
+                ROOM_A_4 -> 4
+                ROOM_B_4 -> 4
+                ROOM_C_4 -> 4
+                ROOM_D_4 -> 4
                 else -> throw IllegalArgumentException("Not a valid position: $position")
             }
     }
 
     fun generateValidMoves(): List<Move> =
         buildList {
-            for (src in TOP_ROOMS + BOTTOM_ROOMS + HALLWAYS) {
+            for (src in ROOMS[height]!! + HALLWAYS) {
                 val amphipodType = positions[src]
 
                 if (amphipodType != EMPTY) {
                     for (dst in findAccessiblePositions(src)) {
-                        val isDifferentRoom = isHallway(src) || isHallway(dst) || getHorizontalPosition(src) != getHorizontalPosition(dst)
-                        val isHallwayToHallway = isHallway(src) && isHallway(dst)
-                        val isDesiredRoom = isHallway(dst) || getHorizontalPosition(dst) == TYPE_ROOM_HORIZONTAL_POS[amphipodType]
-                        val allowedMove = isDifferentRoom && !isHallwayToHallway && isDesiredRoom
-
-                        if (allowedMove) {
+                        if (isMoveAllowed(src, dst, amphipodType)) {
                             add(move(src, dst))
                         }
                     }
@@ -210,25 +262,29 @@ data class AmphipodBurrow(val positions: String) {
             }
         }
 
-    private fun findAccessiblePositions(src: Int): Set<Int> =
-        GRAPH.nodes.find { it.position == src }
-            ?.let { srcNode ->
-                val accessiblePositions = mutableSetOf<Int>()
+    private fun findAccessiblePositions(src: Int): List<Int> =
+        ALL_PATHS[height]
+            ?.get(src)
+            ?.filterValues { path -> path.all { it == src || positions[it] == EMPTY } }
+            ?.map { (dst, _) -> dst }
+            ?.toList()
+            ?: emptyList()
 
-                visitAll(srcNode) { node ->
-                    if (node == srcNode) {
-                        GRAPH.getAdjacentNodes(node)
-                    } else if (positions[node.position] == EMPTY) {
-                        accessiblePositions.add(node.position)
-                        GRAPH.getAdjacentNodes(node)
-                    } else {
-                        emptySet()
-                    }
-                }
+    private fun isMoveAllowed(src: Int, dst: Int, amphipodType: Char): Boolean {
+        val srcIsRoom = isRoom(src)
+        val dstIsRoom = isRoom(dst)
+        val isRoomToHall = srcIsRoom && !dstIsRoom
+        val isHallToRoom = !srcIsRoom && dstIsRoom
 
-                accessiblePositions
-            }
-            ?: emptySet()
+        return (isRoomToHall
+                || (isHallToRoom && isDesiredRoom(dst, amphipodType) && isRoomEmptyOrMyTypeOnly(amphipodType)))
+    }
+
+    private fun isDesiredRoom(destRoomPos: Int, amphipodType: Char) =
+        getHorizontalPosition(destRoomPos) == TYPE_ROOM_HORIZONTAL_POS[amphipodType]
+
+    private fun isRoomEmptyOrMyTypeOnly(amphipodType: Char) =
+        roomContents(amphipodType).all { it == EMPTY || it == amphipodType }
 
     private fun move(src: Int, dst: Int): Move =
         Move(
@@ -265,33 +321,39 @@ data class AmphipodBurrow(val positions: String) {
 
         return distance * TYPE_COST[positions[from]]!!
     }
+
+    fun roomContents(type: Char) =
+        ROOMS[height]
+            ?.filter { getHorizontalPosition(it) == TYPE_ROOM_HORIZONTAL_POS[type] }
+            ?.sortedBy { getVerticalPosition(it) }
+            ?.map { positions[it] }
+            ?.joinToString(separator = "")
+            ?: ""
 }
 
 data class Move(val burrow: AmphipodBurrow, val cost: Int)
 
 fun findCheapestMovesToOrganise(burrow: AmphipodBurrow): List<Move> {
-    val cumulativeDistance: MutableMap<Move, Int> = HashMap()
+    val cumulativeDistance: MutableMap<AmphipodBurrow, Int> = HashMap()
     val predecessors: MutableMap<Move, Move> = HashMap()
     val toVisit: Queue<Pair<Move, Int>> = PriorityQueue(Comparator.comparing { (_, distance) -> distance })
     val start = Move(burrow, cost = 0)
     var current: Move? = start
-    cumulativeDistance[start] = 0
+    cumulativeDistance[start.burrow] = 0
 
     while (current != null) {
-//        println("${cumulativeDistance.size} / ${toVisit.size}")
-
         if (current.burrow.isOrganized) {
             break
         }
 
-        val currentNodeDistance = cumulativeDistance[current] ?: Int.MAX_VALUE
+        val currentNodeDistance = cumulativeDistance[current.burrow] ?: Int.MAX_VALUE
 
         for (move in current.burrow.generateValidMoves()) {
-            val otherNodeDistance = cumulativeDistance[move] ?: Int.MAX_VALUE
+            val otherNodeDistance = cumulativeDistance[move.burrow] ?: Int.MAX_VALUE
             val newDistance = currentNodeDistance + move.cost
 
             if (newDistance < otherNodeDistance) {
-                cumulativeDistance[move] = newDistance
+                cumulativeDistance[move.burrow] = newDistance
                 predecessors[move] = current
                 toVisit.add(Pair(move, newDistance))
             }
@@ -314,6 +376,20 @@ fun toString(moves: List<Move>) =
         var totalCost = 0
         for (move in moves) {
             totalCost += move.cost
-            append("${move.burrow}\ncost=${move.cost} total=$totalCost\n")
+            append("${move.burrow}\ncost=${move.cost} total=$totalCost\n\n")
         }
     }
+
+fun unfold(input: String): String =
+    input.split("\n")
+        .let { lines ->
+            buildString {
+                appendLine(lines[0])
+                appendLine(lines[1])
+                appendLine(lines[2])
+                appendLine("  #D#C#B#A#")
+                appendLine("  #D#B#A#C#")
+                appendLine(lines[3])
+                append(lines[4])
+            }
+        }
