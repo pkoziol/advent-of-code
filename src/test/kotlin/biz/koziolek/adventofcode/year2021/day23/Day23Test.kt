@@ -21,7 +21,7 @@ internal class Day23Test {
     @Test
     fun testParseInput() {
         val burrow = AmphipodBurrow.fromString(sampleInput)
-        assertEquals(AmphipodBurrow(".......BCBDADCA"), burrow)
+        assertEquals(AmphipodBurrow(".......BAxxCDxxBCxxDAxx"), burrow)
         assertFalse(burrow.isOrganized)
         assertEquals(".......", burrow.hallway)
         assertEquals("BA", burrow.roomContents('A'))

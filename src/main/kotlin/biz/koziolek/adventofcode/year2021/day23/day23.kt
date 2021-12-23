@@ -18,8 +18,8 @@ fun main() {
 
 data class AmphipodBurrow(val positions: String, val height: Int = 2) {
     val isOrganized = when (height) {
-        2 -> positions == ".......ABCDABCD"
-        4 -> positions == ".......ABCDABCDABCDABCD"
+        2 -> positions == ".......AAxxBBxxCCxxDDxx"
+        4 -> positions == ".......AAAABBBBCCCCDDDD"
         else -> throw IllegalArgumentException("Height $height is not supported")
     }
 
@@ -49,27 +49,27 @@ data class AmphipodBurrow(val positions: String, val height: Int = 2) {
         private const val HALLWAY_6 = 5
         private const val HALLWAY_7 = 6
         private const val ROOM_A_1 = 7
-        private const val ROOM_B_1 = 8
-        private const val ROOM_C_1 = 9
-        private const val ROOM_D_1 = 10
-        private const val ROOM_A_2 = 11
+        private const val ROOM_B_1 = 11
+        private const val ROOM_C_1 = 15
+        private const val ROOM_D_1 = 19
+        private const val ROOM_A_2 = 8
         private const val ROOM_B_2 = 12
-        private const val ROOM_C_2 = 13
-        private const val ROOM_D_2 = 14
-        private const val ROOM_A_3 = 15
-        private const val ROOM_B_3 = 16
+        private const val ROOM_C_2 = 16
+        private const val ROOM_D_2 = 20
+        private const val ROOM_A_3 = 9
+        private const val ROOM_B_3 = 13
         private const val ROOM_C_3 = 17
-        private const val ROOM_D_3 = 18
-        private const val ROOM_A_4 = 19
-        private const val ROOM_B_4 = 20
-        private const val ROOM_C_4 = 21
+        private const val ROOM_D_3 = 21
+        private const val ROOM_A_4 = 10
+        private const val ROOM_B_4 = 14
+        private const val ROOM_C_4 = 18
         private const val ROOM_D_4 = 22
 
         private val HALLWAYS = HALLWAY_1..HALLWAY_7
 
         // height -> room positions
         private val ROOMS = mapOf(
-            2 to ROOM_A_1..ROOM_D_2,
+            2 to listOf(ROOM_A_1, ROOM_A_2, ROOM_B_1, ROOM_B_2, ROOM_C_1, ROOM_C_2, ROOM_D_1, ROOM_D_2),
             4 to ROOM_A_1..ROOM_D_4,
         )
 
@@ -185,11 +185,14 @@ data class AmphipodBurrow(val positions: String, val height: Int = 2) {
                             append(lines[1][11])
 
                             // Rooms
-                            for (i in 2 until lines.size - 1) {
-                                append(lines[i][3])
-                                append(lines[i][5])
-                                append(lines[i][7])
-                                append(lines[i][9])
+                            for (j in listOf(3, 5, 7, 9)) {
+                                for (i in 1..4) {
+                                    if (i + 1 < lines.size - 1) {
+                                        append(lines[i + 1][j])
+                                    } else {
+                                        append('x')
+                                    }
+                                }
                             }
                         },
                         height = lines.size - 3
@@ -329,7 +332,7 @@ data class AmphipodBurrow(val positions: String, val height: Int = 2) {
     fun roomContents(type: Char) =
         ROOMS_BY_TYPE[height]
             ?.get(type)
-            ?.joinToString(separator = "") { positions[it].toString() }
+            ?.let { positions.substring(it.first(), it.last() + 1) }
             ?: ""
 }
 
