@@ -2,6 +2,7 @@ package biz.koziolek.adventofcode.year2021.day24
 
 import java.util.*
 
+@Suppress("JoinDeclarationAndAssignment", "DuplicatedCode", "VARIABLE_WITH_REDUNDANT_INITIALIZER")
 fun verifySerialNumberSimplified(serialNumber: Long): Boolean {
     val input = ArrayDeque(serialNumber.toString().map { it.digitToInt().toLong() })
 
@@ -21,6 +22,7 @@ fun verifySerialNumberSimplified(serialNumber: Long): Boolean {
     val z11: Long
     val z12: Long
     val z13: Long
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     val z14: Long
 
     val w1: Long
@@ -154,6 +156,7 @@ fun verifySerialNumberSimplified(serialNumber: Long): Boolean {
     w14 = input.poll()
     x = (z % 26) - 9
     // w14 == (w1 + 1) - 9 == w1 - 8
+    @Suppress("UNUSED_VALUE")
     z14 = if (x != w14)
         26 * (z13 / 26) + (w14 + 10)
     else

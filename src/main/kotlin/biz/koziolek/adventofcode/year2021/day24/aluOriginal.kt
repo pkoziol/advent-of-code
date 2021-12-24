@@ -14,6 +14,7 @@ fun main() {
     println(min)
 }
 
+@Suppress("DuplicatedCode", "VARIABLE_WITH_REDUNDANT_INITIALIZER")
 fun verifySerialNumber(serialNumber: Long, debug: Boolean = false): Boolean {
     val input = ArrayDeque(serialNumber.toString().map { it.digitToInt().toLong() })
 
