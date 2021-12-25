@@ -391,4 +391,11 @@ internal class Day25Test {
         val (stepNumber, _) = moveUntilStop(map)
         assertEquals(432, stepNumber)
     }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val starCount = 50
+        assertEquals(50, starCount)
+    }
 }
