@@ -30,7 +30,7 @@ internal class Day1Test {
         val elves = parseElvesCalories(sampleInput)
         assertEquals(5, elves.size)
         val elfWithMostCalories = findElfWithMostCalories(elves)
-        assertEquals(24000, elfWithMostCalories?.calories?.sum())
+        assertEquals(24000, elfWithMostCalories?.totalCalories)
     }
 
     @Test
@@ -39,14 +39,14 @@ internal class Day1Test {
         val input = findInput(object {}).bufferedReader().readLines()
         val elves = parseElvesCalories(input)
         val elfWithMostCalories = findElfWithMostCalories(elves)
-        assertEquals(68775, elfWithMostCalories?.calories?.sum())
+        assertEquals(68775, elfWithMostCalories?.totalCalories)
     }
 
     @Test
     fun testSampleInputTop3() {
         val elves = parseElvesCalories(sampleInput)
         val top3ElvesWithMostCalories = findTopElvesWithMostCalories(elves, count = 3)
-        assertEquals(45000, top3ElvesWithMostCalories.sumOf { it.calories.sum() })
+        assertEquals(45000, top3ElvesWithMostCalories.sumOf { it.totalCalories })
     }
 
     @Test
@@ -55,6 +55,6 @@ internal class Day1Test {
         val input = findInput(object {}).bufferedReader().readLines()
         val elves = parseElvesCalories(input)
         val top3ElvesWithMostCalories = findTopElvesWithMostCalories(elves, count = 3)
-        assertEquals(202585, top3ElvesWithMostCalories.sumOf { it.calories.sum() })
+        assertEquals(202585, top3ElvesWithMostCalories.sumOf { it.totalCalories })
     }
 }

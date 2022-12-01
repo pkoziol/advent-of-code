@@ -6,44 +6,33 @@ fun main() {
     val inputFile = findInput(object {})
 
     val elves = parseElvesCalories(inputFile.bufferedReader().readLines())
-    println("Elf with most calories has: ${findElfWithMostCalories(elves)?.calories?.sum()}")
+    println("Elf with most calories has: ${findElfWithMostCalories(elves)?.totalCalories}")
 
     val top3ElvesWithMostCalories = findTopElvesWithMostCalories(elves, count = 3)
-    println("Top 3 elves with most calories have: ${top3ElvesWithMostCalories.sumOf { it.calories.sum() }}")
+    println("Top 3 elves with most calories have: ${top3ElvesWithMostCalories.sumOf { it.totalCalories }}")
 }
 
-data class Elf(val calories: List<Int>)
+data class Elf(val calories: List<Int> = listOf()) {
 
-fun parseElvesCalories(lines: Iterable<String>): List<Elf> {
-    val elves = mutableListOf<Elf>()
-    var elf: Elf? = null
+    val totalCalories = calories.sum()
 
-    for (line in lines) {
-        if (line.isEmpty()) {
-            if (elf != null) {
-                elves.add(elf)
+    fun addCalories(calorie: Int) = copy(calories = calories + calorie)
+}
+
+fun parseElvesCalories(lines: Iterable<String>): List<Elf> =
+    lines
+        .fold(listOf(Elf())) { elves, line ->
+            when {
+                line.isEmpty() -> elves + Elf()
+                else -> elves.dropLast(1) + elves.last().addCalories(line.toInt())
             }
-            elf = null
-        } else {
-            if (elf == null) {
-                elf = Elf(emptyList())
-            }
-
-            elf = elf.copy(calories = elf.calories + line.toInt())
         }
-    }
-
-    if (elf != null) {
-        elves.add(elf)
-    }
-
-    return elves
-}
+        .filter { it.calories.isNotEmpty() }
 
 fun findElfWithMostCalories(elves: List<Elf>): Elf? =
-    elves.maxByOrNull { it.calories.sum() }
+    elves.maxByOrNull { it.totalCalories }
 
 fun findTopElvesWithMostCalories(elves: List<Elf>, count: Int): List<Elf> =
     elves
-        .sortedByDescending { it.calories.sum() }
+        .sortedByDescending { it.totalCalories }
         .take(count)
