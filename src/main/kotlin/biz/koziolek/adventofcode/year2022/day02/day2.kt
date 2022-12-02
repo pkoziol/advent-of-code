@@ -4,9 +4,13 @@ import biz.koziolek.adventofcode.findInput
 
 fun main() {
     val inputFile = findInput(object {})
-    val encryptedMoves = parseRockPaperScissorsMoves(inputFile.bufferedReader().readLines())
-    val decodedMoves = decodeMoves(encryptedMoves)
-    println("Total score: ${totalScore(decodedMoves)}")
+    val encryptedGuide = parseRockPaperScissorsGuide(inputFile.bufferedReader().readLines())
+
+    val guessedMoves = decodeGuessedMoves(encryptedGuide)
+    println("Total score: ${totalScore(guessedMoves)}")
+
+    val actualMoves = decodeActualMoves(encryptedGuide)
+    println("Total score: ${totalScore(actualMoves)}")
 }
 
 enum class RoundOutcome(val points: Int) {
@@ -42,16 +46,30 @@ data class Round(val opponents: Shape, val my: Shape) {
     val score = my.points + outcome.points
 }
 
-fun parseRockPaperScissorsMoves(lines: Iterable<String>): List<Pair<Char, Char>> =
+fun parseRockPaperScissorsGuide(lines: Iterable<String>): List<Pair<Char, Char>> =
     lines.map { line -> line[0] to line[2] }
 
-fun decodeMoves(moves: List<Pair<Char, Char>>): List<Round> =
-    moves.map { (opponents, my) ->
+fun decodeGuessedMoves(guide: List<Pair<Char, Char>>): List<Round> =
+    guide.map { (opponents, my) ->
         Round(
             opponents = decodeOpponentsShape(opponents),
             my = decodeMyShape(my)
         )
     }
+
+fun decodeActualMoves(guide: List<Pair<Char, Char>>): List<Round> =
+    guide
+        .map { (opponents, outcome) -> decodeOpponentsShape(opponents) to decodeExpectedOutcome(outcome) }
+        .map { (opponents, outcome) ->
+            Round(
+                opponents = opponents,
+                my = when (outcome) {
+                    RoundOutcome.VICTORY -> opponents.losesTo
+                    RoundOutcome.DEFEAT -> opponents.winsOver
+                    RoundOutcome.DRAW -> opponents
+                }
+            )
+        }
 
 fun decodeOpponentsShape(shape: Char): Shape =
     when (shape) {
@@ -67,6 +85,14 @@ fun decodeMyShape(shape: Char): Shape =
         'Y' -> Shape.PAPER
         'Z' -> Shape.SCISSORS
         else -> throw IllegalArgumentException("Illegal my shape: $shape")
+    }
+
+fun decodeExpectedOutcome(outcome: Char): RoundOutcome =
+    when (outcome) {
+        'X' -> RoundOutcome.DEFEAT
+        'Y' -> RoundOutcome.DRAW
+        'Z' -> RoundOutcome.VICTORY
+        else -> throw IllegalArgumentException("Illegal expected outcome: $outcome")
     }
 
 fun totalScore(moves: List<Round>): Int = moves.sumOf { it.score }

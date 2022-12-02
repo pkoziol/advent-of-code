@@ -16,36 +16,71 @@ internal class Day2Test {
 
     @Test
     fun testSampleInput() {
-        val encryptedMoves = parseRockPaperScissorsMoves(sampleInput)
-        assertEquals(3, encryptedMoves.size)
+        val encryptedGuide = parseRockPaperScissorsGuide(sampleInput)
+        assertEquals(3, encryptedGuide.size)
 
-        val decodedMoves = decodeMoves(encryptedMoves)
-        assertEquals(3, decodedMoves.size)
+        val moves = decodeGuessedMoves(encryptedGuide)
+        assertEquals(3, moves.size)
 
-        assertEquals(Shape.ROCK, decodedMoves[0].opponents)
-        assertEquals(Shape.PAPER, decodedMoves[0].my)
-        assertEquals(RoundOutcome.VICTORY, decodedMoves[0].outcome)
-        assertEquals(8, decodedMoves[0].score)
+        assertEquals(Shape.ROCK, moves[0].opponents)
+        assertEquals(Shape.PAPER, moves[0].my)
+        assertEquals(RoundOutcome.VICTORY, moves[0].outcome)
+        assertEquals(8, moves[0].score)
 
-        assertEquals(Shape.PAPER, decodedMoves[1].opponents)
-        assertEquals(Shape.ROCK, decodedMoves[1].my)
-        assertEquals(RoundOutcome.DEFEAT, decodedMoves[1].outcome)
-        assertEquals(1, decodedMoves[1].score)
+        assertEquals(Shape.PAPER, moves[1].opponents)
+        assertEquals(Shape.ROCK, moves[1].my)
+        assertEquals(RoundOutcome.DEFEAT, moves[1].outcome)
+        assertEquals(1, moves[1].score)
 
-        assertEquals(Shape.SCISSORS, decodedMoves[2].opponents)
-        assertEquals(Shape.SCISSORS, decodedMoves[2].my)
-        assertEquals(RoundOutcome.DRAW, decodedMoves[2].outcome)
-        assertEquals(6, decodedMoves[2].score)
+        assertEquals(Shape.SCISSORS, moves[2].opponents)
+        assertEquals(Shape.SCISSORS, moves[2].my)
+        assertEquals(RoundOutcome.DRAW, moves[2].outcome)
+        assertEquals(6, moves[2].score)
 
-        assertEquals(15, totalScore(decodedMoves))
+        assertEquals(15, totalScore(moves))
     }
 
     @Test
     @Tag("answer")
     fun testAnswer1() {
         val input = findInput(object {}).bufferedReader().readLines()
-        val encryptedMoves = parseRockPaperScissorsMoves(input)
-        val decodedMoves = decodeMoves(encryptedMoves)
-        assertEquals(11386, totalScore(decodedMoves))
+        val encryptedGuide = parseRockPaperScissorsGuide(input)
+        val guessedMoves = decodeGuessedMoves(encryptedGuide)
+        assertEquals(11386, totalScore(guessedMoves))
+    }
+
+    @Test
+    fun testSampleInputPart2() {
+        val encryptedGuide = parseRockPaperScissorsGuide(sampleInput)
+        assertEquals(3, encryptedGuide.size)
+
+        val moves = decodeActualMoves(encryptedGuide)
+        assertEquals(3, moves.size)
+
+        assertEquals(Shape.ROCK, moves[0].opponents)
+        assertEquals(Shape.ROCK, moves[0].my)
+        assertEquals(RoundOutcome.DRAW, moves[0].outcome)
+        assertEquals(4, moves[0].score)
+
+        assertEquals(Shape.PAPER, moves[1].opponents)
+        assertEquals(Shape.ROCK, moves[1].my)
+        assertEquals(RoundOutcome.DEFEAT, moves[1].outcome)
+        assertEquals(1, moves[1].score)
+
+        assertEquals(Shape.SCISSORS, moves[2].opponents)
+        assertEquals(Shape.ROCK, moves[2].my)
+        assertEquals(RoundOutcome.VICTORY, moves[2].outcome)
+        assertEquals(7, moves[2].score)
+
+        assertEquals(12, totalScore(moves))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val encryptedGuide = parseRockPaperScissorsGuide(input)
+        val actualMoves = decodeActualMoves(encryptedGuide)
+        assertEquals(13600, totalScore(actualMoves))
     }
 }
