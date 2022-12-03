@@ -4,8 +4,12 @@ import biz.koziolek.adventofcode.findInput
 
 fun main() {
     val inputFile = findInput(object {})
+
     val rucksacks = parseRucksacks(inputFile.bufferedReader().readLines())
     println("Sum of shared item priorities: ${getSumOfSharedItemPriorities(rucksacks)}")
+
+    val groups = groupRucksacks(rucksacks)
+    println("Sum of group badge priorities: ${getSumOfGroupBadges(groups)}")
 }
 
 data class Rucksack(val contents: String) {
@@ -19,8 +23,20 @@ data class Rucksack(val contents: String) {
         compartment1.toSet().intersect(compartment2.toSet()).single()
 }
 
+data class ElfGroup(val rucksacks: List<Rucksack>) {
+    fun findBadge(): Char =
+        rucksacks
+            .fold(rucksacks.first().contents.toSet()) { acc, rucksack ->
+                acc.intersect(rucksack.contents.toSet())
+            }
+            .single()
+}
+
 fun parseRucksacks(lines: Iterable<String>): List<Rucksack> =
     lines.map { line -> Rucksack(line) }
+
+fun groupRucksacks(rucksacks: List<Rucksack>, size: Int = 3): List<ElfGroup> =
+    rucksacks.chunked(size).map { ElfGroup(it) }
 
 fun getItemPriority(item: Char): Int =
     when (item) {
@@ -32,4 +48,9 @@ fun getItemPriority(item: Char): Int =
 fun getSumOfSharedItemPriorities(rucksacks: Iterable<Rucksack>): Int =
     rucksacks
         .map { it.findSharedItem() }
+        .sumOf { getItemPriority(it) }
+
+fun getSumOfGroupBadges(groups: List<ElfGroup>): Int =
+    groups
+        .map { it.findBadge() }
         .sumOf { getItemPriority(it) }

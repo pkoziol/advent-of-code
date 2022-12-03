@@ -68,4 +68,23 @@ internal class Day3Test {
         val rucksacks = parseRucksacks(input)
         assertEquals(7742, getSumOfSharedItemPriorities(rucksacks))
     }
+
+    @Test
+    fun testGroupRucksacks() {
+        val rucksacks = parseRucksacks(sampleInput)
+        val groups = groupRucksacks(rucksacks)
+        assertEquals(2, groups.size)
+        assertEquals('r', groups[0].findBadge())
+        assertEquals('Z', groups[1].findBadge())
+        assertEquals(70, getSumOfGroupBadges(groups))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val rucksacks = parseRucksacks(input)
+        val groups = groupRucksacks(rucksacks)
+        assertEquals(2276, getSumOfGroupBadges(groups))
+    }
 }
