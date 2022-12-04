@@ -53,4 +53,30 @@ internal class Day4Test {
         val assignments = parseAssignments(input)
         assertEquals(571, assignments.count { it.isAnyFullyContainedInOther() })
     }
+
+    @Test
+    fun testAreOverlapping() {
+        val assignments = parseAssignments(sampleInput)
+        assertEquals(6, assignments.size)
+        assertEquals(false, assignments[0].areOverlapping())
+        assertEquals(false, assignments[1].areOverlapping())
+        assertEquals(true, assignments[2].areOverlapping())
+        assertEquals(true, assignments[3].areOverlapping())
+        assertEquals(true, assignments[4].areOverlapping())
+        assertEquals(true, assignments[5].areOverlapping())
+    }
+
+    @Test
+    fun testSampleInputPart2() {
+        val assignments = parseAssignments(sampleInput)
+        assertEquals(4, assignments.count { it.areOverlapping() })
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val assignments = parseAssignments(input)
+        assertEquals(917, assignments.count { it.areOverlapping() })
+    }
 }
