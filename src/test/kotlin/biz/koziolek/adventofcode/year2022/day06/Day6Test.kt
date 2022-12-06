@@ -23,4 +23,20 @@ internal class Day6Test {
         val startOfPacket = findStartOfPacket(input)
         Assertions.assertEquals(1987, startOfPacket)
     }
+
+    @Test
+    fun testFindStartOfMessage() {
+        Assertions.assertEquals(19, findStartOfMessage("mjqjpqmgbljsphdztnvjfqwrcgsmlb"))
+        Assertions.assertEquals(23, findStartOfMessage("bvwbjplbgvbhsrlpgdmjqwftvncz"))
+        Assertions.assertEquals(23, findStartOfMessage("nppdvjthqldpwncqszvftbrmjlhg"))
+        Assertions.assertEquals(29, findStartOfMessage("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg"))
+        Assertions.assertEquals(26, findStartOfMessage("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw"))
+    }
+
+    @Test
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLine()
+        val startOfMessage = findStartOfMessage(input)
+        Assertions.assertEquals(3059, startOfMessage)
+    }
 }
