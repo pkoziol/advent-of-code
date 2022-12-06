@@ -18,6 +18,7 @@ internal class Day6Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer1() {
         val input = findInput(object {}).bufferedReader().readLine()
         val startOfPacket = findStartOfPacket(input)
@@ -34,6 +35,7 @@ internal class Day6Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val input = findInput(object {}).bufferedReader().readLine()
         val startOfMessage = findStartOfMessage(input)

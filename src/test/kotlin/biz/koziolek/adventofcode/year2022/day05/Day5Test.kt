@@ -73,6 +73,7 @@ internal class Day5Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer1() {
         val input = findInput(object {}).bufferedReader().readLines()
         val (stacks, instructions) = parseCargo(input)
@@ -97,6 +98,7 @@ internal class Day5Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val input = findInput(object {}).bufferedReader().readLines()
         val (stacks, instructions) = parseCargo(input)
