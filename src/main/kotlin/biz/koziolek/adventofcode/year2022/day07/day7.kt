@@ -8,6 +8,13 @@ fun main() {
     println(printTree(rootDir))
 
     println("Total size of directories with a total size of at most 100000: ${sumDirectoriesSize(rootDir, maxSize = 100_000)}")
+
+    val dirToDelete = chooseDirectoryToDelete(
+        rootDir,
+        fileSystemSize = 70000000,
+        minRequiredSpace = 30000000,
+    )
+    println("Need to delete ${dirToDelete.name} to free up ${dirToDelete.size}")
 }
 
 sealed class FileOrDir {
@@ -143,3 +150,14 @@ fun sumDirectoriesSize(fileOrDir: FileOrDir, maxSize: Int) =
             .filter { it is Dir && it.size <= maxSize }
             .sumOf { it.size }
     }
+
+fun chooseDirectoryToDelete(dir: Dir, fileSystemSize: Int, minRequiredSpace: Int): Dir {
+    val minSize = minRequiredSpace - (fileSystemSize - dir.size)
+
+    return dir.walk()
+        .filter { it is Dir }
+        .map { it as Dir }
+        .filter { it.size >= minSize }
+        .sortedBy { it.size }
+        .first()
+}

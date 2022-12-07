@@ -119,4 +119,29 @@ internal class Day7Test {
         val rootDir = parseTerminalOutput(input)
         assertEquals(1182909, sumDirectoriesSize(rootDir, maxSize = 100_000))
     }
+
+    @Test
+    fun testSampleAnswer2() {
+        val rootDir = parseTerminalOutput(sampleInput)
+        val dirToDelete = chooseDirectoryToDelete(
+            rootDir,
+            fileSystemSize = 70000000,
+            minRequiredSpace = 30000000,
+        )
+        assertEquals("d", dirToDelete.name)
+        assertEquals(24933642, dirToDelete.size)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val rootDir = parseTerminalOutput(input)
+        val dirToDelete = chooseDirectoryToDelete(
+            rootDir,
+            fileSystemSize = 70000000,
+            minRequiredSpace = 30000000,
+        )
+        assertEquals(2832508, dirToDelete.size)
+    }
 }
