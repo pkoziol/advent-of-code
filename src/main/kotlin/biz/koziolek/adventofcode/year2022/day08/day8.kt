@@ -7,6 +7,7 @@ fun main() {
     val inputFile = findInput(object {})
     val trees = parseTrees(inputFile.bufferedReader().readLines())
     println("Trees visible from edges: ${countVisibleTreesFromEdges(trees)}")
+    println("Highest scenic score: ${findHighestScenicScore(trees)}")
 }
 
 fun parseTrees(lines: List<String>): Map<Coord, Int> =
@@ -50,3 +51,24 @@ fun <T> getWestTrees(trees: Map<Coord, T>, start: Coord): List<Map.Entry<Coord, 
     trees.filter { it.key.y == start.y && it.key.x < start.x }
         .entries
         .sortedByDescending { it.key.x }
+
+fun findHighestScenicScore(trees: Map<Coord, Int>) =
+    trees.maxOf { getScenicScore(trees, it.key) }
+
+fun getScenicScore(trees: Map<Coord, Int>, checkedCoord: Coord): Int =
+    listOf(
+        getNorthTrees(trees, checkedCoord),
+        getEastTrees(trees, checkedCoord),
+        getSouthTrees(trees, checkedCoord),
+        getWestTrees(trees, checkedCoord),
+    )
+        .map { otherTrees ->
+            getViewingDistance(trees[checkedCoord]!!, otherTrees.map { it.value })
+        }
+        .reduce(Int::times)
+
+fun getViewingDistance(checkedTree: Int, otherTrees: List<Int>): Int {
+    val shorterTrees = otherTrees.takeWhile { it < checkedTree }.count()
+    val blockTree = if (shorterTrees < otherTrees.size) 1 else 0
+    return shorterTrees + blockTree
+}
