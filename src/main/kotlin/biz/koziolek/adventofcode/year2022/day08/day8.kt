@@ -25,32 +25,38 @@ fun countVisibleTreesFromEdges(trees: Map<Coord, Int>) =
             getSouthTrees(trees, treeCoord),
             getWestTrees(trees, treeCoord),
         ).any { otherTrees ->
-            isVisible(treeHeight, otherTrees.map { it.value })
+            isVisible(treeHeight, otherTrees.map { it.second })
         }
     }
 
 fun isVisible(checkedTree: Int, otherTrees: List<Int>) =
     otherTrees.all { it < checkedTree }
 
-fun <T> getNorthTrees(trees: Map<Coord, T>, start: Coord): List<Map.Entry<Coord, T>> =
-    trees.filter { it.key.x == start.x && it.key.y < start.y }
-        .entries
-        .sortedByDescending { it.key.y }
+fun <T> getNorthTrees(trees: Map<Coord, T>, start: Coord): List<Pair<Coord, T>> =
+    (start.y - 1 downTo 0)
+        .filter { it >= 0 }
+        .map { start.copy(y = it) }
+        .map { it to trees[it]!! }
 
-fun <T> getEastTrees(trees: Map<Coord, T>, start: Coord): List<Map.Entry<Coord, T>> =
-    trees.filter { it.key.y == start.y && it.key.x > start.x }
-        .entries
-        .sortedBy { it.key.x }
+fun <T> getEastTrees(trees: Map<Coord, T>, start: Coord): List<Pair<Coord, T>> =
+    generateSequence(start.x + 1) { it + 1 }
+        .map { start.copy(x = it) }
+        .takeWhile { trees[it] != null }
+        .map { it to trees[it]!! }
+        .toList()
 
-fun <T> getSouthTrees(trees: Map<Coord, T>, start: Coord): List<Map.Entry<Coord, T>> =
-    trees.filter { it.key.x == start.x && it.key.y > start.y }
-        .entries
-        .sortedBy { it.key.y }
+fun <T> getSouthTrees(trees: Map<Coord, T>, start: Coord): List<Pair<Coord, T>> =
+    generateSequence(start.y + 1) { it + 1 }
+        .map { start.copy(y = it) }
+        .takeWhile { trees[it] != null }
+        .map { it to trees[it]!! }
+        .toList()
 
-fun <T> getWestTrees(trees: Map<Coord, T>, start: Coord): List<Map.Entry<Coord, T>> =
-    trees.filter { it.key.y == start.y && it.key.x < start.x }
-        .entries
-        .sortedByDescending { it.key.x }
+fun <T> getWestTrees(trees: Map<Coord, T>, start: Coord): List<Pair<Coord, T>> =
+    (start.x - 1 downTo 0)
+        .filter { it >= 0 }
+        .map { start.copy(x = it) }
+        .map { it to trees[it]!! }
 
 fun findHighestScenicScore(trees: Map<Coord, Int>) =
     trees.maxOf { getScenicScore(trees, it.key) }
@@ -63,7 +69,7 @@ fun getScenicScore(trees: Map<Coord, Int>, checkedCoord: Coord): Int =
         getWestTrees(trees, checkedCoord),
     )
         .map { otherTrees ->
-            getViewingDistance(trees[checkedCoord]!!, otherTrees.map { it.value })
+            getViewingDistance(trees[checkedCoord]!!, otherTrees.map { it.second })
         }
         .reduce(Int::times)
 
