@@ -47,4 +47,19 @@ internal class Day8Test {
         val trees = parseTrees(input)
         assertEquals(1688, countVisibleTreesFromEdges(trees))
     }
+
+    @Test
+    fun testGetScenicScore() {
+        val trees = parseTrees(sampleInput)
+        assertEquals(4, getScenicScore(trees, Coord(x = 2, y = 1)))
+        assertEquals(8, getScenicScore(trees, Coord(x = 2, y = 3)))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val trees = parseTrees(input)
+        assertEquals(410400, findHighestScenicScore(trees))
+    }
 }
