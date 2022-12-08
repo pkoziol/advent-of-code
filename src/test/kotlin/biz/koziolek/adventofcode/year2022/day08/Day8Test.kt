@@ -28,10 +28,10 @@ internal class Day8Test {
     fun testFindTreesIn4Directions() {
         val trees = parseTrees(sampleInput)
         val start = Coord(x = 0, y = 1)
-        assertEquals("3", getNorthTrees(trees, start).joinToString("") { it.value.toString() })
-        assertEquals("5512", getEastTrees(trees, start).joinToString("") { it.value.toString() })
-        assertEquals("633", getSouthTrees(trees, start).joinToString("") { it.value.toString() })
-        assertEquals("", getWestTrees(trees, start).joinToString("") { it.value.toString() })
+        assertEquals("3", getNorthTrees(trees, start).joinToString("") { it.second.toString() })
+        assertEquals("5512", getEastTrees(trees, start).joinToString("") { it.second.toString() })
+        assertEquals("633", getSouthTrees(trees, start).joinToString("") { it.second.toString() })
+        assertEquals("", getWestTrees(trees, start).joinToString("") { it.second.toString() })
     }
 
     @Test
