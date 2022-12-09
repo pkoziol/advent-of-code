@@ -9,12 +9,16 @@ import kotlin.math.sign
 
 fun main() {
     val inputFile = findInput(object {})
-    val rope = PlanckRope()
     val moves = parseMoves(inputFile.bufferedReader().readLines())
+
+    val rope = PlanckRope()
     val allMovedRopes = moveRopeInSteps(rope, moves)
     println("Positions visited by tail at least once: ${countPositionsVisitedByTail(allMovedRopes)}")
-}
 
+    val longRope = LongRope.ofLength(10)
+    val allMovedLongRopes = moveRopeInSteps(longRope, moves)
+    println("Positions visited by tail at least once: ${countPositionsVisitedByTail(allMovedLongRopes)}")
+}
 interface Rope {
 
     val head: Coord
@@ -36,6 +40,10 @@ data class PlanckRope(
             Move.DOWN -> 0 to -1
             Move.LEFT -> -1 to 0
             Move.RIGHT -> 1 to 0
+            Move.UP_LEFT -> -1 to 1
+            Move.UP_RIGHT -> 1 to 1
+            Move.DOWN_LEFT -> -1 to -1
+            Move.DOWN_RIGHT -> 1 to -1
         }
 
         val newHead = Coord(
@@ -81,11 +89,79 @@ data class PlanckRope(
         }
 }
 
+data class LongRope(
+    val planckRopes: List<PlanckRope>
+) : Rope {
+
+    companion object {
+
+        fun ofLength(length: Int) =
+            LongRope(List(length - 1) { PlanckRope() })
+    }
+
+    override val head: Coord
+        get() = planckRopes.first().head
+
+    override val tail: Coord
+        get() = planckRopes.last().tail
+
+    override fun move(move: Move): Rope {
+        val movedPlanckRopes = mutableListOf<PlanckRope>()
+        var nextMove: Move? = move
+
+        for (rope in planckRopes) {
+            val movedRope = if (nextMove != null) {
+                rope.move(nextMove)
+            } else {
+                rope
+            }
+
+            nextMove = if (movedRope.tail == rope.tail) {
+                null
+            } else {
+                val tailDistanceX = movedRope.tail.x - rope.tail.x
+                val tailDistanceY = movedRope.tail.y - rope.tail.y
+
+                when (tailDistanceX to tailDistanceY) {
+                    0 to 1 -> Move.UP
+                    0 to -1 -> Move.DOWN
+                    -1 to 0 -> Move.LEFT
+                    1 to 0 -> Move.RIGHT
+                    -1 to 1 -> Move.UP_LEFT
+                    1 to 1 -> Move.UP_RIGHT
+                    -1 to -1 -> Move.DOWN_LEFT
+                    1 to -1 -> Move.DOWN_RIGHT
+                    else -> throw IllegalStateException("Unexpected tail distance: $tailDistanceX,$tailDistanceY}")
+                }
+            }
+
+            movedPlanckRopes.add(movedRope)
+        }
+
+        return LongRope(movedPlanckRopes)
+    }
+
+    private val symbols = ('1'..'9') + ('a'..'z')
+
+    override fun getSymbol(coord: Coord): Char? =
+        if (coord == planckRopes.first().head) {
+            'H'
+        } else {
+            planckRopes.withIndex()
+                .find { (_, planckRope) -> coord == planckRope.tail }
+                ?.let { (index, _) -> symbols[index] }
+        }
+}
+
 enum class Move {
     UP,
     DOWN,
     LEFT,
     RIGHT,
+    UP_LEFT,
+    UP_RIGHT,
+    DOWN_LEFT,
+    DOWN_RIGHT,
 }
 
 fun <T : Rope> moveRopeInSteps(rope: T, moves: List<Move>): List<T> =
