@@ -9,16 +9,77 @@ import kotlin.math.sign
 
 fun main() {
     val inputFile = findInput(object {})
-    val rope = Rope()
+    val rope = PlanckRope()
     val moves = parseMoves(inputFile.bufferedReader().readLines())
     val allMovedRopes = moveRopeInSteps(rope, moves)
     println("Positions visited by tail at least once: ${countPositionsVisitedByTail(allMovedRopes)}")
 }
 
-data class Rope(
-    val head: Coord = Coord(0, 0),
-    val tail: Coord = Coord(0, 0),
-)
+interface Rope {
+
+    val head: Coord
+    val tail: Coord
+
+    fun move(move: Move): Rope
+
+    fun getSymbol(coord: Coord): Char?
+}
+
+data class PlanckRope(
+    override val head: Coord = Coord(0, 0),
+    override val tail: Coord = Coord(0, 0),
+) : Rope {
+
+    override fun move(move: Move): PlanckRope {
+        val (headMoveX, headMoveY) = when (move) {
+            Move.UP -> 0 to 1
+            Move.DOWN -> 0 to -1
+            Move.LEFT -> -1 to 0
+            Move.RIGHT -> 1 to 0
+        }
+
+        val newHead = Coord(
+            x = head.x + headMoveX,
+            y = head.y + headMoveY,
+        )
+
+        val tailDistanceX = newHead.x - tail.x
+        val tailDistanceY = newHead.y - tail.y
+
+        var tailMoveX = 0
+        var tailMoveY = 0
+        if (abs(tailDistanceX) > 1) {
+            tailMoveX = tailDistanceX.sign
+
+            if (tail.y != newHead.y) {
+                tailMoveY = tailDistanceY.sign
+            }
+        } else if (abs(tailDistanceY) > 1) {
+            tailMoveY = tailDistanceY.sign
+
+            if (tail.x != newHead.x) {
+                tailMoveX = tailDistanceX.sign
+            }
+        }
+
+        val newTail = Coord(
+            x = tail.x + tailMoveX,
+            y = tail.y + tailMoveY,
+        )
+
+        return PlanckRope(
+            head = newHead,
+            tail = newTail,
+        )
+    }
+
+    override fun getSymbol(coord: Coord): Char? =
+        when (coord) {
+            head -> 'H'
+            tail -> 'T'
+            else -> null
+        }
+}
 
 enum class Move {
     UP,
@@ -27,59 +88,11 @@ enum class Move {
     RIGHT,
 }
 
-fun moveRopeInSteps(rope: Rope, moves: List<Move>): List<Rope> =
+fun <T : Rope> moveRopeInSteps(rope: T, moves: List<Move>): List<T> =
     moves.fold(listOf(rope)) { ropes, move ->
-        ropes + moveRope(ropes.last(), move)
+        @Suppress("UNCHECKED_CAST")
+        ropes + ropes.last().move(move) as T
     }
-
-fun moveRope(rope: Rope, move: Move, times: Int): Rope =
-    moveRope(rope, List(times) { move })
-
-fun moveRope(rope: Rope, moves: List<Move>): Rope =
-    moves.fold(rope) { movedRope, direction -> moveRope(movedRope, direction) }
-
-fun moveRope(rope: Rope, move: Move): Rope {
-    val (headMoveX, headMoveY) = when (move) {
-        Move.UP -> 0 to 1
-        Move.DOWN -> 0 to -1
-        Move.LEFT -> -1 to 0
-        Move.RIGHT -> 1 to 0
-    }
-
-    val newHead = Coord(
-        x = rope.head.x + headMoveX,
-        y = rope.head.y + headMoveY,
-    )
-
-    val tailDistanceX = newHead.x - rope.tail.x
-    val tailDistanceY = newHead.y - rope.tail.y
-
-    var tailMoveX = 0
-    var tailMoveY = 0
-    if (abs(tailDistanceX) > 1) {
-        tailMoveX = tailDistanceX.sign
-
-        if (rope.tail.y != newHead.y) {
-            tailMoveY = tailDistanceY.sign
-        }
-    } else if (abs(tailDistanceY) > 1) {
-        tailMoveY = tailDistanceY.sign
-
-        if (rope.tail.x != newHead.x) {
-            tailMoveX = tailDistanceX.sign
-        }
-    }
-
-    val newTail = Coord(
-        x = rope.tail.x + tailMoveX,
-        y = rope.tail.y + tailMoveY,
-    )
-
-    return Rope(
-        head = newHead,
-        tail = newTail,
-    )
-}
 
 fun visualizeRope(rope: Rope, corners: Pair<Coord, Coord>, markStart: Boolean = false): String {
     val minX = min(corners.first.x, corners.second.x)
@@ -90,10 +103,11 @@ fun visualizeRope(rope: Rope, corners: Pair<Coord, Coord>, markStart: Boolean = 
     return buildString {
         for (y in maxY downTo minY) {
             for (x in minX..maxX) {
-                if (x == rope.head.x && y == rope.head.y) {
-                    append('H')
-                } else if (x == rope.tail.x && y == rope.tail.y) {
-                    append('T')
+                val coord = Coord(x, y)
+                val symbol = rope.getSymbol(coord)
+
+                if (symbol != null) {
+                    append(symbol)
                 } else if (markStart && x == 0 && y == 0) {
                     append('s')
                 } else {
