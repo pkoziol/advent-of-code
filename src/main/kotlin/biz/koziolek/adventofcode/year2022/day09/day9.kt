@@ -35,20 +35,9 @@ data class PlanckRope(
 ) : Rope {
 
     override fun move(move: Move): PlanckRope {
-        val (headMoveX, headMoveY) = when (move) {
-            Move.UP -> 0 to 1
-            Move.DOWN -> 0 to -1
-            Move.LEFT -> -1 to 0
-            Move.RIGHT -> 1 to 0
-            Move.UP_LEFT -> -1 to 1
-            Move.UP_RIGHT -> 1 to 1
-            Move.DOWN_LEFT -> -1 to -1
-            Move.DOWN_RIGHT -> 1 to -1
-        }
-
         val newHead = Coord(
-            x = head.x + headMoveX,
-            y = head.y + headMoveY,
+            x = head.x + move.dx,
+            y = head.y + move.dy,
         )
 
         val tailDistanceX = newHead.x - tail.x
@@ -122,17 +111,9 @@ data class LongRope(
                 val tailDistanceX = movedRope.tail.x - rope.tail.x
                 val tailDistanceY = movedRope.tail.y - rope.tail.y
 
-                when (tailDistanceX to tailDistanceY) {
-                    0 to 1 -> Move.UP
-                    0 to -1 -> Move.DOWN
-                    -1 to 0 -> Move.LEFT
-                    1 to 0 -> Move.RIGHT
-                    -1 to 1 -> Move.UP_LEFT
-                    1 to 1 -> Move.UP_RIGHT
-                    -1 to -1 -> Move.DOWN_LEFT
-                    1 to -1 -> Move.DOWN_RIGHT
-                    else -> throw IllegalStateException("Unexpected tail distance: $tailDistanceX,$tailDistanceY}")
-                }
+                Move.values()
+                    .find { it.dx == tailDistanceX && it.dy == tailDistanceY }
+                    ?: throw IllegalStateException("Unexpected tail distance: $tailDistanceX,$tailDistanceY}")
             }
 
             movedPlanckRopes.add(movedRope)
@@ -153,15 +134,15 @@ data class LongRope(
         }
 }
 
-enum class Move {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    UP_LEFT,
-    UP_RIGHT,
-    DOWN_LEFT,
-    DOWN_RIGHT,
+enum class Move(val dx: Int, val dy: Int) {
+    UP(0, 1),
+    DOWN(0, -1),
+    LEFT(-1, 0),
+    RIGHT(1, 0),
+    UP_LEFT(-1, 1),
+    UP_RIGHT(1, 1),
+    DOWN_LEFT(-1, -1),
+    DOWN_RIGHT(1, -1),
 }
 
 fun <T : Rope> moveRopeInSteps(rope: T, moves: List<Move>): List<T> =
