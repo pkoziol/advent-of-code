@@ -23,7 +23,7 @@ internal class Day9Test {
     @Test
     fun testSimpleMoves() {
         val corners1 = Coord(0, 0) to Coord(4, 2)
-        val rope1 = Rope(
+        val rope1 = PlanckRope(
             head = Coord(x = 2, y = 1),
             tail = Coord(x = 1, y = 1),
         )
@@ -36,7 +36,7 @@ internal class Day9Test {
             visualizeRope(rope1, corners1)
         )
 
-        val movedRope1 = moveRope(rope1, Move.RIGHT, 1)
+        val movedRope1 = rope1.move(Move.RIGHT)
         assertEquals(Coord(x = 3, y = 1), movedRope1.head)
         assertEquals(Coord(x = 2, y = 1), movedRope1.tail)
         assertEquals(
@@ -49,7 +49,7 @@ internal class Day9Test {
         )
 
         val corners2 = Coord(0, 0) to Coord(2, 4)
-        val rope2 = Rope(
+        val rope2 = PlanckRope(
             head = Coord(x = 1, y = 2),
             tail = Coord(x = 1, y = 3),
         )
@@ -64,7 +64,7 @@ internal class Day9Test {
             visualizeRope(rope2, corners2)
         )
 
-        val movedRope2 = moveRope(rope2, Move.DOWN, 1)
+        val movedRope2 = rope2.move(Move.DOWN)
         assertEquals(Coord(x = 1, y = 1), movedRope2.head)
         assertEquals(Coord(x = 1, y = 2), movedRope2.tail)
         assertEquals(
@@ -82,7 +82,7 @@ internal class Day9Test {
     @Test
     fun testDiagonalMoves() {
         val corners = Coord(0, 0) to Coord(4, 4)
-        val rope = Rope(
+        val rope = PlanckRope(
             head = Coord(x = 2, y = 2),
             tail = Coord(x = 1, y = 1),
         )
@@ -97,7 +97,7 @@ internal class Day9Test {
             visualizeRope(rope, corners)
         )
 
-        val movedRope1 = moveRope(rope, Move.UP, 1)
+        val movedRope1 = rope.move(Move.UP)
         assertEquals(Coord(x = 2, y = 3), movedRope1.head)
         assertEquals(Coord(x = 2, y = 2), movedRope1.tail)
         assertEquals(
@@ -111,7 +111,7 @@ internal class Day9Test {
             visualizeRope(movedRope1, corners)
         )
 
-        val movedRope2 = moveRope(rope, Move.RIGHT, 1)
+        val movedRope2 = rope.move(Move.RIGHT)
         assertEquals(Coord(x = 3, y = 2), movedRope2.head)
         assertEquals(Coord(x = 2, y = 2), movedRope2.tail)
         assertEquals(
@@ -129,7 +129,7 @@ internal class Day9Test {
     @Test
     fun testCoveringMoves() {
         val corners = Coord(0, 0) to Coord(4, 2)
-        val rope1 = Rope(
+        val rope1 = PlanckRope(
             head = Coord(x = 1, y = 1),
             tail = Coord(x = 1, y = 1),
         )
@@ -142,7 +142,7 @@ internal class Day9Test {
             visualizeRope(rope1, corners)
         )
 
-        val rope2 = moveRope(rope1, Move.RIGHT, 1)
+        val rope2 = rope1.move(Move.RIGHT)
         assertEquals(Coord(x = 2, y = 1), rope2.head)
         assertEquals(Coord(x = 1, y = 1), rope2.tail)
         assertEquals(
@@ -154,7 +154,7 @@ internal class Day9Test {
             visualizeRope(rope2, corners)
         )
 
-        val rope3 = moveRope(rope2, Move.LEFT, 1)
+        val rope3 = rope2.move(Move.LEFT)
         assertEquals(Coord(x = 1, y = 1), rope3.head)
         assertEquals(Coord(x = 1, y = 1), rope3.tail)
         assertEquals(
@@ -181,7 +181,7 @@ internal class Day9Test {
     @Test
     fun testSampleMoves() {
         val corners = Coord(0, 0) to Coord(5, 4)
-        val rope = Rope()
+        val rope = PlanckRope()
         val moves = parseMoves(sampleInput)
         
         val expectedStates = """
@@ -343,7 +343,7 @@ internal class Day9Test {
 
     @Test
     fun testSampleAnswer1() {
-        val rope = Rope()
+        val rope = PlanckRope()
         val moves = parseMoves(sampleInput)
         val allMovedRopes = moveRopeInSteps(rope, moves)
 
@@ -354,7 +354,7 @@ internal class Day9Test {
     @Tag("answer")
     fun testAnswer1() {
         val input = findInput(object {}).bufferedReader().readLines()
-        val rope = Rope()
+        val rope = PlanckRope()
         val moves = parseMoves(input)
         val allMovedRopes = moveRopeInSteps(rope, moves)
 
