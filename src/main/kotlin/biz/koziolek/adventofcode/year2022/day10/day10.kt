@@ -4,11 +4,15 @@ import biz.koziolek.adventofcode.findInput
 
 fun main() {
     val inputFile = findInput(object {})
-    val commands = parseCPUCommands(inputFile.bufferedReader().lineSequence())
+    val commands = parseCPUCommands(inputFile.bufferedReader().lineSequence()).toList()
     val cpu = CPU(cycle = 1, registers = Registers(x = 1))
-    val cpuStates = runProgram(cpu, commands)
+    val cpuStates = runProgram(cpu, commands.asSequence())
 
     println("Sum of signal strength during the 20th, 60th, 100th, 140th, 180th, and 220th cycles: ${sumSignalStrengths(cpuStates, cycles = listOf(20, 60, 100, 140, 180, 220))}")
+
+    val crt = CRT(width = 40, height = 6, contents = "")
+    val lastCRT = syncCRTWithCPU(crt, cpu, commands.asSequence())
+    println("CRT:\n${lastCRT.render()}")
 }
 
 data class CPU(
@@ -37,6 +41,18 @@ data class AddX(val value: Int) : Command {
 
     override fun execute(registers: Registers) =
         registers.copy(x = registers.x + value)
+}
+
+data class CRT(
+    val width: Int,
+    val height: Int,
+    val contents: String,
+) {
+    fun addPixel(isLit: Boolean): CRT =
+        copy(contents = contents + if (isLit) '#' else '.')
+
+    fun render() =
+        contents.chunked(width).joinToString("\n")
 }
 
 fun parseCPUCommands(lines: Sequence<String>): Sequence<Command> =
@@ -70,3 +86,16 @@ fun sumSignalStrengths(cpuStates: Sequence<CPU>, cycles: Collection<Int>): Int =
     cpuStates
         .filter { cycles.contains(it.cycle) }
         .sumOf { it.signalStrength }
+
+fun syncCRTWithCPU(crt: CRT, cpu: CPU, commands: Sequence<Command>): CRT =
+    runProgram(cpu, commands)
+        .take(crt.width * crt.height)
+        .fold(crt, ::updateCRT)
+
+fun updateCRT(crt: CRT, cpu: CPU, spriteLength: Int = 3): CRT {
+    val spritePosition = cpu.registers.x
+    val spriteRange = (spritePosition - spriteLength/2)..(spritePosition + spriteLength/2)
+    val drawnPixelPosition = crt.contents.length % crt.width
+    val isLit = drawnPixelPosition in spriteRange
+    return crt.addPixel(isLit)
+}

@@ -227,4 +227,39 @@ internal class Day10Test {
 
         assertEquals(14920, sumSignalStrengths(cpuStates, cycles = listOf(20, 60, 100, 140, 180, 220)))
     }
+
+    @Test
+    fun testUpdateCRT() {
+        val commands = parseCPUCommands(sampleInput2)
+        val cpu = CPU(cycle = 1, registers = Registers(x = 1))
+        val crt = CRT(width = 40, height = 6, contents = "")
+        val lastCRT = syncCRTWithCPU(crt, cpu, commands)
+
+        assertEquals("""
+            ##..##..##..##..##..##..##..##..##..##..
+            ###...###...###...###...###...###...###.
+            ####....####....####....####....####....
+            #####.....#####.....#####.....#####.....
+            ######......######......######......####
+            #######.......#######.......#######.....
+        """.trimIndent(), lastCRT.render())
+    }
+
+    @Test
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().lineSequence()
+        val commands = parseCPUCommands(input)
+        val cpu = CPU(cycle = 1, registers = Registers(x = 1))
+        val crt = CRT(width = 40, height = 6, contents = "")
+        val lastCRT = syncCRTWithCPU(crt, cpu, commands)
+
+        assertEquals("""
+            ###..#..#..##...##...##..###..#..#.####.
+            #..#.#..#.#..#.#..#.#..#.#..#.#..#....#.
+            ###..#..#.#....#..#.#....###..#..#...#..
+            #..#.#..#.#....####.#....#..#.#..#..#...
+            #..#.#..#.#..#.#..#.#..#.#..#.#..#.#....
+            ###...##...##..#..#..##..###...##..####.
+        """.trimIndent(), lastCRT.render())
+    }
 }
