@@ -11,18 +11,18 @@ fun main() {
 
 data class Monkey(
     val id: Int,
-    val items: List<Int>,
-    val operation: (Int) -> Int,
-    val test: (Int) -> Boolean,
+    val items: List<Item>,
+    val operation: (Item) -> Item,
+    val test: (Item) -> Boolean,
     val targets: Map<Boolean, Int>,
     val inspectedItems: Int = 0,
 ) {
-    fun inspectItems(): Pair<Monkey, List<Pair<Int, Int>>> =
+    fun inspectItems(worryDivider: Int): Pair<Monkey, List<Pair<Item, Int>>> =
         copy(
             items = emptyList(),
             inspectedItems = inspectedItems + items.size,
         ) to items.map { item ->
-            val worryLevel = operation(item) / 3
+            val worryLevel = operation(item) / worryDivider
             val testResult = test(worryLevel)
             val targetID = targets[testResult]
                 ?: throw IllegalStateException("No target found for $worryLevel at $this")
@@ -30,23 +30,50 @@ data class Monkey(
             worryLevel to targetID
         }
 
-    fun addItem(item: Int): Monkey = copy(items = items + item)
+    fun addItem(item: Item): Monkey = copy(items = items + item)
 }
 
-data class Multiply(val value: Int) : (Int) -> Int {
-    override fun invoke(item: Int): Int = item * value
+sealed interface Item {
+    operator fun plus(number: Int): Item
+    operator fun times(number: Int): Item
+    operator fun div(number: Int): Item
+    fun square(): Item
+    fun isDivisible(factor: Int): Boolean
 }
 
-data class Add(val value: Int) : (Int) -> Int {
-    override fun invoke(item: Int): Int = item + value
+data class SimpleItem(
+    val value: Int
+) : Item {
+    override fun plus(number: Int): Item =
+        copy(value = value + number)
+
+    override fun times(number: Int): Item =
+        copy(value = value * number)
+
+    override fun div(number: Int): Item =
+        copy(value = value / number)
+
+    override fun square(): Item =
+        copy(value = value * value)
+
+    override fun isDivisible(factor: Int): Boolean =
+        value % factor == 0
 }
 
-object Square : (Int) -> Int {
-    override fun invoke(item: Int): Int = item * item
+data class Multiply(val value: Int) : (Item) -> Item {
+    override fun invoke(item: Item): Item = item * value
 }
 
-data class Divisible(val value: Int) : (Int) -> Boolean {
-    override fun invoke(item: Int): Boolean = item % value == 0
+data class Add(val value: Int) : (Item) -> Item {
+    override fun invoke(item: Item): Item = item + value
+}
+
+object Square : (Item) -> Item {
+    override fun invoke(item: Item): Item = item.square()
+}
+
+data class Divisible(val value: Int) : (Item) -> Boolean {
+    override fun invoke(item: Item): Boolean = item.isDivisible(value)
 }
 
 fun parseMonkeys(lines: Iterable<String>): List<Monkey> =
@@ -69,7 +96,7 @@ fun parseMonkeys(lines: Iterable<String>): List<Monkey> =
                         .find(line)
                         ?.groups?.get(1)?.value
                         ?.split(',')
-                        ?.map { it.trim().toInt() }
+                        ?.map { SimpleItem(it.trim().toInt()) }
                         ?: throw IllegalStateException("Could parse starting items in: '$line'")
                 }
 
@@ -125,16 +152,16 @@ fun parseMonkeys(lines: Iterable<String>): List<Monkey> =
         }
     }
 
-fun playKeepAway(monkeys: List<Monkey>, rounds: Int): List<Monkey> =
+fun playKeepAway(monkeys: List<Monkey>, rounds: Int, worryDivider: Int = 3): List<Monkey> =
     (1..rounds)
-        .fold(monkeys) { currentMonkeys, _ -> playKeepAway(currentMonkeys) }
+        .fold(monkeys) { currentMonkeys, _ -> playKeepAway(currentMonkeys, worryDivider) }
 
-fun playKeepAway(monkeys: List<Monkey>): List<Monkey> =
+fun playKeepAway(monkeys: List<Monkey>, worryDivider: Int = 3): List<Monkey> =
     monkeys.map { it.id }
         .sorted()
         .fold(monkeys) { currentMonkeys, currentID ->
             val currentMonkey = currentMonkeys.find { it.id == currentID }!!
-            val (updatedMonkey, itemsToTargets) = currentMonkey.inspectItems()
+            val (updatedMonkey, itemsToTargets) = currentMonkey.inspectItems(worryDivider)
 
             currentMonkeys
                 .map { monkey ->
