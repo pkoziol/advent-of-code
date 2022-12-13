@@ -125,4 +125,18 @@ internal class Day13Test {
         val packetPairs = parsePacketPairs(input)
         assertEquals(6369, getSumOfPacketPairsInRightOrder(packetPairs))
     }
+
+    @Test
+    fun testGetDecoderKey() {
+        val packetPairs = parsePacketPairs(sampleInput)
+        assertEquals(140, getDecoderKey(packetPairs))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val packetPairs = parsePacketPairs(input)
+        assertEquals(25800, getDecoderKey(packetPairs))
+    }
 }
