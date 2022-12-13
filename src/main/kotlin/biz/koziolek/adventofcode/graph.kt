@@ -66,14 +66,22 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
             ?.toSet()
             ?: emptySet()
 
-    fun findShortestPath(start: N, end: N): List<N> {
+    fun findShortestPath(start: N, end: N): List<N> =
+        findShortestPath(end) { it == start }
+
+    fun findShortestPath(starts: Set<N>, end: N): List<N> =
+        findShortestPath(end) { it in starts }
+
+    private fun findShortestPath(end: N, isStart: (N) -> Boolean): List<N> {
         val cumulativeDistance: MutableMap<N, Int> = HashMap()
         val toVisit: Queue<Pair<N, Int>> = PriorityQueue(Comparator.comparing { (_, distance) -> distance })
         var current: N? = end
+        var start: N? = null
         cumulativeDistance[end] = 0
 
         while (current != null) {
-            if (current == start) {
+            if (isStart(current)) {
+                start = current
                 break
             }
 

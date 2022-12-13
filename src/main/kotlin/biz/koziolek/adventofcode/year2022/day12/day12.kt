@@ -7,6 +7,7 @@ fun main() {
     val heightMap = parseHeightMap(inputFile.bufferedReader().readLines())
     val elevationGraph = buildElevationGraph(heightMap)
     println("Fewest steps from S to E: ${findFewestStepsFromStartToEnd(elevationGraph)}")
+    println("Fewest steps from any a to E: ${findFewestStepsFromZeroToEnd(elevationGraph)}")
 }
 
 fun parseHeightMap(lines: Iterable<String>): Map<Coord, Char> =
@@ -56,6 +57,15 @@ fun findFewestStepsFromStartToEnd(elevationGraph: Graph<ElevationNode, UniDirect
     val end = elevationGraph.nodes.find { it.label == 'E' }
         ?: throw IllegalStateException("End not found")
     val shortestPath = elevationGraph.findShortestPath(start, end)
+
+    return shortestPath.size - 1
+}
+
+fun findFewestStepsFromZeroToEnd(elevationGraph: Graph<ElevationNode, UniDirectionalGraphEdge<ElevationNode>>): Int {
+    val starts = elevationGraph.nodes.filter { it.height == 0 }.toSet()
+    val end = elevationGraph.nodes.find { it.label == 'E' }
+        ?: throw IllegalStateException("End not found")
+    val shortestPath = elevationGraph.findShortestPath(starts, end)
 
     return shortestPath.size - 1
 }
