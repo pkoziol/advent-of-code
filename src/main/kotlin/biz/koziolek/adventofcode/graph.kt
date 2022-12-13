@@ -18,13 +18,26 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
         edges.any { it is UniDirectionalGraphEdge<*> }
     }
 
-    private val nodeEdges: Map<N, Set<E>> by lazy {
+    private val nodeStartingEdges: Map<N, Set<E>> by lazy {
         buildMap {
             for (edge in edges) {
                 if (edge.startsWith(edge.node1)) {
                     merge(edge.node1, mutableSetOf(edge)) { a, b -> a + b }
                 }
                 if (edge.startsWith(edge.node2)) {
+                    merge(edge.node2, mutableSetOf(edge)) { a, b -> a + b }
+                }
+            }
+        }
+    }
+
+    private val nodeEndingEdges: Map<N, Set<E>> by lazy {
+        buildMap {
+            for (edge in edges) {
+                if (edge.endsWith(edge.node1)) {
+                    merge(edge.node1, mutableSetOf(edge)) { a, b -> a + b }
+                }
+                if (edge.endsWith(edge.node2)) {
                     merge(edge.node2, mutableSetOf(edge)) { a, b -> a + b }
                 }
             }
@@ -48,7 +61,7 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
         ) { "    ${it.toGraphvizString()}" }
 
     fun getAdjacentNodes(node: N): Set<N> =
-        nodeEdges[node]
+        nodeStartingEdges[node]
             ?.map { it.getOther(node) }
             ?.toSet()
             ?: emptySet()
@@ -66,7 +79,7 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
 
             val currentNodeDistance = cumulativeDistance[current] ?: Int.MAX_VALUE
 
-            for (edge in edges) {
+            for (edge in nodeEndingEdges[current]!!) {
                 if (edge.endsWith(current)) {
                     val otherNode = edge.getOther(current)
                     val otherNodeDistance = cumulativeDistance[otherNode] ?: Int.MAX_VALUE
