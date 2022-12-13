@@ -98,4 +98,20 @@ internal class Day12Test {
         val elevationGraph = buildElevationGraph(heightMap)
         assertEquals(528, findFewestStepsFromStartToEnd(elevationGraph))
     }
+
+    @Test
+    fun testSamplePath2() {
+        val heightMap = parseHeightMap(sampleInput)
+        val elevationGraph = buildElevationGraph(heightMap)
+        assertEquals(29, findFewestStepsFromZeroToEnd(elevationGraph))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val heightMap = parseHeightMap(input)
+        val elevationGraph = buildElevationGraph(heightMap)
+        assertEquals(522, findFewestStepsFromZeroToEnd(elevationGraph))
+    }
 }
