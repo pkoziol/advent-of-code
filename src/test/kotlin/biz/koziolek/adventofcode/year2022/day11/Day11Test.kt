@@ -4,6 +4,10 @@ import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import java.util.stream.Stream
 
 @Tag("2022")
 internal class Day11Test {
@@ -135,48 +139,60 @@ internal class Day11Test {
         assertEquals(58322, getMonkeyBusiness(monkeys20))
     }
 
-//    @ParameterizedTest(name = "rounds={0}")
-//    @MethodSource
-//    fun testPlayWithoutDividingWorryLevel(rounds: Int, expectedInspectedItems: List<Int>) {
-//        val monkeys = parseMonkeys(sampleInput)
-//        val monkeysAfterNRounds = playKeepAway(monkeys, rounds = rounds, worryDivider = 1)
-//
-//        assertEquals(
-//            expectedInspectedItems,
-//            monkeysAfterNRounds.sortedBy { it.id }.map { it.inspectedItems }
-//        )
-//    }
-//
-//    companion object {
-//        @JvmStatic
-//        fun testPlayWithoutDividingWorryLevel(): Stream<Arguments> =
-//            Stream.of(
-//                Arguments.of(1, listOf(2, 4, 3, 6)),
-//                Arguments.of(20, listOf(99, 97, 8, 103)),
-//                Arguments.of(1000, listOf(5204, 4792, 199, 5192)),
-//                Arguments.of(2000, listOf(10419, 9577, 392, 10391)),
-//                Arguments.of(3000, listOf(15638, 14358, 587, 15593)),
-//                Arguments.of(4000, listOf(20858, 19138, 780, 20797)),
-//                Arguments.of(5000, listOf(26075, 23921, 974, 26000)),
-//                Arguments.of(6000, listOf(31294, 28702, 1165, 31204)),
-//                Arguments.of(7000, listOf(36508, 33488, 1360, 36400)),
-//                Arguments.of(8000, listOf(41728, 38268, 1553, 41606)),
-//                Arguments.of(9000, listOf(46945, 43051, 1746, 46807)),
-//                Arguments.of(10000, listOf(52166, 47830, 1938, 52013)),
-//            )
-//    }
-//
-//    @Test
-//    fun testPlay10000RoundsWithoutDividingWorryLevel() {
-//        val monkeys = parseMonkeys(sampleInput)
-//
-//        val monkeys1 = playKeepAway(monkeys, rounds = 1, worryDivider = 1)
-//        assertEquals(2, monkeys1.find { it.id == 0 }?.inspectedItems)
-//        assertEquals(4, monkeys1.find { it.id == 1 }?.inspectedItems)
-//        assertEquals(3, monkeys1.find { it.id == 2 }?.inspectedItems)
-//        assertEquals(6, monkeys1.find { it.id == 3 }?.inspectedItems)
-//
-//        val monkeys10000 = playKeepAway(monkeys, rounds = 10000)
-//        assertEquals(2713310158, getMonkeyBusiness(monkeys10000))
-//    }
+    @ParameterizedTest(name = "rounds={0}")
+    @MethodSource
+    fun testPlayWithoutDividingWorryLevel(rounds: Int, expectedInspectedItems: List<Long>) {
+        val monkeys = parseMonkeys(sampleInput)
+        val upgradedMonkeys = upgradeItems(monkeys)
+        val monkeysAfterNRounds = playKeepAway(upgradedMonkeys, rounds = rounds, worryDivider = 1)
+
+        assertEquals(
+            expectedInspectedItems,
+            monkeysAfterNRounds.sortedBy { it.id }.map { it.inspectedItems }
+        )
+    }
+
+    companion object {
+        @JvmStatic
+        fun testPlayWithoutDividingWorryLevel(): Stream<Arguments> =
+            Stream.of(
+                Arguments.of(1, listOf<Long>(2, 4, 3, 6)),
+                Arguments.of(20, listOf<Long>(99, 97, 8, 103)),
+                Arguments.of(1000, listOf<Long>(5204, 4792, 199, 5192)),
+                Arguments.of(2000, listOf<Long>(10419, 9577, 392, 10391)),
+                Arguments.of(3000, listOf<Long>(15638, 14358, 587, 15593)),
+                Arguments.of(4000, listOf<Long>(20858, 19138, 780, 20797)),
+                Arguments.of(5000, listOf<Long>(26075, 23921, 974, 26000)),
+                Arguments.of(6000, listOf<Long>(31294, 28702, 1165, 31204)),
+                Arguments.of(7000, listOf<Long>(36508, 33488, 1360, 36400)),
+                Arguments.of(8000, listOf<Long>(41728, 38268, 1553, 41606)),
+                Arguments.of(9000, listOf<Long>(46945, 43051, 1746, 46807)),
+                Arguments.of(10000, listOf<Long>(52166, 47830, 1938, 52013)),
+            )
+    }
+
+    @Test
+    fun testPlay10000RoundsWithoutDividingWorryLevel() {
+        val monkeys = parseMonkeys(sampleInput)
+        val upgradedMonkeys = upgradeItems(monkeys)
+
+        val monkeys1 = playKeepAway(upgradedMonkeys, rounds = 1, worryDivider = 1)
+        assertEquals(2L, monkeys1.find { it.id == 0 }?.inspectedItems)
+        assertEquals(4L, monkeys1.find { it.id == 1 }?.inspectedItems)
+        assertEquals(3L, monkeys1.find { it.id == 2 }?.inspectedItems)
+        assertEquals(6L, monkeys1.find { it.id == 3 }?.inspectedItems)
+
+        val monkeys10000 = playKeepAway(upgradedMonkeys, rounds = 10000, worryDivider = 1)
+        assertEquals(2713310158, getMonkeyBusiness(monkeys10000))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val monkeys = parseMonkeys(input)
+        val upgradedMonkeys = upgradeItems(monkeys)
+        val monkeys10000 = playKeepAway(upgradedMonkeys, rounds = 10000, worryDivider = 1)
+        assertEquals(13937702909, getMonkeyBusiness(monkeys10000))
+    }
 }
