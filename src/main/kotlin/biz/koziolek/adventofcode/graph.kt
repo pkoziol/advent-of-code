@@ -66,14 +66,16 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
 
             val currentNodeDistance = cumulativeDistance[current] ?: Int.MAX_VALUE
 
-            for (edge in nodeEdges[current]!!) {
-                val otherNode = edge.getOther(current)
-                val otherNodeDistance = cumulativeDistance[otherNode] ?: Int.MAX_VALUE
-                val newDistance = currentNodeDistance + edge.weight
+            for (edge in edges) {
+                if (edge.endsWith(current)) {
+                    val otherNode = edge.getOther(current)
+                    val otherNodeDistance = cumulativeDistance[otherNode] ?: Int.MAX_VALUE
+                    val newDistance = currentNodeDistance + edge.weight
 
-                if (newDistance < otherNodeDistance) {
-                    cumulativeDistance[otherNode] = newDistance
-                    toVisit.add(Pair(otherNode, newDistance))
+                    if (newDistance < otherNodeDistance) {
+                        cumulativeDistance[otherNode] = newDistance
+                        toVisit.add(Pair(otherNode, newDistance))
+                    }
                 }
             }
             
