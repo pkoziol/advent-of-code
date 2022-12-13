@@ -8,7 +8,13 @@ fun main() {
     val inputFile = findInput(object {})
     val packetPairs = parsePacketPairs(inputFile.bufferedReader().readLines())
     println("Sum of packet pairs in right order: ${getSumOfPacketPairsInRightOrder(packetPairs)}")
+    println("Decoder key: ${getDecoderKey(packetPairs)}")
 }
+
+val DIVIDER_PACKETS = listOf(
+    parseListPacket("[[2]]"),
+    parseListPacket("[[6]]"),
+)
 
 sealed interface Packet : Comparable<Packet>
 
@@ -109,3 +115,13 @@ fun getSumOfPacketPairsInRightOrder(packetPairs: List<Pair<Packet, Packet>>): In
         .withIndex()
         .filter { (_, pair) -> pair.first < pair.second }
         .sumOf { it.index + 1 }
+
+fun getDecoderKey(packetPairs: List<Pair<Packet, Packet>>): Int =
+    packetPairs.asSequence()
+        .flatMap { listOf(it.first, it.second) }
+        .let { it + DIVIDER_PACKETS }
+        .sorted()
+        .withIndex()
+        .filter { (_, packet) -> packet in DIVIDER_PACKETS }
+        .map { (index, _) -> index + 1 }
+        .reduce(Int::times)
