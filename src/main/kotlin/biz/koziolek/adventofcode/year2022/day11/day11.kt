@@ -5,8 +5,13 @@ import biz.koziolek.adventofcode.findInput
 fun main() {
     val inputFile = findInput(object {})
     val monkeys = parseMonkeys(inputFile.bufferedReader().readLines())
+
     val monkeys20 = playKeepAway(monkeys, rounds = 20)
     println("Monkey business after 20 rounds: ${getMonkeyBusiness(monkeys20)}")
+
+    val upgradedMonkeys = upgradeItems(monkeys)
+    val monkeys10000 = playKeepAway(upgradedMonkeys, rounds = 10000, worryDivider = 1)
+    println("Monkey business after 10 000 rounds: ${getMonkeyBusiness(monkeys10000)}")
 }
 
 data class Monkey(
@@ -15,7 +20,7 @@ data class Monkey(
     val operation: (Item) -> Item,
     val test: (Item) -> Boolean,
     val targets: Map<Boolean, Int>,
-    val inspectedItems: Int = 0,
+    val inspectedItems: Long = 0,
 ) {
     fun inspectItems(worryDivider: Int): Pair<Monkey, List<Pair<Item, Int>>> =
         copy(
@@ -58,6 +63,48 @@ data class SimpleItem(
 
     override fun isDivisible(factor: Int): Boolean =
         value % factor == 0
+}
+
+data class RemainderOnlyItem(
+    val divisorsAndRemainders: Map<Int, Int>
+) : Item {
+
+    companion object {
+        fun create(divisors: Set<Int>, number: Int): RemainderOnlyItem =
+            RemainderOnlyItem(
+                divisorsAndRemainders = divisors.associateWith { number % it },
+            )
+    }
+
+    override fun plus(number: Int): Item =
+        copy(
+            divisorsAndRemainders = divisorsAndRemainders.mapValues { (divisor, remainder) ->
+                (remainder + number) % divisor
+            },
+        )
+
+    override fun times(number: Int): Item =
+        copy(
+            divisorsAndRemainders = divisorsAndRemainders.mapValues { (divisor, remainder) ->
+                (remainder * number) % divisor
+            },
+        )
+
+    override fun div(number: Int): Item =
+        when (number) {
+            1 -> this
+            else -> throw UnsupportedOperationException("Division is not supported for RemainderOnlyItem")
+        }
+
+    override fun square(): Item =
+        copy(
+            divisorsAndRemainders = divisorsAndRemainders.mapValues { (divisor, remainder) ->
+                (remainder * remainder) % divisor
+            },
+        )
+
+    override fun isDivisible(factor: Int): Boolean =
+        divisorsAndRemainders[factor] == 0
 }
 
 data class Multiply(val value: Int) : (Item) -> Item {
@@ -180,9 +227,31 @@ fun playKeepAway(monkeys: List<Monkey>, worryDivider: Int = 3): List<Monkey> =
                 }
         }
 
-fun getMonkeyBusiness(monkeys: List<Monkey>): Int =
+fun getMonkeyBusiness(monkeys: List<Monkey>): Long =
     monkeys
         .map { it.inspectedItems }
         .sortedDescending()
         .take(2)
-        .reduce(Int::times)
+        .reduce(Long::times)
+
+fun upgradeItems(monkeys: List<Monkey>): List<Monkey> {
+    val divisors = monkeys
+        .map { monkey ->
+            when (monkey.test) {
+                is Divisible -> monkey.test.value
+                else -> throw IllegalArgumentException("Unsupported test ${monkey.test} for $monkey")
+            }
+        }
+        .toSet()
+    
+    return monkeys.map { monkey ->
+        monkey.copy(
+            items = monkey.items.map { item ->
+                when (item) {
+                    is RemainderOnlyItem -> item
+                    is SimpleItem -> RemainderOnlyItem.create(divisors, item.value)
+                }
+            },
+        )
+    }
+}
