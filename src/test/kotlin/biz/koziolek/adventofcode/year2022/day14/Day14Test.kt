@@ -34,7 +34,6 @@ internal class Day14Test {
     fun testBuildRockMap() {
         val rockLines = parseRockLines(sampleInput)
         val rockMap = buildRockMap(rockLines)
-        assertEquals(21, rockMap.size)
 
         assertEquals(SOURCE, rockMap[Coord(500, 0)])
 

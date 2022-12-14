@@ -27,25 +27,37 @@ fun parseRockLines(lines: Iterable<String>): Set<Line> =
             }
     }.toSet()
 
-fun buildRockMap(rockLines: Set<Line>, source: Coord = Coord(500, 0)): Map<Coord, Char> =
+data class RockMap(private val map: Map<Coord, Char>) {
+    val source = map.entries.single { it.value == SOURCE }.key
+    val minX = map.keys.minOf { it.x }
+    val maxX = map.keys.maxOf { it.x }
+    val minY = map.keys.minOf { it.y }
+    val maxY = map.keys.maxOf { it.y }
+
+    operator fun get(coord: Coord) = map[coord]
+
+    fun isFree(coord: Coord) =
+        coord !in map || map[coord] == AIR
+
+    fun addSand(coord: Coord) =
+        copy(map = map + (coord to SAND))
+}
+
+fun buildRockMap(rockLines: Set<Line>, source: Coord = Coord(500, 0)): RockMap =
     rockLines
         .flatMap { line -> line.getCoveredPoints() }
         .associateWith { ROCK }
         .plus(source to SOURCE)
+        .let { RockMap(it) }
 
-fun visualizeRockMap(rockMap: Map<Coord, Char>): String =
+fun visualizeRockMap(rockMap: RockMap): String =
     buildString {
-        val minX = rockMap.keys.minOf { it.x }
-        val maxX = rockMap.keys.maxOf { it.x }
-        val minY = rockMap.keys.minOf { it.y }
-        val maxY = rockMap.keys.maxOf { it.y }
-
-        for (y in minY..maxY) {
-            for (x in minX..maxX) {
+        for (y in rockMap.minY..rockMap.maxY) {
+            for (x in rockMap.minX..rockMap.maxX) {
                 append(rockMap[Coord(x, y)] ?: AIR)
             }
 
-            if (y < maxY) {
+            if (y < rockMap.maxY) {
                 append("\n")
             }
         }
@@ -53,14 +65,14 @@ fun visualizeRockMap(rockMap: Map<Coord, Char>): String =
 
 object FallenIntoAbyss : Exception()
 
-fun dropSand(map: Map<Coord, Char>, count: Int = 1): Map<Coord, Char> =
+fun dropSand(map: RockMap, count: Int = 1): RockMap =
     (1..count).fold(map) { currentMap, _ ->
         dropSand(currentMap)
     }
 
-fun dropSand(map: Map<Coord, Char>): Map<Coord, Char> {
-    val abyssY = map.keys.maxOf { it.y }
-    var sand = map.entries.single { it.value == SOURCE }.key
+fun dropSand(map: RockMap): RockMap {
+    val abyssY = map.maxY
+    var sand = map.source
     var canMove = true
 
     while (canMove) {
@@ -72,7 +84,7 @@ fun dropSand(map: Map<Coord, Char>): Map<Coord, Char> {
 
         canMove = false
         for (coord in coordsToTry) {
-            if (coord !in map || map[coord] == AIR) {
+            if (map.isFree(coord)) {
                 canMove = true
                 sand = coord
                 break
@@ -84,10 +96,10 @@ fun dropSand(map: Map<Coord, Char>): Map<Coord, Char> {
         }
     }
 
-    return map + (sand to SAND)
+    return map.addSand(sand)
 }
 
-fun countSandNotInAbyss(rockMap: Map<Coord, Char>): Int =
+fun countSandNotInAbyss(rockMap: RockMap): Int =
     sequence {
         var map = rockMap
         while (true) {
