@@ -8,7 +8,8 @@ fun main() {
     val inputFile = findInput(object {})
     val rockLines = parseRockLines(inputFile.bufferedReader().readLines())
     val rockMap = buildRockMap(rockLines)
-    println("Inits of sand that come to rest before sand starts flowing into the abyss: ${countSandNotInAbyss(rockMap)}")
+    println("Units of sand that come to rest before sand starts flowing into the abyss: ${countSandNotInAbyss(rockMap)}")
+    println("Units of sand that come to rest before sand blocks the source: ${countSandWithInfiniteFloor(rockMap)}")
 }
 
 const val ROCK = '#'
@@ -27,20 +28,61 @@ fun parseRockLines(lines: Iterable<String>): Set<Line> =
             }
     }.toSet()
 
-data class RockMap(private val map: Map<Coord, Char>) {
-    val source = map.entries.single { it.value == SOURCE }.key
-    val minX = map.keys.minOf { it.x }
-    val maxX = map.keys.maxOf { it.x }
-    val minY = map.keys.minOf { it.y }
-    val maxY = map.keys.maxOf { it.y }
+interface RockMap {
+    val source: Coord?
+    val minX: Int
+    val maxX: Int
+    val minY: Int
+    val maxY: Int
+    val maxRockY: Int
+    operator fun get(coord: Coord): Char?
+    fun isFree(coord: Coord): Boolean
+    fun addSand(coord: Coord): RockMap
+}
 
-    operator fun get(coord: Coord) = map[coord]
+data class RockMapWithAbyss(private val map: Map<Coord, Char>) : RockMap {
+    override val source = map.entries.singleOrNull { it.value == SOURCE }?.key
+    override val minX = map.keys.minOf { it.x }
+    override val maxX = map.keys.maxOf { it.x }
+    override val minY = map.keys.minOf { it.y }
+    override val maxY = map.keys.maxOf { it.y }
+    override val maxRockY = map.filter { it.value == ROCK }.maxOf { it.key.y }
 
-    fun isFree(coord: Coord) =
+    override operator fun get(coord: Coord) = map[coord]
+
+    override fun isFree(coord: Coord) =
         coord !in map || map[coord] == AIR
 
-    fun addSand(coord: Coord) =
-        copy(map = map + (coord to SAND))
+    override fun addSand(coord: Coord) =
+        RockMapWithAbyss(map = map + (coord to SAND))
+}
+
+data class RockMapWithFloor(
+    val map: RockMap,
+    val floorDistance: Int = 2
+) : RockMap {
+    private val floorY = map.maxRockY + floorDistance
+    override val source = map.source
+    override val minX = map.minX
+    override val maxX = map.maxX
+    override val minY = map.minY
+    override val maxY = floorY
+    override val maxRockY = floorY
+
+    override fun get(coord: Coord) =
+        if (map[coord] != null) {
+            map[coord]
+        } else if (coord.y == floorY) {
+            ROCK
+        } else {
+            null
+        }
+
+    override fun isFree(coord: Coord) =
+        map.isFree(coord) && coord.y != floorY
+
+    override fun addSand(coord: Coord) =
+        copy(map = map.addSand(coord))
 }
 
 fun buildRockMap(rockLines: Set<Line>, source: Coord = Coord(500, 0)): RockMap =
@@ -48,7 +90,7 @@ fun buildRockMap(rockLines: Set<Line>, source: Coord = Coord(500, 0)): RockMap =
         .flatMap { line -> line.getCoveredPoints() }
         .associateWith { ROCK }
         .plus(source to SOURCE)
-        .let { RockMap(it) }
+        .let { RockMapWithAbyss(it) }
 
 fun visualizeRockMap(rockMap: RockMap): String =
     buildString {
@@ -64,6 +106,7 @@ fun visualizeRockMap(rockMap: RockMap): String =
     }
 
 object FallenIntoAbyss : Exception()
+object SourceBlocked : Exception()
 
 fun dropSand(map: RockMap, count: Int = 1): RockMap =
     (1..count).fold(map) { currentMap, _ ->
@@ -72,7 +115,7 @@ fun dropSand(map: RockMap, count: Int = 1): RockMap =
 
 fun dropSand(map: RockMap): RockMap {
     val abyssY = map.maxY
-    var sand = map.source
+    var sand = map.source ?: throw SourceBlocked
     var canMove = true
 
     while (canMove) {
@@ -108,6 +151,11 @@ fun countSandNotInAbyss(rockMap: RockMap): Int =
                 yield(map)
             } catch (e: FallenIntoAbyss) {
                 return@sequence
+            } catch (e: SourceBlocked) {
+                return@sequence
             }
         }
     }.count()
+
+fun countSandWithInfiniteFloor(rockMap: RockMap): Int =
+    countSandNotInAbyss(RockMapWithFloor(rockMap))
