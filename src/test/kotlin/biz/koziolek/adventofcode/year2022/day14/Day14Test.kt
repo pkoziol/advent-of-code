@@ -192,4 +192,20 @@ internal class Day14Test {
         val rockMap = buildRockMap(rockLines)
         assertEquals(763, countSandNotInAbyss(rockMap))
     }
+
+    @Test
+    fun testCountSandWithInfiniteFloor() {
+        val rockLines = parseRockLines(sampleInput)
+        val rockMap = buildRockMap(rockLines)
+        assertEquals(93, countSandWithInfiniteFloor(rockMap))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val rockLines = parseRockLines(input)
+        val rockMap = buildRockMap(rockLines)
+        assertEquals(23921, countSandWithInfiniteFloor(rockMap))
+    }
 }
