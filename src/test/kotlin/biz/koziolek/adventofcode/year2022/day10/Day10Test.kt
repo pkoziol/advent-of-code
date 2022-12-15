@@ -246,6 +246,7 @@ internal class Day10Test {
     }
 
     @Test
+    @Tag("answer")
     fun testAnswer2() {
         val input = findInput(object {}).bufferedReader().lineSequence()
         val commands = parseCPUCommands(input)
