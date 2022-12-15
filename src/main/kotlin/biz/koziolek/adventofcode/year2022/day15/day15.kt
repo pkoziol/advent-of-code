@@ -6,7 +6,12 @@ import biz.koziolek.adventofcode.findInput
 fun main() {
     val inputFile = findInput(object {})
     val sensors = parseSensors(inputFile.bufferedReader().readLines())
+
     println("Positions with y=2000000 without beacons: ${countPositionsWithoutBeacons(sensors, y = 2000000)}")
+
+    val distressBeacon = findDistressBeacon(sensors, maxX = 4000000, maxY = 4000000)
+    val tuningFrequency = getTuningFrequency(distressBeacon)
+    println("Distress beacon is located at $distressBeacon with tuning frequency: $tuningFrequency")
 }
 
 data class Sensor(
@@ -52,6 +57,36 @@ fun countPositionsWithoutBeacons(sensors: List<Sensor>, y: Int): Int {
         .count { x -> 
             val coord = Coord(x, y)
             sensors.all { sensor -> coord != sensor.beacon.location }
-                    && sensors.any { sensor -> coord.manhattanDistanceTo(sensor.location) <= sensor.distanceToBeacon }
+                    && !canBeBeacon(coord, sensors)
         }
 }
+
+fun findDistressBeacon(sensors: List<Sensor>,
+                       minX: Int = 0, maxX: Int = Int.MAX_VALUE,
+                       minY: Int = 0, maxY: Int = Int.MAX_VALUE): Coord =
+    sensors.flatMap { getPointsAtDistance(it.location, it.distanceToBeacon + 1) }
+        .distinct()
+        .filter { it.x in minX..maxX && it.y in minY..maxY }
+        .single { canBeBeacon(it, sensors) }
+
+fun canBeBeacon(coord: Coord, sensors: List<Sensor>): Boolean =
+    sensors.all { sensor -> coord.manhattanDistanceTo(sensor.location) > sensor.distanceToBeacon }
+
+fun getPointsAtDistance(from: Coord, distance: Int): Sequence<Coord> =
+    sequence {
+        for ((x, y) in (from.x..from.x+distance).zip(from.y+distance downTo from.y)) {
+            yield(Coord(x, y))
+        }
+        for ((x, y) in (from.x+distance downTo from.x).zip(from.y downTo from.y-distance)) {
+            yield(Coord(x, y))
+        }
+        for ((x, y) in (from.x downTo from.x-distance).zip(from.y-distance..from.y)) {
+            yield(Coord(x, y))
+        }
+        for ((x, y) in (from.x-distance..from.x).zip(from.y..from.y+distance)) {
+            yield(Coord(x, y))
+        }
+    }
+
+fun getTuningFrequency(coord: Coord): Long =
+    coord.x * 4000000L + coord.y

@@ -55,4 +55,31 @@ internal class Day15Test {
         val countPositionsWithoutBeacons = countPositionsWithoutBeacons(sensors, y = 2000000)
         assertEquals(5832528, countPositionsWithoutBeacons)
     }
+
+    @Test
+    fun testGetPointsAtDistance() {
+        val from = Coord(1, 3)
+        val distance = 4
+        assertTrue(getPointsAtDistance(from, distance).all { it.manhattanDistanceTo(from) == 4 })
+    }
+
+    @Test
+    fun testFindDistressBeacon() {
+        val sensors = parseSensors(sampleInput)
+        assertEquals(Coord(x=14, y=11), findDistressBeacon(sensors, maxX = 20, maxY = 20))
+    }
+
+    @Test
+    fun testGetTuningFrequency() {
+        assertEquals(56000011, getTuningFrequency(Coord(x=14, y=11)))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val sensors = parseSensors(input)
+        val distressBeacon = findDistressBeacon(sensors, maxX = 4000000, maxY = 4000000)
+        assertEquals(13360899249595, getTuningFrequency(distressBeacon))
+    }
 }
