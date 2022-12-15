@@ -1,10 +1,22 @@
 package biz.koziolek.adventofcode
 
+import kotlin.math.abs
+import kotlin.math.pow
+import kotlin.math.sqrt
+
 data class Coord(val x: Int, val y: Int) {
     operator fun plus(other: Coord) = Coord(x + other.x, y + other.y)
     operator fun minus(other: Coord) = Coord(x - other.x, y - other.y)
     operator fun unaryMinus() = Coord(-x, -y)
     override fun toString() = "$x,$y"
+
+    fun distanceTo(other: Coord) = sqrt(
+        (x - other.x).toDouble().pow(2)
+                + (y - other.y).toDouble().pow(2)
+    )
+
+    infix fun manhattanDistanceTo(other: Coord): Int =
+        abs(x - other.x) + abs(y - other.y)
 
     companion object {
         fun fromString(str: String): Coord =
