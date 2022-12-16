@@ -3,6 +3,7 @@ package biz.koziolek.adventofcode.year2022.day15
 import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
@@ -74,6 +75,7 @@ internal class Day15Test {
         assertEquals(56000011, getTuningFrequency(Coord(x=14, y=11)))
     }
 
+    @Disabled("Needs 7-8 GB of RAM which I don't have on Github")
     @Test
     @Tag("answer")
     fun testAnswer2() {
