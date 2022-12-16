@@ -64,28 +64,56 @@ fun countPositionsWithoutBeacons(sensors: List<Sensor>, y: Int): Int {
 fun findDistressBeacon(sensors: List<Sensor>,
                        minX: Int = 0, maxX: Int = Int.MAX_VALUE,
                        minY: Int = 0, maxY: Int = Int.MAX_VALUE): Coord =
-    sensors.flatMap { getPointsAtDistance(it.location, it.distanceToBeacon + 1) }
-        .distinct()
+    sensors.asSequence()
+        .flatMap { getPointsAtDistance(it.location, it.distanceToBeacon + 1) }
         .filter { it.x in minX..maxX && it.y in minY..maxY }
+        .distinct()
         .single { canBeBeacon(it, sensors) }
 
 fun canBeBeacon(coord: Coord, sensors: List<Sensor>): Boolean =
     sensors.all { sensor -> coord.manhattanDistanceTo(sensor.location) > sensor.distanceToBeacon }
 
+class CoordIterator(
+    xRange: Iterable<Int>,
+    yRange: Iterable<Int>
+) : Iterator<Coord> {
+    private val xIter1 = xRange.iterator()
+    private val yIter1 = yRange.iterator()
+
+    override fun hasNext() = xIter1.hasNext() && yIter1.hasNext()
+
+    override fun next() = Coord(xIter1.next(), yIter1.next())
+}
+
 fun getPointsAtDistance(from: Coord, distance: Int): Sequence<Coord> =
     sequence {
-        for ((x, y) in (from.x..from.x+distance).zip(from.y+distance downTo from.y)) {
-            yield(Coord(x, y))
-        }
-        for ((x, y) in (from.x+distance downTo from.x).zip(from.y downTo from.y-distance)) {
-            yield(Coord(x, y))
-        }
-        for ((x, y) in (from.x downTo from.x-distance).zip(from.y-distance..from.y)) {
-            yield(Coord(x, y))
-        }
-        for ((x, y) in (from.x-distance..from.x).zip(from.y..from.y+distance)) {
-            yield(Coord(x, y))
-        }
+        yieldAll(
+            CoordIterator(
+                xRange = from.x..from.x + distance,
+                yRange = from.y + distance downTo from.y,
+            )
+        )
+
+        yieldAll(
+            CoordIterator(
+                xRange = from.x + distance downTo from.x,
+                yRange = from.y downTo from.y - distance,
+            )
+        )
+
+        yieldAll(
+            CoordIterator(
+                xRange = from.x downTo from.x - distance,
+                yRange = from.y - distance..from.y,
+            )
+        )
+
+        yieldAll(
+            CoordIterator(
+                xRange = from.x - distance..from.x,
+                yRange = from.y..from.y + distance,
+            )
+        )
     }
 
 fun getTuningFrequency(coord: Coord): Long =
