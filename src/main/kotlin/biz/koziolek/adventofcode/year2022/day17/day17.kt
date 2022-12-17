@@ -79,66 +79,52 @@ data class Chamber(
         }
 
     fun dropRock(rock: Map<Coord, Char>): Chamber {
-        var tmpRocks = spawn(rock, rocks)
+        var tmpRock = spawn(rock)
         var movesCount = 0
+        var rested = false
 
 //        println("init:\n${copy(rocks = tmpRocks)}\n")
 
-        while (tmpRocks.any { it.value == FALLING_ROCK }) {
+        while (!rested) {
             val sideDirection = if (jetPattern[(jetIndex + movesCount) % jetPattern.length] == '<') LEFT else RIGHT
             movesCount++
 
-            if (canMove(tmpRocks, sideDirection)) {
-                tmpRocks = move(tmpRocks, sideDirection)
+            if (canMove(tmpRock, sideDirection)) {
+                tmpRock = move(tmpRock, sideDirection)
             }
 //            println("side:\n${copy(rocks = tmpRocks)}\n")
 
-            tmpRocks = if (canMove(tmpRocks, DOWN)) {
-                move(tmpRocks, DOWN)
+            if (canMove(tmpRock, DOWN)) {
+                tmpRock = move(tmpRock, DOWN)
             } else {
-                rest(tmpRocks)
+                rested = true
             }
 //            println("down:\n${copy(rocks = tmpRocks)}\n")
         }
 
         return copy(
-            rocks = tmpRocks,
+            rocks = rocks + tmpRock.mapValues { ROCK },
             jetIndex = jetIndex + movesCount,
         )
     }
 
-    private fun spawn(rock: Map<Coord, Char>, rocks: Map<Coord, Char>): Map<Coord, Char> =
-        rocks + rock
-            .mapKeys { (coord, _) -> coord + Coord(2, height + 3) }
-            .mapValues { FALLING_ROCK }
+    private fun spawn(rock: Map<Coord, Char>): Map<Coord, Char> =
+        rock
+            .map { (coord, _) -> (coord + Coord(2, height + 3)) to FALLING_ROCK }
+            .toMap()
 
-    private fun canMove(rocks: Map<Coord, Char>, direction: Coord): Boolean {
-        return rocks
-            .filterValues { it == FALLING_ROCK }
-            .keys
-            .map { it + direction }
-            .all { newCoord ->
+    private fun canMove(rock: Map<Coord, Char>, direction: Coord): Boolean {
+        return rock.keys
+            .all { coord ->
+                val newCoord = coord + direction
                 newCoord.x in 0 until width
                         && newCoord.y >= 0
                         && rocks[newCoord] in setOf(null, AIR, FALLING_ROCK)
             }
     }
 
-    private fun move(tmpRocks: Map<Coord, Char>, direction: Coord) =
-        tmpRocks.mapKeys { (coord, value) ->
-            when (value) {
-                FALLING_ROCK -> coord + direction
-                else -> coord
-            }
-        }
-
-    private fun rest(tmpRocks: Map<Coord, Char>) =
-        tmpRocks.mapValues { (_, value) ->
-            when (value) {
-                FALLING_ROCK -> ROCK
-                else -> value
-            }
-        }
+    private fun move(tmpRock: Map<Coord, Char>, direction: Coord) =
+        tmpRock.mapKeys { (coord, _) -> coord + direction }
 
     override fun toString() =
         buildString {
