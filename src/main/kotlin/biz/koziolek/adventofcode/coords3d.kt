@@ -25,42 +25,46 @@ data class Coord3d(val x: Int, val y: Int, val z: Int) {
                 .map { it.toInt() }
                 .let { Coord3d(x = it[0], y = it[1], z = it[2]) }
     }
+
+    fun getAdjacentCoords(includeDiagonal: Boolean = false): Set<Coord3d> =
+        sequence {
+            yield(Coord3d(-1, 0, 0))
+            yield(Coord3d(0, -1, 0))
+            yield(Coord3d(0, 0, -1))
+            yield(Coord3d(1, 0, 0))
+            yield(Coord3d(0, 1, 0))
+            yield(Coord3d(0, 0, 1))
+
+            if (includeDiagonal) {
+                yield(Coord3d(-1, -1, -1))
+                yield(Coord3d(0, -1, -1))
+                yield(Coord3d(1, -1, -1))
+                yield(Coord3d(-1, 0, -1))
+                yield(Coord3d(1, 0, -1))
+                yield(Coord3d(-1, 1, -1))
+                yield(Coord3d(0, 1, -1))
+                yield(Coord3d(1, 1, -1))
+
+                yield(Coord3d(-1, -1, 0))
+                yield(Coord3d(1, -1, 0))
+                yield(Coord3d(-1, 1, 0))
+                yield(Coord3d(1, 1, 0))
+
+                yield(Coord3d(-1, -1, 1))
+                yield(Coord3d(0, -1, 1))
+                yield(Coord3d(1, -1, 1))
+                yield(Coord3d(-1, 0, 1))
+                yield(Coord3d(1, 0, 1))
+                yield(Coord3d(-1, 1, 1))
+                yield(Coord3d(0, 1, 1))
+                yield(Coord3d(1, 1, 1))
+            }
+        }
+            .map { this + it }
+            .toSet()
 }
 
 fun Collection<Coord3d>.getAdjacentCoords(coord: Coord3d, includeDiagonal: Boolean = false): Set<Coord3d> =
-    sequence {
-        yield(Coord3d(-1, 0, 0))
-        yield(Coord3d(0, -1, 0))
-        yield(Coord3d(0, 0, -1))
-        yield(Coord3d(1, 0, 0))
-        yield(Coord3d(0, 1, 0))
-        yield(Coord3d(0, 0, 1))
-
-        if (includeDiagonal) {
-            yield(Coord3d(-1, -1, -1))
-            yield(Coord3d(0, -1, -1))
-            yield(Coord3d(1, -1, -1))
-            yield(Coord3d(-1, 0, -1))
-            yield(Coord3d(1, 0, -1))
-            yield(Coord3d(-1, 1, -1))
-            yield(Coord3d(0, 1, -1))
-            yield(Coord3d(1, 1, -1))
-
-            yield(Coord3d(-1, -1, 0))
-            yield(Coord3d(1, -1, 0))
-            yield(Coord3d(-1, 1, 0))
-            yield(Coord3d(1, 1, 0))
-
-            yield(Coord3d(-1, -1, 1))
-            yield(Coord3d(0, -1, 1))
-            yield(Coord3d(1, -1, 1))
-            yield(Coord3d(-1, 0, 1))
-            yield(Coord3d(1, 0, 1))
-            yield(Coord3d(-1, 1, 1))
-            yield(Coord3d(0, 1, 1))
-            yield(Coord3d(1, 1, 1))
-        }
-    }
-        .map { coord + it }
+    coord.getAdjacentCoords(includeDiagonal)
         .filter { contains(it) }
         .toSet()
