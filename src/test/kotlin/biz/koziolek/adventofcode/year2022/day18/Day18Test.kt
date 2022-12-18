@@ -43,4 +43,20 @@ internal class Day18Test {
         val droplet = parseDroplet(input)
         assertEquals(4628, getSurfaceArea(droplet))
     }
+
+    @Test
+    fun testGetOutsideSurfaceArea() {
+        val droplet = parseDroplet(sampleInput)
+        val lavaAirMap = mapOutside(droplet)
+        assertEquals(58, getOutsideSurfaceArea(lavaAirMap))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val droplet = parseDroplet(input)
+        val lavaAirMap = mapOutside(droplet)
+        assertEquals(2582, getOutsideSurfaceArea(lavaAirMap))
+    }
 }
