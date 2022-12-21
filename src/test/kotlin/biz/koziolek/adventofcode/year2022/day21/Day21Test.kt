@@ -49,4 +49,18 @@ internal class Day21Test {
         val yellingMonkeys = parseYellingMonkeys(input)
         assertEquals(24947355373338, findYelledNumber("root", yellingMonkeys))
     }
+
+    @Test
+    fun testFindNumberToYell() {
+        val yellingMonkeys = parseYellingMonkeys(sampleInput)
+        assertEquals(301, findNumberToYell(yellingMonkeys))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val yellingMonkeys = parseYellingMonkeys(input)
+        assertEquals(3876907167495, findNumberToYell(yellingMonkeys))
+    }
 }

@@ -1,6 +1,6 @@
 package biz.koziolek.adventofcode.year2022.day21
 
-import biz.koziolek.adventofcode.findInput
+import biz.koziolek.adventofcode.*
 import java.util.*
 
 fun main() {
@@ -9,8 +9,9 @@ fun main() {
     println("'root' monkey yells: ${findYelledNumber("root", yellingMonkeys)}")
 }
 
-sealed interface YellingMonkey {
-    val id: String
+sealed interface YellingMonkey : GraphNode {
+    override val id: String
+    override fun toGraphvizString() = id
 }
 
 data class SpecificNumberYellingMonkey(
@@ -86,4 +87,69 @@ fun findYelledNumber(monkeyID: String, yellingMonkeys: List<YellingMonkey>): Lon
     }
 
     return monkeyNumbers[monkeyID]!!
+}
+
+fun findNumberToYell(yellingMonkeys: List<YellingMonkey>): Long {
+    val monkeyMap = yellingMonkeys.associateBy { it.id }
+    val rootMonkey = monkeyMap["root"] as MathOperationYellingMonkey
+    val human = monkeyMap["humn"]!!
+
+    val graph: Graph<YellingMonkey, UniDirectionalGraphEdge<YellingMonkey>> = buildGraph {
+        yellingMonkeys.forEach { monkey ->
+            if (monkey is MathOperationYellingMonkey) {
+                add(UniDirectionalGraphEdge(monkey, yellingMonkeys.single { it.id == monkey.operand1 }))
+                add(UniDirectionalGraphEdge(monkey, yellingMonkeys.single { it.id == monkey.operand2 }))
+            }
+        }
+    }
+
+    if (graph.edges.count { it.node1 == human || it.node2 == human } != 1) {
+        throw UnsupportedOperationException("Human has to be on exactly one edge")
+    }
+
+    val path = graph.findShortestPath(start = rootMonkey, end = human)
+
+    var wantedNumber: Long? = null
+
+    for (currentMonkey in path) {
+        if (currentMonkey !is MathOperationYellingMonkey) {
+            break
+        }
+
+        val knownChildID = if (monkeyMap[currentMonkey.operand1] !in path) {
+            currentMonkey.operand1
+        } else {
+            currentMonkey.operand2
+        }
+        val knownValue = findYelledNumber(knownChildID, yellingMonkeys)
+        val knownIsLeft = (knownChildID == currentMonkey.operand1)
+
+        wantedNumber = if (currentMonkey.id == "root") {
+            knownValue
+        } else if (currentMonkey.operation == '+') {
+            wantedNumber!! - knownValue
+        } else if (currentMonkey.operation == '-') {
+            if (knownIsLeft) {
+                knownValue - wantedNumber!!
+            } else {
+                wantedNumber!! + knownValue
+            }
+        } else if (currentMonkey.operation == '*') {
+            wantedNumber!! / knownValue
+        } else if (currentMonkey.operation == '/') {
+            if (knownIsLeft) {
+                knownValue / wantedNumber!!
+            } else {
+                wantedNumber!! * knownValue
+            }
+        } else {
+            throw IllegalArgumentException("Unknown operation: '${currentMonkey.operation}'")
+        }
+    }
+
+    if (wantedNumber != null) {
+        return wantedNumber
+    } else {
+        throw IllegalStateException("Human number to yell was not found")
+    }
 }
