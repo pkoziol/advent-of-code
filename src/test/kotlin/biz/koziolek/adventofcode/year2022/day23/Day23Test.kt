@@ -254,4 +254,20 @@ internal class Day23Test {
         val movedElves = moveElves(elves, rounds = 10)
         assertEquals(3864, countEmptyGround(movedElves))
     }
+
+    @Test
+    fun testMoveElvesUntilNoMovements() {
+        val elves = parseElves(sampleInput2)
+        val (lastRound, _) = moveElvesUntilNoMovements(elves)
+        assertEquals(20, lastRound)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val elves = parseElves(input)
+        val (lastRound, _) = moveElvesUntilNoMovements(elves)
+        assertEquals(946, lastRound)
+    }
 }

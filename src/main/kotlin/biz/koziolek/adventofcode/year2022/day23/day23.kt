@@ -102,25 +102,25 @@ enum class Direction {
 fun moveElves(elves: Set<Coord>, rounds: Int): Set<Coord> =
     directionsToConsider()
         .take(rounds)
-        .fold(elves) { currentElves, directions ->
-            val proposedMoves: Collection<Pair<Coord, Coord?>> = proposeMoves(currentElves, directions)
+        .fold(elves, ::processRound)
 
-            proposedMoves.groupBy { it.second }
-                .entries
-                .flatMap { it ->
-                    if (it.key == null) {
-                        // Doesn't want to move
-                        it.value.map { it.first }
-                    } else if (it.value.size != 1) {
-                        // Conflicting propositions
-                        it.value.map { it.first }
-                    } else {
-                        // Typical move
-                        it.value.map { it.second!! }
-                    }
-                }
-                .toSet()
+fun moveElvesUntilNoMovements(elves: Set<Coord>): Pair<Int, Set<Coord>> {
+    var currentElves = elves
+    var round = 0
+
+    for (directions in directionsToConsider()) {
+        val newElves = processRound(currentElves, directions)
+        round++
+
+        if (newElves == currentElves) {
+            break
         }
+
+        currentElves = newElves
+    }
+
+    return round to currentElves
+}
 
 private fun directionsToConsider(): Sequence<List<Direction>> =
     sequence {
@@ -136,6 +136,26 @@ private fun directionsToConsider(): Sequence<List<Direction>> =
             offset++
         }
     }
+
+private fun processRound(currentElves: Set<Coord>, directions: List<Direction>): Set<Coord> {
+    val proposedMoves: Collection<Pair<Coord, Coord?>> = proposeMoves(currentElves, directions)
+
+    return proposedMoves.groupBy { it.second }
+        .entries
+        .flatMap { it ->
+            if (it.key == null) {
+                // Doesn't want to move
+                it.value.map { it.first }
+            } else if (it.value.size != 1) {
+                // Conflicting propositions
+                it.value.map { it.first }
+            } else {
+                // Typical move
+                it.value.map { it.second!! }
+            }
+        }
+        .toSet()
+}
 
 private fun proposeMoves(elves: Set<Coord>, directions: List<Direction>): Collection<Pair<Coord, Coord?>> =
     elves.map { elf ->
