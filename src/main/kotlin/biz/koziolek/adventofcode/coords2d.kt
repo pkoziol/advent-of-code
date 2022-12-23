@@ -32,7 +32,10 @@ fun <T> Map<Coord, T>.getWidth() = keys.maxOfOrNull { it.x }?.plus(1) ?: 0
 
 fun <T> Map<Coord, T>.getHeight() = keys.maxOfOrNull { it.y }?.plus(1) ?: 0
 
-fun <T> Map<Coord, T>.getAdjacentCoords(coord: Coord, includeDiagonal: Boolean): Set<Coord> {
+fun <T> Map<Coord, T>.getAdjacentCoords(coord: Coord, includeDiagonal: Boolean): Set<Coord> =
+    keys.getAdjacentCoords(coord, includeDiagonal)
+
+fun Iterable<Coord>.getAdjacentCoords(coord: Coord, includeDiagonal: Boolean): Set<Coord> {
     return sequence {
         yield(Coord(-1, 0))
         yield(Coord(0, -1))
@@ -47,7 +50,7 @@ fun <T> Map<Coord, T>.getAdjacentCoords(coord: Coord, includeDiagonal: Boolean):
         }
     }
         .map { coord + it }
-        .filter { containsKey(it) }
+        .filter { contains(it) }
         .toSet()
 }
 
