@@ -7,12 +7,27 @@ fun main() {
     val games = parseGames(inputFile.bufferedReader().readLines())
     val possible = findPossibleGames(games, FULL_SET)
     println("Possible games are: ${possible.map { it.id }} with sum of IDs: ${sumGameIds(possible)}")
+    println("Sum of powers of minimum sets: ${sumPowersOfMinimumSets(games)}")
 }
 
 val FULL_SET = CubeSet(red = 12, green = 13, blue = 14)
 
-data class Game(val id: Int, val sets: List<CubeSet>)
+data class Game(val id: Int, val sets: List<CubeSet>) {
+    val minimumSet: CubeSet
+        get() = CubeSet(
+            red = sets.maxOf { it.red },
+            green = sets.maxOf { it.green },
+            blue = sets.maxOf { it.blue },
+        )
+
+    fun isPossible(fullSet: CubeSet) =
+        sets.all { set -> set.isSubSetOf(fullSet) }
+}
+
 data class CubeSet(val red: Int = 0, val green: Int = 0, val blue: Int = 0) {
+    val power: Int
+        get() = red * green * blue
+
     fun add(count: Int, color: String): CubeSet {
         val (newRed, newGreen, newBlue) = when (color) {
             "red" -> Triple(count, 0, 0)
@@ -47,6 +62,9 @@ fun parseGames(lines: Iterable<String>): List<Game> =
     }
 
 fun findPossibleGames(games: List<Game>, fullSet: CubeSet): List<Game> =
-    games.filter { game -> game.sets.all { set -> set.isSubSetOf(fullSet) } }
+    games.filter { it.isPossible(fullSet) }
 
 fun sumGameIds(games: List<Game>) = games.sumOf { it.id }
+
+fun sumPowersOfMinimumSets(games: List<Game>): Int =
+    games.sumOf { it.minimumSet.power }

@@ -66,4 +66,44 @@ internal class Day2Test {
         val possible = findPossibleGames(games, FULL_SET)
         assertEquals(2076, sumGameIds(possible))
     }
+
+    @Test
+    fun testFindMinimSet() {
+        val games = parseGames(sampleInput)
+        assertEquals(CubeSet(red = 4, green = 2, blue = 6), games[0].minimumSet)
+        assertEquals(CubeSet(red = 1, green = 3, blue = 4), games[1].minimumSet)
+        assertEquals(CubeSet(red = 20, green = 13, blue = 6), games[2].minimumSet)
+        assertEquals(CubeSet(red = 14, green = 3, blue = 15), games[3].minimumSet)
+        assertEquals(CubeSet(red = 6, green = 3, blue = 2), games[4].minimumSet)
+
+        assertTrue(games[0].isPossible(games[0].minimumSet))
+        assertTrue(games[1].isPossible(games[1].minimumSet))
+        assertTrue(games[2].isPossible(games[2].minimumSet))
+        assertTrue(games[3].isPossible(games[3].minimumSet))
+        assertTrue(games[4].isPossible(games[4].minimumSet))
+    }
+
+    @Test
+    fun testCubeSetPower() {
+        val games = parseGames(sampleInput)
+        assertEquals(48, games[0].minimumSet.power)
+        assertEquals(12, games[1].minimumSet.power)
+        assertEquals(1560, games[2].minimumSet.power)
+        assertEquals(630, games[3].minimumSet.power)
+        assertEquals(36, games[4].minimumSet.power)
+    }
+
+    @Test
+    fun testSumPowersOfMinimumSets() {
+        val games = parseGames(sampleInput)
+        assertEquals(2286, sumPowersOfMinimumSets(games))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val games = parseGames(input)
+        assertEquals(70950, sumPowersOfMinimumSets(games))
+    }
 }
