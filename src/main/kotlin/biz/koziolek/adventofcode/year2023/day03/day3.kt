@@ -47,7 +47,7 @@ fun parseEngineSchematic(lines: Iterable<String>): EngineSchematic {
     val width = map.getWidth()
     val height = map.getHeight()
 
-    val numbers = buildList<EngineNumber> {
+    val numbers = buildList {
         var y = 0
         while (y < height) {
             var x = 0
@@ -63,18 +63,15 @@ fun parseEngineSchematic(lines: Iterable<String>): EngineSchematic {
                 }
 
                 if (number > 0) {
-                    val numDigits: Int = log10(number.toDouble()).toInt() + 1
+                    val numDigits = log10(number.toDouble()).toInt() + 1
                     val symbols = (startCoord.x until (startCoord.x + numDigits))
                         .flatMap { xx -> map.getAdjacentCoords(Coord(x = xx, y = startCoord.y), includeDiagonal = true) }
                         .toSet()
-                        .map { adjCoord ->
+                        .mapNotNull { adjCoord ->
                             map[adjCoord]
                                 ?.takeIf { it.isSymbol() }
-                                ?.let { symbol ->
-                                    EngineSymbol(symbol, adjCoord)
-                                }
+                                ?.let { symbol -> EngineSymbol(symbol, adjCoord) }
                         }
-                        .filterNotNull()
 
                     add(EngineNumber(number, startCoord, symbols))
                     x += numDigits
