@@ -7,16 +7,35 @@ fun main() {
     val inputFile = findInput(object {})
     val engineSchematic = parseEngineSchematic(inputFile.bufferedReader().readLines())
     println("Sum of numbers adjacent to a symbol: ${engineSchematic.numbersAdjacentToSymbol.sumOf { it.number }}")
+    println("Sum of all of the gear ratios: ${engineSchematic.gears.sumOf { it.ratio }}")
 }
 
 data class EngineSchematic(val numbers: List<EngineNumber>) {
     val numbersAdjacentToSymbol: List<EngineNumber>
         get() = numbers.filter { it.symbols.isNotEmpty() }
+
+    val gears: List<EngineGear>
+        get() = numbers
+            .flatMap { number ->
+                number.symbols
+                    .filter { it.symbol.isGear() }
+                    .map { it to number }
+            }
+            .groupBy(
+                keySelector = { it.first },
+                valueTransform = { it.second }
+            )
+            .filter { it.value.size == 2 }
+            .map { EngineGear(it.key.coord, it.value[0], it.value[1]) }
 }
 
 data class EngineNumber(val number: Int, val coord: Coord, val symbols: List<EngineSymbol>)
 
 data class EngineSymbol(val symbol: Char, val coord: Coord)
+
+data class EngineGear(val coord: Coord, val num1: EngineNumber, val num2: EngineNumber) {
+    val ratio = num1.number * num2.number
+}
 
 fun parseEngineSchematic(lines: Iterable<String>): EngineSchematic {
     val map = lines.flatMapIndexed { y, line ->
@@ -50,7 +69,7 @@ fun parseEngineSchematic(lines: Iterable<String>): EngineSchematic {
                         .toSet()
                         .map { adjCoord ->
                             map[adjCoord]
-                                ?.takeIf { !it.isDigit() && it != '.' }
+                                ?.takeIf { it.isSymbol() }
                                 ?.let { symbol ->
                                     EngineSymbol(symbol, adjCoord)
                                 }
@@ -70,3 +89,8 @@ fun parseEngineSchematic(lines: Iterable<String>): EngineSchematic {
 
     return EngineSchematic(numbers)
 }
+
+private const val EMPTY = '.'
+private const val GEAR = '*'
+private fun Char.isSymbol() = !this.isDigit() && this != EMPTY // What about letters?
+private fun Char.isGear() = this == GEAR

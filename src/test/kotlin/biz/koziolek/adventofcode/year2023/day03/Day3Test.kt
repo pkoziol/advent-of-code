@@ -73,4 +73,18 @@ internal class Day3Test {
         val engineSchematic = parseEngineSchematic(input)
         assertEquals(551094, engineSchematic.numbersAdjacentToSymbol.sumOf { it.number })
     }
+
+    @Test
+    fun testSampleAnswer2() {
+        val engineSchematic = parseEngineSchematic(sampleInput)
+        assertEquals(467835, engineSchematic.gears.sumOf { it.ratio })
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val engineSchematic = parseEngineSchematic(input)
+        assertEquals(80179647, engineSchematic.gears.sumOf { it.ratio })
+    }
 }
