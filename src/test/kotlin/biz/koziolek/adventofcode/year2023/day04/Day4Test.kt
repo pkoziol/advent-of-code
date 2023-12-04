@@ -57,4 +57,26 @@ internal class Day4Test {
         val scratchCards = parseScratchCards(input)
         assertEquals(33950, scratchCards.sumOf { it.points })
     }
+
+    @Test
+    fun testSampleAnswer2() {
+        val scratchCards = parseScratchCards(sampleInput)
+        val finalScratchCards = winMoreScratchCards(scratchCards)
+        assertEquals(1, finalScratchCards.find { it.id == 1 }?.count)
+        assertEquals(2, finalScratchCards.find { it.id == 2 }?.count)
+        assertEquals(4, finalScratchCards.find { it.id == 3 }?.count)
+        assertEquals(8, finalScratchCards.find { it.id == 4 }?.count)
+        assertEquals(14, finalScratchCards.find { it.id == 5 }?.count)
+        assertEquals(1, finalScratchCards.find { it.id == 6 }?.count)
+        assertEquals(30, finalScratchCards.sumOf { it.count })
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val scratchCards = parseScratchCards(input)
+        val finalScratchCards = winMoreScratchCards(scratchCards)
+        assertEquals(14814534, finalScratchCards.sumOf { it.count })
+    }
 }
