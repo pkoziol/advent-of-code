@@ -2,6 +2,7 @@ package biz.koziolek.adventofcode.year2023.day05
 
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
@@ -46,8 +47,8 @@ internal class Day5Test {
 
     @Test
     fun testParseAlmanac() {
-        val almanac = parseAlmanac(sampleInput)
-        assertEquals(listOf(79L, 14L, 55L, 13L), almanac.seeds)
+        val almanac = parseAlmanacV1(sampleInput)
+        assertEquals(listOf(79L, 14L, 55L, 13L), almanac.seeds.toList())
         assertEquals(7, almanac.maps.size)
 
         assertEquals(
@@ -137,10 +138,10 @@ internal class Day5Test {
 
     @Test
     fun testSampleAnswer1() {
-        val almanac = parseAlmanac(sampleInput)
+        val almanac = parseAlmanacV1(sampleInput)
         assertEquals(
             listOf(82L, 43L, 86L, 35L),
-            almanac.mapAll(from = "seed", to = "location", items = almanac.seeds)
+            almanac.mapAll(from = "seed", to = "location", items = almanac.seeds).toList()
         )
         assertEquals(35, almanac.mapAll(from = "seed", to = "location", items = almanac.seeds).min())
     }
@@ -149,7 +150,28 @@ internal class Day5Test {
     @Tag("answer")
     fun testAnswer1() {
         val input = findInput(object {}).bufferedReader().readLines()
-        val almanac = parseAlmanac(input)
+        val almanac = parseAlmanacV1(input)
         assertEquals(331445006, almanac.mapAll(from = "seed", to = "location", items = almanac.seeds).min())
+    }
+
+    @Test
+    fun testParseAlmanacV2() {
+        val almanac = parseAlmanacV2(sampleInput)
+        assertEquals(27, almanac.seeds.toList().size)
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val almanac = parseAlmanacV2(sampleInput)
+        assertEquals(46, almanac.mapAll(from = "seed", to = "location", items = almanac.seeds).min())
+    }
+
+    @Test
+    @Tag("answer")
+    @Disabled("Too slow for big numbers")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val almanac = parseAlmanacV2(input)
+        assertEquals(6472060, almanac.mapAll(from = "seed", to = "location", items = almanac.seeds).min())
     }
 }
