@@ -8,24 +8,36 @@ import kotlin.math.sqrt
 
 fun main() {
     val inputFile = findInput(object {})
-    val races = parseBoatRaces(inputFile.bufferedReader().readLines())
+    val lines = inputFile.bufferedReader().readLines()
+
+    val races = parseBoatRaces(lines)
+    println("Margin of error for ${races.size} races is: ${findMarginOfError(races)}")
+
+    val theRace = parseTheBoatRace(lines)
+    println("Ways to win the race is: ${findWaysToWinRace(theRace).count()}")
 }
 
-data class BoatRace(val time: Int, val distance: Int)
+data class BoatRace(val time: Long, val distance: Long)
 
 fun parseBoatRaces(lines: Iterable<String>): List<BoatRace> {
     val (firstLine, secondLine) = lines.toList()
-    val times = readInts(firstLine)
-    val distances = readInts(secondLine)
+    val times = readNumbers(firstLine)
+    val distances = readNumbers(secondLine)
     return times.zip(distances).map { BoatRace(it.first, it.second) }
 }
 
-private fun readInts(line: String) =
+fun parseTheBoatRace(lines: Iterable<String>): BoatRace =
+    lines
+        .map { it.replace(Regex(" +"), "").replace(":", ": ") }
+        .let { parseBoatRaces(it) }
+        .single()
+
+private fun readNumbers(line: String) =
     line
         .replace(Regex(" +"), " ")
         .split(" ")
         .drop(1)
-        .map { it.toInt() }
+        .map { it.toLong() }
 
 fun findWaysToWinRace(race: BoatRace): IntRange {
     val delta = race.time.toDouble().pow(2) - 4 * (race.distance + 0.00000001)
