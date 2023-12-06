@@ -47,4 +47,26 @@ internal class Day6Test {
         val races = parseBoatRaces(input)
         assertEquals(227850, findMarginOfError(races))
     }
+    @Test
+    fun testParseTheBoat() {
+        val race = parseTheBoatRace(sampleInput)
+        assertEquals(
+            BoatRace(time = 71530, distance = 940200),
+            race
+        )
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val race = parseTheBoatRace(sampleInput)
+        assertEquals(71503, findWaysToWinRace(race).count())
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val race = parseTheBoatRace(input)
+        assertEquals(42948149, findWaysToWinRace(race).count())
+    }
 }
