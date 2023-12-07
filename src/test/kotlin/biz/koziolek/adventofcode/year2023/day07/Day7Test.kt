@@ -2,6 +2,7 @@ package biz.koziolek.adventofcode.year2023.day07
 
 import biz.koziolek.adventofcode.findInput
 import biz.koziolek.adventofcode.year2023.day07.CamelCard.*
+import biz.koziolek.adventofcode.year2023.day07.CamelHandType.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -49,13 +50,13 @@ internal class Day7Test {
 
     @Test
     fun testType() {
-        assertEquals(CamelHandType.FIVE_OF_A_KIND, CamelHand.fromString("AAAAA").type)
-        assertEquals(CamelHandType.FOUR_OF_A_KIND, CamelHand.fromString("AA8AA").type)
-        assertEquals(CamelHandType.FULL_HOUSE, CamelHand.fromString("23332").type)
-        assertEquals(CamelHandType.THREE_OF_A_KIND, CamelHand.fromString("TTT98").type)
-        assertEquals(CamelHandType.TWO_PAIR, CamelHand.fromString("23432").type)
-        assertEquals(CamelHandType.ONE_PAIR, CamelHand.fromString("A23A4").type)
-        assertEquals(CamelHandType.HIGH_CARD, CamelHand.fromString("23456").type)
+        assertEquals(FIVE_OF_A_KIND, CamelHand.fromString("AAAAA").type)
+        assertEquals(FOUR_OF_A_KIND, CamelHand.fromString("AA8AA").type)
+        assertEquals(FULL_HOUSE, CamelHand.fromString("23332").type)
+        assertEquals(THREE_OF_A_KIND, CamelHand.fromString("TTT98").type)
+        assertEquals(TWO_PAIR, CamelHand.fromString("23432").type)
+        assertEquals(ONE_PAIR, CamelHand.fromString("A23A4").type)
+        assertEquals(HIGH_CARD, CamelHand.fromString("23456").type)
     }
 
     @Test
@@ -78,7 +79,6 @@ internal class Day7Test {
     @Test
     fun testSampleAnswer1() {
         val bids = parseCamelBids(sampleInput)
-        println(bids.sortedBy { it.hand })
         assertEquals(6440, getTotalWinnings(bids))
     }
 
@@ -88,5 +88,69 @@ internal class Day7Test {
         val input = findInput(object {}).bufferedReader().readLines()
         val bids = parseCamelBids(input)
         assertEquals(251058093, getTotalWinnings(bids))
+    }
+
+    @Test
+    fun testParseCamelBidsWithJokers() {
+        val bids = parseCamelBids(sampleInput, jacksAreJokers = true)
+        assertEquals(
+            listOf(
+                CamelBid(
+                    hand = CamelHand(cards = listOf(THREE, TWO, TEN, THREE, KING)),
+                    bid = 765,
+                ),
+                CamelBid(
+                    hand = CamelHand(cards = listOf(TEN, FIVE, FIVE, JOKER, FIVE)),
+                    bid = 684,
+                ),
+                CamelBid(
+                    hand = CamelHand(cards = listOf(KING, KING, SIX, SEVEN, SEVEN)),
+                    bid = 28,
+                ),
+                CamelBid(
+                    hand = CamelHand(cards = listOf(KING, TEN, JOKER, JOKER, TEN)),
+                    bid = 220,
+                ),
+                CamelBid(
+                    hand = CamelHand(cards = listOf(QUEEN, QUEEN, QUEEN, JOKER, ACE)),
+                    bid = 483,
+                ),
+            ),
+            bids
+        )
+    }
+
+    @Test
+    fun testTypeAndOrderingWithJokers() {
+        assertEquals(ONE_PAIR, CamelHand.fromString("32T3K", jacksAreJokers = true).type)
+        assertEquals(TWO_PAIR, CamelHand.fromString("KK677", jacksAreJokers = true).type)
+        assertEquals(FOUR_OF_A_KIND, CamelHand.fromString("T55J5", jacksAreJokers = true).type)
+        assertEquals(FOUR_OF_A_KIND, CamelHand.fromString("KTJJT", jacksAreJokers = true).type)
+        assertEquals(FOUR_OF_A_KIND, CamelHand.fromString("QQQJA", jacksAreJokers = true).type)
+        assertEquals(FIVE_OF_A_KIND, CamelHand.fromString("2JJJJ", jacksAreJokers = true).type)
+        assertEquals(FIVE_OF_A_KIND, CamelHand.fromString("JJJJJ", jacksAreJokers = true).type)
+
+        val card1 = CamelHand.fromString("QQQQ2", jacksAreJokers = true)
+        val card2 = CamelHand.fromString("JKKK2", jacksAreJokers = true)
+        val card3 = CamelHand.fromString("66662", jacksAreJokers = true)
+        assertEquals(FOUR_OF_A_KIND, card1.type)
+        assertEquals(FOUR_OF_A_KIND, card2.type)
+        assertEquals(FOUR_OF_A_KIND, card3.type)
+        assertTrue(card1 > card2)
+        assertTrue(card3 > card2)
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val bids = parseCamelBids(sampleInput, jacksAreJokers = true)
+        assertEquals(5905, getTotalWinnings(bids))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val bids = parseCamelBids(input, jacksAreJokers = true)
+        assertEquals(249781879, getTotalWinnings(bids))
     }
 }
