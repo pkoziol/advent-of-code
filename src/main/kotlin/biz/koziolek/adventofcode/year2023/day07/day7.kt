@@ -27,7 +27,7 @@ data class CamelHand(var cards: List<CamelCard>) : Comparable<CamelHand> {
         for ((thisCard, otherCard) in cards.zip(other.cards)) {
             val cardComparison = thisCard.compareTo(otherCard)
             if (cardComparison != 0) {
-                return cardComparison
+                return -cardComparison
             }
         }
 
@@ -36,19 +36,19 @@ data class CamelHand(var cards: List<CamelCard>) : Comparable<CamelHand> {
 }
 
 enum class CamelCard(val symbol: Char) {
-    TWO('2'),
-    THREE('3'),
-    FOUR('4'),
-    FIVE('5'),
-    SIX('6'),
-    SEVEN('7'),
-    EIGHT('8'),
-    NINE('9'),
-    TEN('T'),
-    JACK('J'),
-    QUEEN('Q'),
+    ACE('A'),
     KING('K'),
-    ACE('A');
+    QUEEN('Q'),
+    JACK('J'),
+    TEN('T'),
+    NINE('9'),
+    EIGHT('8'),
+    SEVEN('7'),
+    SIX('6'),
+    FIVE('5'),
+    FOUR('4'),
+    THREE('3'),
+    TWO('2');
 
     companion object {
         fun fromChar(symbol: Char): CamelCard =
