@@ -11,11 +11,18 @@ fun main() {
 data class CamelBid(val hand: CamelHand, val bid: Int)
 
 data class CamelHand(var cards: List<CamelCard>) : Comparable<CamelHand> {
-    val type = CamelHandType.fromCards(cards)
+    val type: CamelHandType
+        get() {
+            return if (cards.contains(CamelCard.JOKER)) {
+                findBestHand(cards).type
+            } else {
+                CamelHandType.fromCards(cards)
+            }
+        }
 
     companion object {
-        fun fromString(str: String): CamelHand =
-            CamelHand(cards = str.map { CamelCard.fromChar(it) })
+        fun fromString(str: String, jacksAreJokers: Boolean = false): CamelHand =
+            CamelHand(cards = str.map { CamelCard.fromChar(it, jacksAreJokers) })
     }
 
     override fun compareTo(other: CamelHand): Int {
@@ -48,11 +55,19 @@ enum class CamelCard(val symbol: Char) {
     FIVE('5'),
     FOUR('4'),
     THREE('3'),
-    TWO('2');
+    TWO('2'),
+    JOKER('*');
 
     companion object {
-        fun fromChar(symbol: Char): CamelCard =
+        fun fromChar(symbol: Char, jacksAreJokers: Boolean = false): CamelCard =
             entries.single { it.symbol == symbol }
+                .let { card ->
+                    if (jacksAreJokers && card == JACK) {
+                        JOKER
+                    } else {
+                        card
+                    }
+                }
     }
 }
 
@@ -90,12 +105,26 @@ enum class CamelHandType(private val expectedCounts: List<Int>) {
     }
 }
 
-fun parseCamelBids(lines: Iterable<String>): List<CamelBid> =
+private fun findBestHand(cards: List<CamelCard>): CamelHand {
+    val jokerCount = cards.count { it == CamelCard.JOKER }
+    val nonJokerCards = cards.filter { it != CamelCard.JOKER }
+    val nonJokerCounts = nonJokerCards
+        .groupingBy { it }
+        .eachCount()
+
+    val mostCommonCard = nonJokerCounts.entries.maxByOrNull { it.value }
+
+    return CamelHand(
+        cards = nonJokerCards + List(jokerCount) { _ -> mostCommonCard?.key ?: CamelCard.ACE }
+    )
+}
+
+fun parseCamelBids(lines: Iterable<String>, jacksAreJokers: Boolean = false): List<CamelBid> =
     lines.map { line ->
         val (cardsStr, bidValue) = line.split(" ")
         CamelBid(
             hand = CamelHand(
-                cards = cardsStr.map { CamelCard.fromChar(it) },
+                cards = cardsStr.map { CamelCard.fromChar(it, jacksAreJokers) },
             ),
             bid = bidValue.toInt(),
         )
