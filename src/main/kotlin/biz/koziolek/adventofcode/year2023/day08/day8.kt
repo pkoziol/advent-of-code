@@ -57,8 +57,6 @@ data class WastelandMap(
         var currentNodes = ghostStartNodes
         val found = mutableSetOf<Int>()
 
-        println("Instructions len: ${instructions.length}")
-
         while (!currentNodes.all { it.isGhostEnd }) {
             val move = instructions[(movesCount % instructions.length).toInt()]
             currentNodes = currentNodes.map { findNext(it, move) }
@@ -67,21 +65,8 @@ data class WastelandMap(
 
             currentNodes.forEachIndexed { index, node ->
                 if (node.isGhostEnd) {
-                    println("$index found ${node.id} in $movesCount % ${instructions.length} = ${movesCount % instructions.length}")
                     found.add(index)
                 }
-            }
-
-            if (found.size == 6) {
-                println("Found all!")
-                found.add(11111)
-            }
-
-            if (movesCount % 10000000 == 0L) {
-                println(movesCount)
-            }
-            if (movesCount > 100000) {
-                break
             }
         }
 
