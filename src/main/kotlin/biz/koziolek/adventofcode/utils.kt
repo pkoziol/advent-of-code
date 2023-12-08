@@ -78,3 +78,32 @@ fun BitSet.toLong(n: Int = length()): Long = toLong(0, n)
 
 fun BitSet.toLong(fromIndex: Int, toIndex: Int): Long =
     (fromIndex until toIndex).fold(0L) { long, index -> long * 2 + if (this[index]) 1 else 0 }
+
+fun gcd(a: Long, b: Long): Long {
+    var aa = a
+    var bb = b
+    while (bb > 0) {
+        val temp = bb
+        bb = aa % bb
+        aa = temp
+    }
+    return aa
+}
+
+/**
+ * Greatest common divisor
+ */
+fun gcd(numbers: Iterable<Long>): Long =
+    numbers.reduce { acc, l -> gcd(acc, l) }
+
+/**
+ * Least common multiple
+ */
+fun lcm(a: Long, b: Long): Long =
+    a * (b / gcd(a, b))
+
+/**
+ * Least common multiple
+ */
+fun lcm(numbers: Iterable<Long>): Long =
+    numbers.reduce { acc, l -> lcm(acc, l) }
