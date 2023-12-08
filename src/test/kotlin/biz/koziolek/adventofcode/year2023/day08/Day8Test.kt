@@ -110,7 +110,6 @@ internal class Day8Test {
 
     @Test
     @Tag("answer")
-//    @Disabled
     fun testAnswer2() {
         val input = findInput(object {}).bufferedReader().readLines()
         val map = parseWastelandMap(input)
