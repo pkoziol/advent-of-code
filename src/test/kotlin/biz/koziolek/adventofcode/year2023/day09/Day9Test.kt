@@ -116,4 +116,26 @@ internal class Day9Test {
         val report = parseOasisReport(input)
         assertEquals(1479011877, report.readings.sumOf { predictNextValue(it) })
     }
+
+    @Test
+    fun testPredictPreviousValue() {
+        val report = parseOasisReport(sampleInput)
+        assertEquals(-3, predictPreviousValue(report.readings[0]))
+        assertEquals(0, predictPreviousValue(report.readings[1]))
+        assertEquals(5, predictPreviousValue(report.readings[2]))
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val report = parseOasisReport(sampleInput)
+        assertEquals(2, report.readings.sumOf { predictPreviousValue(it) })
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val report = parseOasisReport(input)
+        assertEquals(973, report.readings.sumOf { predictPreviousValue(it) })
+    }
 }

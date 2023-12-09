@@ -6,6 +6,7 @@ fun main() {
     val inputFile = findInput(object {})
     val report = parseOasisReport(inputFile.bufferedReader().readLines())
     println("Sum of extrapolated values: ${report.readings.sumOf { predictNextValue(it) }}")
+    println("Sum of extrapolated values backwards: ${report.readings.sumOf { predictPreviousValue(it) }}")
 }
 
 data class OasisReport(val readings: List<List<Int>>)
@@ -20,7 +21,10 @@ fun parseOasisReport(lines: Iterable<String>): OasisReport =
 fun predictNextValue(history: List<Int>): Int =
     extrapolateHistory(history).first.last
 
-fun extrapolateHistory(history: List<Int>): List<List<Int>> {
+fun predictPreviousValue(history: List<Int>): Int =
+    extrapolateHistoryBackwards(history).first.first
+
+internal fun extrapolateHistory(history: List<Int>): List<List<Int>> {
     val reduced = reduceHistory(history)
     val lastRowExtended = reduced.last + 0
     return reduced
@@ -30,8 +34,18 @@ fun extrapolateHistory(history: List<Int>): List<List<Int>> {
             listOf(newRow) + acc
         }
 }
+internal fun extrapolateHistoryBackwards(history: List<Int>): List<List<Int>> {
+    val reduced = reduceHistory(history)
+    val lastRowExtended = listOf(0) + reduced.last
+    return reduced
+        .dropLast(1)
+        .foldRight(listOf(lastRowExtended)) { ints, acc ->
+            val newRow = listOf(ints.first - acc.first.first) + ints
+            listOf(newRow) + acc
+        }
+}
 
-fun reduceHistory(history: List<Int>): List<List<Int>> =
+internal fun reduceHistory(history: List<Int>): List<List<Int>> =
     buildList {
         var current = history
         add(current)
