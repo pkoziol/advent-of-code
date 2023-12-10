@@ -145,8 +145,7 @@ internal class Day10Test {
 
     private fun debugPrintMaze(maze: PipeMaze) {
         println("Maze with loop:\n${mazeToString(maze, loopColor = WHITE)}")
-        println("Maze with replaced start:\n${mazeToString(maze, loopColor = WHITE, replaceStart = true)}")
-        println("Maze with marked inside:\n${mazeToString(maze, loopColor = WHITE, replaceStart = true, insideColor = BRIGHT_WHITE)}")
+        println("Maze with marked inside:\n${mazeToString(maze, loopColor = WHITE, insideColor = BRIGHT_WHITE)}")
     }
 
     @Test

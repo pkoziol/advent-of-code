@@ -18,9 +18,7 @@ const val SOUTH_EAST = 'F' // is a 90-degree bend connecting south and east.
 const val GROUND = '.' // is ground; there is no pipe in this tile.
 const val START = 'S'
 
-data class PipeMaze(val contents: Map<Coord, Char>) {
-    val startPos = contents.entries.single { it.value == START }.key
-
+data class PipeMaze(val contents: Map<Coord, Char>, val startPos: Coord) {
     val theLoop by lazy {
         buildMap<Coord, Char> {
             val coordsToCheck = mutableListOf(startPos)
@@ -30,7 +28,7 @@ data class PipeMaze(val contents: Map<Coord, Char>) {
                 val pipe = contents[coord]
                 if (pipe != null) {
                     put(coord, pipe)
-                    findConnectedTo(coord)
+                    findConnectedTo(contents, coord)
                         .filter { !contains(it) }
                         .forEach { coordsToCheck.add(it) }
                 }
@@ -49,27 +47,11 @@ data class PipeMaze(val contents: Map<Coord, Char>) {
             .toSet()
     }
 
-    fun findConnectedTo(coord: Coord): Set<Coord> =
-        when (contents[coord]) {
-            NORTH_SOUTH -> setOf(coord + Coord(0, -1), coord + Coord(0, 1))
-            EAST_WEST -> setOf(coord + Coord(-1, 0), coord + Coord(1, 0))
-            NORTH_EAST -> setOf(coord + Coord(0, -1), coord + Coord(1, 0))
-            NORTH_WEST -> setOf(coord + Coord(0, -1), coord + Coord(-1, 0))
-            SOUTH_WEST -> setOf(coord + Coord(0, 1), coord + Coord(-1, 0))
-            SOUTH_EAST -> setOf(coord + Coord(0, 1), coord + Coord(1, 0))
-            START -> contents
-                .getAdjacentCoords(coord, includeDiagonal = false)
-                .filter { findConnectedTo(it).contains(coord) }
-                .toSet()
-            else -> emptySet()
-        }
-
     fun findEdgeIntersections(coord: Coord): Int {
         val map = (0 until coord.y)
             .map { y -> Coord(coord.x, y) }
-        val loopWithoutStart = replaceStart(theLoop)
         val ray = map
-            .mapNotNull { loopWithoutStart[it] }
+            .mapNotNull { theLoop[it] }
         val rayStr = ray.joinToString("")
 
 //        val countEW = ray.count { it == EAST_WEST }
@@ -95,63 +77,83 @@ data class PipeMaze(val contents: Map<Coord, Char>) {
 
         return intersections
     }
+}
 
-    fun replaceStart(pipes: Map<Coord, Char>): Map<Coord, Char> {
-        val start = pipes.entries.singleOrNull { it.value == START }
-        return if (start != null) {
-            val startCoord = start.key
-            val connectedTo = findConnectedTo(startCoord)
-            if (connectedTo.size != 2) {
-                throw IllegalArgumentException("Not 2?!")
-            }
+fun findConnectedTo(pipes: Map<Coord, Char>, coord: Coord): Set<Coord> =
+    when (pipes[coord]) {
+        NORTH_SOUTH -> setOf(coord + Coord(0, -1), coord + Coord(0, 1))
+        EAST_WEST -> setOf(coord + Coord(-1, 0), coord + Coord(1, 0))
+        NORTH_EAST -> setOf(coord + Coord(0, -1), coord + Coord(1, 0))
+        NORTH_WEST -> setOf(coord + Coord(0, -1), coord + Coord(-1, 0))
+        SOUTH_WEST -> setOf(coord + Coord(0, 1), coord + Coord(-1, 0))
+        SOUTH_EAST -> setOf(coord + Coord(0, 1), coord + Coord(1, 0))
+        START -> pipes
+            .getAdjacentCoords(coord, includeDiagonal = false)
+            .filter { findConnectedTo(pipes, it).contains(coord) }
+            .toSet()
 
-            val leftOrRight = connectedTo.filter { it.y == startCoord.y }
-            val upOrDown = connectedTo.filter { it.x == startCoord.x }
-            val replacement = if (upOrDown.size == 2) {
-                NORTH_SOUTH
-            } else if (leftOrRight.size == 2) {
-                EAST_WEST
-            } else {
-                val diff = Coord(
-                    x = leftOrRight.single().x - startCoord.x,
-                    y = upOrDown.single().y - startCoord.y,
-                )
+        else -> emptySet()
+    }
 
-                when (diff) {
-                    Coord(1, -1) -> NORTH_EAST
-                    Coord(-1, -1) -> NORTH_WEST
-                    Coord(-1, 1) -> SOUTH_WEST
-                    Coord(1, 1) -> SOUTH_EAST
-                    else -> throw IllegalArgumentException("Unexpected diff: $diff")
-                }
-            }
+fun findStartReplacement(pipes: Map<Coord, Char>, startCoord: Coord): Char {
+    val connectedTo = findConnectedTo(pipes, startCoord)
+    if (connectedTo.size != 2) {
+        throw IllegalArgumentException("Not 2?!")
+    }
 
-            pipes + (startCoord to replacement)
-        } else {
-            pipes
+    val leftOrRight = connectedTo.filter { it.y == startCoord.y }
+    val upOrDown = connectedTo.filter { it.x == startCoord.x }
+    val replacement = if (upOrDown.size == 2) {
+        NORTH_SOUTH
+    } else if (leftOrRight.size == 2) {
+        EAST_WEST
+    } else {
+        val diff = Coord(
+            x = leftOrRight.single().x - startCoord.x,
+            y = upOrDown.single().y - startCoord.y,
+        )
+
+        when (diff) {
+            Coord(1, -1) -> NORTH_EAST
+            Coord(-1, -1) -> NORTH_WEST
+            Coord(-1, 1) -> SOUTH_WEST
+            Coord(1, 1) -> SOUTH_EAST
+            else -> throw IllegalArgumentException("Unexpected diff: $diff")
         }
     }
 
+    return replacement
 }
 
-fun parsePipeMaze(lines: Iterable<String>): PipeMaze =
-    lines
-        .flatMapIndexed { y, line ->
-            line.mapIndexed { x, char ->
-                Coord(x, y) to char
+fun parsePipeMaze(lines: Iterable<String>): PipeMaze {
+    var startPos: Coord? = null
+    val pipes = buildMap {
+        lines
+            .flatMapIndexed { y, line ->
+                line.mapIndexed { x, char ->
+                    val coord = Coord(x, y)
+                    put(coord, char)
+
+                    if (char == START) {
+                        startPos = coord
+                    }
+                }
             }
-        }
-        .toMap()
-        .let { PipeMaze(it) }
+
+        val startReplacement = findStartReplacement(this, startPos!!)
+        put(startPos!!, startReplacement)
+    }
+
+    return PipeMaze(pipes, startPos!!)
+}
 
 fun mazeToString(maze: PipeMaze,
-                 replaceStart: Boolean = false,
                  defaultColor: AsciiColor = AsciiColor.BLACK,
                  startColor: AsciiColor = AsciiColor.BRIGHT_YELLOW,
                  loopColor: AsciiColor? = null,
                  insideColor: AsciiColor? = null) =
     pipesToString(
-        if (replaceStart) maze.replaceStart(maze.contents) else maze.contents,
+        maze.contents,
         highlights = maze.contents.keys.associateWith { defaultColor }
                 + (if (loopColor != null ) maze.theLoop.keys.associateWith { loopColor } else emptyMap())
                 + mapOf(maze.startPos to startColor)
