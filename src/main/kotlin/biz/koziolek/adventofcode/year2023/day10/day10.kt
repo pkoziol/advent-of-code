@@ -10,17 +10,18 @@ fun main() {
 }
 
 const val NORTH_SOUTH = '|'
-const val EAST_WEST = '-' // is a horizontal pipe connecting east and west.
-const val NORTH_EAST = 'L' // is a 90-degree bend connecting north and east.
-const val NORTH_WEST = 'J' // is a 90-degree bend connecting north and west.
-const val SOUTH_WEST = '7' // is a 90-degree bend connecting south and west.
-const val SOUTH_EAST = 'F' // is a 90-degree bend connecting south and east.
-const val GROUND = '.' // is ground; there is no pipe in this tile.
+const val EAST_WEST = '-'
+const val NORTH_EAST = 'L'
+const val NORTH_WEST = 'J'
+const val SOUTH_WEST = '7'
+const val SOUTH_EAST = 'F'
+@Suppress("unused")
+const val GROUND = '.'
 const val START = 'S'
 
 data class PipeMaze(val contents: Map<Coord, Char>, val startPos: Coord) {
     val theLoop by lazy {
-        buildMap<Coord, Char> {
+        buildMap {
             val coordsToCheck = mutableListOf(startPos)
 
             while (coordsToCheck.isNotEmpty()) {
@@ -39,43 +40,46 @@ data class PipeMaze(val contents: Map<Coord, Char>, val startPos: Coord) {
     val theLoopFarthestDistanceFromStart: Int by lazy { theLoop.size / 2 }
 
     val insideTheLoop: Set<Coord> by lazy {
-        val filter = contents.keys
+        contents.keys
             .filter { !theLoop.keys.contains(it) }
-        filter
             .filter { findEdgeIntersections(it) % 2 == 1 }
             .map { it }
             .toSet()
     }
 
+    private val singleCrossingRegex: Regex =
+        listOf(
+            Regex.escape(EAST_WEST.toString()),
+            buildVerticalLineRegex(SOUTH_EAST, NORTH_WEST),
+            buildVerticalLineRegex(SOUTH_WEST, NORTH_EAST),
+        )
+            .joinToString("|")
+            .let { Regex(it) }
+
+    private val doubleCrossingRegex: Regex =
+        listOf(
+            buildVerticalLineRegex(SOUTH_EAST, NORTH_EAST),
+            buildVerticalLineRegex(SOUTH_WEST, NORTH_WEST),
+        )
+            .joinToString("|")
+            .let { Regex(it) }
+
+    private fun buildVerticalLineRegex(corner1: Char, corner2: Char) =
+        Regex.escape(corner1.toString()) + Regex.escape(NORTH_SOUTH.toString()) + "*" + Regex.escape(corner2.toString())
+
+    @Suppress("MemberVisibilityCanBePrivate")
     fun findEdgeIntersections(coord: Coord): Int {
-        val map = (0 until coord.y)
+        val rayStr = (0 until coord.y)
             .map { y -> Coord(coord.x, y) }
-        val ray = map
-            .mapNotNull { theLoop[it] }
-        val rayStr = ray.joinToString("")
-
-//        val countEW = ray.count { it == EAST_WEST }
-//        val countNE = ray.count { it == NORTH_EAST }
-//        val countNW = ray.count { it == NORTH_WEST }
-//        val countSW = ray.count { it == SOUTH_WEST }
-//        val countSE = ray.count { it == SOUTH_EAST }
-//        val a = countSE + countNW
-//        val aa = if (a > 0) { a - 1 } else { 0 }
-//        val b = countSW + countNE
-//        val bb = if (b > 0) { b - 1 } else { 0 }
-//        val intersections = countEW + aa + bb
-
-        val singleCrossing = Regex("-|F\\|*J|7\\|*L")
-            .findAll(rayStr)
+            .mapNotNull { theLoop[it] }.joinToString("")
+        val singleCrossing = singleCrossingRegex.findAll(rayStr)
             .map { it.value }
             .toList()
-        val doubleCrossing = Regex("F\\|*L|7\\|*J")
-            .findAll(rayStr)
+        val doubleCrossing = doubleCrossingRegex.findAll(rayStr)
             .map { it.value }
             .toList()
-        val intersections = 0 + singleCrossing.size + doubleCrossing.size * 2
 
-        return intersections
+        return 0 + singleCrossing.size + doubleCrossing.size * 2
     }
 }
 
@@ -98,7 +102,7 @@ fun findConnectedTo(pipes: Map<Coord, Char>, coord: Coord): Set<Coord> =
 fun findStartReplacement(pipes: Map<Coord, Char>, startCoord: Coord): Char {
     val connectedTo = findConnectedTo(pipes, startCoord)
     if (connectedTo.size != 2) {
-        throw IllegalArgumentException("Not 2?!")
+        throw IllegalArgumentException("Expected exactly 2 pipes connected start, but got ${connectedTo.size}: $connectedTo")
     }
 
     val leftOrRight = connectedTo.filter { it.y == startCoord.y }
