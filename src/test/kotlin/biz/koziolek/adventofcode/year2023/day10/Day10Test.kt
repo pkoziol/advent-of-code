@@ -6,43 +6,42 @@ import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 
 @Tag("2023")
 internal class Day10Test {
 
-    private val sampleInput1a = """
+    private val inputs = mapOf(
+        "1a" to """
             .....
             .S-7.
             .|.|.
             .L-J.
             .....
-        """.trimIndent().split("\n")
-
-    private val sampleInput1b = """
+        """.trimIndent().split("\n"),
+        "1b" to """
             -L|F7
             7S-7|
             L|7||
             -L-J|
             L|-JF
-        """.trimIndent().split("\n")
-
-    private val sampleInput2a = """
+        """.trimIndent().split("\n"),
+        "2a" to """
             ..F7.
             .FJ|.
             SJ.L7
             |F--J
             LJ...
-        """.trimIndent().split("\n")
-
-    private val sampleInput2b = """
+        """.trimIndent().split("\n"),
+        "2b" to """
             7-F7-
             .FJ|7
             SJLL7
             |F--J
             LJ.LJ
-        """.trimIndent().split("\n")
-
-    private val sampleInput3 = """
+        """.trimIndent().split("\n"),
+        "3" to """
             ..........
             .S------7.
             .|F----7|.
@@ -52,9 +51,8 @@ internal class Day10Test {
             .|..||..|.
             .L--JL--J.
             ..........
-        """.trimIndent().split("\n")
-
-    private val sampleInput4 = """
+        """.trimIndent().split("\n"),
+        "4" to """
             .F----7F7F7F7F-7....
             .|F--7||||||||FJ....
             .||.FJ||||||||L7....
@@ -65,9 +63,8 @@ internal class Day10Test {
             .....|FJLJ|FJ|F7|.LJ
             ....FJL-7.||.||||...
             ....L---J.LJ.LJLJ...
-        """.trimIndent().split("\n")
-
-    private val sampleInput5 = """
+        """.trimIndent().split("\n"),
+        "5" to """
             FF7FSF7F7F7F7F7F---7
             L|LJ||||||||||||F--J
             FL-7LJLJ||||||LJL-77
@@ -78,55 +75,44 @@ internal class Day10Test {
             7-L-JL7||F7|L7F-7F7|
             L.L7LFJ|||||FJL7||LJ
             L7JLJL-JLJLJL--JLJ.L
-        """.trimIndent().split("\n")
+        """.trimIndent().split("\n"),
+    )
 
-    @Test
-    fun testParsePipeMaze() {
-        val maze1a = parsePipeMaze(sampleInput1a)
-        assertEquals(25, maze1a.contents.size)
-        assertEquals(Coord(1, 1), maze1a.startPos)
-
-        val maze1b = parsePipeMaze(sampleInput1b)
-        assertEquals(25, maze1b.contents.size)
-        assertEquals(Coord(1, 1), maze1b.startPos)
-
-        val maze2a = parsePipeMaze(sampleInput2a)
-        assertEquals(25, maze2a.contents.size)
-        assertEquals(Coord(0, 2), maze2a.startPos)
-
-        val maze2b = parsePipeMaze(sampleInput2b)
-        assertEquals(25, maze2b.contents.size)
-        assertEquals(Coord(0, 2), maze2b.startPos)
+    @ParameterizedTest(name = "input={0}")
+    @CsvSource(
+        "1a,25,1,1",
+        "1b,25,1,1",
+        "2a,25,0,2",
+        "2b,25,0,2",
+    )
+    fun testParsePipeMaze(inputId: String, expectedSize: Int, expectedStartX: Int, expectedStartY: Int) {
+        val maze = parsePipeMaze(inputs[inputId]!!)
+        assertEquals(expectedSize, maze.contents.size)
+        assertEquals(Coord(expectedStartX, expectedStartY), maze.startPos)
     }
 
-    @Test
-    fun testFindLoop() {
-        val maze1a = parsePipeMaze(sampleInput1a)
-        assertEquals(8, maze1a.theLoop.size)
-
-        val maze1b = parsePipeMaze(sampleInput1b)
-        assertEquals(8, maze1b.theLoop.size)
-
-        val maze2a = parsePipeMaze(sampleInput2a)
-        assertEquals(16, maze2a.theLoop.size)
-
-        val maze2b = parsePipeMaze(sampleInput2b)
-        assertEquals(16, maze2b.theLoop.size)
+    @ParameterizedTest(name = "input={0}")
+    @CsvSource(
+        "1a,8",
+        "1b,8",
+        "2a,16",
+        "2b,16",
+    )
+    fun testFindLoop(inputId: String, expectedSize: Int) {
+        val maze = parsePipeMaze(inputs[inputId]!!)
+        assertEquals(expectedSize, maze.theLoop.size)
     }
 
-    @Test
-    fun testSampleAnswer1() {
-        val maze1a = parsePipeMaze(sampleInput1a)
-        assertEquals(4, maze1a.theLoopFarthestDistanceFromStart)
-
-        val maze1b = parsePipeMaze(sampleInput1b)
-        assertEquals(4, maze1b.theLoopFarthestDistanceFromStart)
-
-        val maze2a = parsePipeMaze(sampleInput2a)
-        assertEquals(8, maze2a.theLoopFarthestDistanceFromStart)
-
-        val maze2b = parsePipeMaze(sampleInput2b)
-        assertEquals(8, maze2b.theLoopFarthestDistanceFromStart)
+    @ParameterizedTest(name = "input={0}")
+    @CsvSource(
+        "1a,4",
+        "1b,4",
+        "2a,8",
+        "2b,8",
+    )
+    fun testSampleAnswer1(inputId: String, expectedDistance: Int) {
+        val maze = parsePipeMaze(inputs[inputId]!!)
+        assertEquals(expectedDistance, maze.theLoopFarthestDistanceFromStart)
     }
 
     @Test
@@ -137,28 +123,30 @@ internal class Day10Test {
         assertEquals(6846, maze.theLoopFarthestDistanceFromStart)
     }
 
-    @Test
-    fun testSampleAnswer2() {
-        val maze3 = parsePipeMaze(sampleInput3)
-        debugPrintMaze(maze3)
-        assertEquals(4, maze3.insideTheLoop.size)
+    @ParameterizedTest(name = "input={0}")
+    @CsvSource(
+        "1a,1,true",
+        "1b,1,true",
+        "2a,1,true",
+        "2b,1,true",
+        "3,4,true",
+        "4,8,true",
+        "5,10,true",
+    )
+    fun testSampleAnswer2(inputId: String, expectedSize: Int, debug: Boolean) {
+        val maze = parsePipeMaze(inputs[inputId]!!)
 
-        val maze4 = parsePipeMaze(sampleInput4)
-        debugPrintMaze(maze4)
-        assertEquals(8, maze4.insideTheLoop.size)
+        if (debug) {
+            debugPrintMaze(maze)
+        }
 
-        val maze5 = parsePipeMaze(sampleInput5)
-        debugPrintMaze(maze5)
-        assertEquals(10, maze5.insideTheLoop.size)
+        assertEquals(expectedSize, maze.insideTheLoop.size)
     }
 
     private fun debugPrintMaze(maze: PipeMaze) {
-        println(mazeToString(maze, loopColor = WHITE))
-        println()
-        println(mazeToString(maze, loopColor = WHITE, replaceStart = true))
-        println()
-        println(mazeToString(maze, loopColor = WHITE, replaceStart = true, insideColor = BRIGHT_WHITE))
-        println()
+        println("Maze with loop:\n${mazeToString(maze, loopColor = WHITE)}")
+        println("Maze with replaced start:\n${mazeToString(maze, loopColor = WHITE, replaceStart = true)}")
+        println("Maze with marked inside:\n${mazeToString(maze, loopColor = WHITE, replaceStart = true, insideColor = BRIGHT_WHITE)}")
     }
 
     @Test

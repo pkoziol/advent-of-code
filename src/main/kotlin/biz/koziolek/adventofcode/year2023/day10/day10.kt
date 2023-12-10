@@ -6,7 +6,7 @@ fun main() {
     val inputFile = findInput(object {})
     val maze = parsePipeMaze(inputFile.bufferedReader().readLines())
     println("Farthest distance from the start on the loop: ${maze.theLoopFarthestDistanceFromStart}")
-    println("Farthest distance from the start on the loop: ${maze.theLoopFarthestDistanceFromStart}")
+    println("Tiles are enclosed by the loop: ${maze.insideTheLoop.size}")
 }
 
 const val NORTH_SOUTH = '|'
@@ -147,12 +147,14 @@ fun parsePipeMaze(lines: Iterable<String>): PipeMaze =
 fun mazeToString(maze: PipeMaze,
                  replaceStart: Boolean = false,
                  defaultColor: AsciiColor = AsciiColor.BLACK,
+                 startColor: AsciiColor = AsciiColor.BRIGHT_YELLOW,
                  loopColor: AsciiColor? = null,
                  insideColor: AsciiColor? = null) =
     pipesToString(
         if (replaceStart) maze.replaceStart(maze.contents) else maze.contents,
         highlights = maze.contents.keys.associateWith { defaultColor }
                 + (if (loopColor != null ) maze.theLoop.keys.associateWith { loopColor } else emptyMap())
+                + mapOf(maze.startPos to startColor)
                 + (if (insideColor != null ) maze.insideTheLoop.associateWith { insideColor } else emptyMap())
     )
 
