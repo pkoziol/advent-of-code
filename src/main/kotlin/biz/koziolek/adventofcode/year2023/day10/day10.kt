@@ -39,6 +39,9 @@ data class PipeMaze(val contents: Map<Coord, Char>, val startPos: Coord) {
 
     val theLoopFarthestDistanceFromStart: Int by lazy { theLoop.size / 2 }
 
+    /**
+     * Find coordinates inside the loop using [Ray casting algorithm](https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm)
+     */
     val insideTheLoop: Set<Coord> by lazy {
         contents.keys
             .filter { !theLoop.keys.contains(it) }
@@ -47,6 +50,23 @@ data class PipeMaze(val contents: Map<Coord, Char>, val startPos: Coord) {
             .toSet()
     }
 
+    /**
+     * Finds edges that are crossed once.
+     *
+     *         *
+     *     ----|----
+     *         | F--
+     *         |/
+     *         |
+     *        /|
+     *     --J |
+     *     --7 |
+     *        \|
+     *         |
+     *         |\
+     *         | L--
+     *         v
+     */
     private val singleCrossingRegex: Regex =
         listOf(
             Regex.escape(EAST_WEST.toString()),
@@ -56,6 +76,26 @@ data class PipeMaze(val contents: Map<Coord, Char>, val startPos: Coord) {
             .joinToString("|")
             .let { Regex(it) }
 
+    /**
+     * Finds edges that are crossed twice.
+     *
+     *         *
+     *         | F--
+     *         |/
+     *         |
+     *        /|
+     *        \|
+     *         |
+     *     --7 |\
+     *        \| L--
+     *         |
+     *         |\
+     *         |/
+     *         |
+     *        /|
+     *     --J |
+     *         v
+     */
     private val doubleCrossingRegex: Regex =
         listOf(
             buildVerticalLineRegex(SOUTH_EAST, NORTH_EAST),
@@ -67,6 +107,10 @@ data class PipeMaze(val contents: Map<Coord, Char>, val startPos: Coord) {
     private fun buildVerticalLineRegex(corner1: Char, corner2: Char) =
         Regex.escape(corner1.toString()) + Regex.escape(NORTH_SOUTH.toString()) + "*" + Regex.escape(corner2.toString())
 
+    /**
+     * Cast a ray starting at the north edge going down to [coord]
+     * and count how many loop edges it crosses.
+     */
     @Suppress("MemberVisibilityCanBePrivate")
     fun findEdgeIntersections(coord: Coord): Int {
         val rayStr = (0 until coord.y)
