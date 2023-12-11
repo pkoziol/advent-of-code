@@ -28,29 +28,6 @@ data class Coord(val x: Int, val y: Int) {
     }
 }
 
-data class LongCoord(val x: Long, val y: Long) {
-    constructor(x: Int, y: Int) : this(x.toLong(), y.toLong())
-    operator fun plus(other: LongCoord) = LongCoord(x + other.x, y + other.y)
-    operator fun minus(other: LongCoord) = LongCoord(x - other.x, y - other.y)
-    operator fun unaryMinus() = LongCoord(-x, -y)
-    override fun toString() = "$x,$y"
-
-    fun distanceTo(other: LongCoord) = sqrt(
-        (x - other.x).toDouble().pow(2)
-                + (y - other.y).toDouble().pow(2)
-    )
-
-    infix fun manhattanDistanceTo(other: LongCoord): Long =
-        abs(x - other.x) + abs(y - other.y)
-
-    companion object {
-        fun fromString(str: String): LongCoord =
-            str.split(',')
-                .map { it.toLong() }
-                .let { LongCoord(x = it[0], y = it[1]) }
-    }
-}
-
 fun IntProgression.zipAsCoord(ys: IntProgression) = zip(ys) { x, y -> Coord(x, y) }
 
 fun <T> Map<Coord, T>.getWidth() = keys.maxOfOrNull { it.x }?.plus(1) ?: 0
