@@ -176,17 +176,13 @@ fun findStartReplacement(pipes: Map<Coord, Char>, startCoord: Coord): Char {
 fun parsePipeMaze(lines: Iterable<String>): PipeMaze {
     var startPos: Coord? = null
     val pipes = buildMap {
-        lines
-            .flatMapIndexed { y, line ->
-                line.mapIndexed { x, char ->
-                    val coord = Coord(x, y)
-                    put(coord, char)
+        lines.parse2DMap().forEach { (coord, char) ->
+            put(coord, char)
 
-                    if (char == START) {
-                        startPos = coord
-                    }
-                }
+            if (char == START) {
+                startPos = coord
             }
+        }
 
         val startReplacement = findStartReplacement(this, startPos!!)
         put(startPos!!, startReplacement)

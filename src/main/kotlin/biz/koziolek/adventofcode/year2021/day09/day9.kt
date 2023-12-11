@@ -1,9 +1,6 @@
 package biz.koziolek.adventofcode.year2021.day09
 
-import biz.koziolek.adventofcode.Coord
-import biz.koziolek.adventofcode.findInput
-import biz.koziolek.adventofcode.getAdjacentCoords
-import biz.koziolek.adventofcode.visitAll
+import biz.koziolek.adventofcode.*
 
 fun main() {
     val inputFile = findInput(object {})
@@ -48,11 +45,7 @@ fun findSmokeBasins(smokeMap: Map<Coord, Int>): Collection<Set<Coord>> {
 }
 
 fun parseSmokeMap(lines: List<String>): Map<Coord, Int> =
-    lines.flatMapIndexed { y, line ->
-        line.mapIndexed { x, char ->
-            Coord(x, y) to char.digitToInt()
-        }
-    }.toMap()
+    lines.parse2DMap { it.digitToInt() }.toMap()
 
 fun findSmokeLowPoints(smokeMap: Map<Coord, Int>): Set<Coord> =
         smokeMap.flatMap { (coord, currentHeight) ->

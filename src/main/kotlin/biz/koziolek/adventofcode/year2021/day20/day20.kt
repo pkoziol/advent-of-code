@@ -103,11 +103,8 @@ fun parseInputImage(lines: Iterable<String>): InfiniteImage =
     InfiniteImage(
         finitePixels = lines
             .drop(2)
-            .flatMapIndexed { y, line ->
-                line.mapIndexed { x, char ->
-                    Coord(x, y) to (char == '#')
-                }
-            }.toMap(),
+            .parse2DMap { it == '#' }
+            .toMap(),
         infinitePixels = false,
     )
 

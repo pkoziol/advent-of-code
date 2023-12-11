@@ -11,11 +11,7 @@ fun main() {
 }
 
 fun parseHeightMap(lines: Iterable<String>): Map<Coord, Char> =
-    lines.flatMapIndexed { y, line ->
-        line.mapIndexed { x, char ->
-            Coord(x, y) to char
-        }
-    }.toMap()
+    lines.parse2DMap().toMap()
 
 data class ElevationNode(
     val label: Char,
