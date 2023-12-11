@@ -38,12 +38,7 @@ data class EngineGear(val coord: Coord, val num1: EngineNumber, val num2: Engine
 }
 
 fun parseEngineSchematic(lines: Iterable<String>): EngineSchematic {
-    val map = lines.flatMapIndexed { y, line ->
-        line.mapIndexed { x, char ->
-            Coord(x, y) to char
-        }
-    }.toMap()
-
+    val map = lines.parse2DMap().toMap()
     val width = map.getWidth()
     val height = map.getHeight()
 

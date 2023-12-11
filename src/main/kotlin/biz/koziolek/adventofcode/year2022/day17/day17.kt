@@ -2,6 +2,7 @@ package biz.koziolek.adventofcode.year2022.day17
 
 import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
+import biz.koziolek.adventofcode.parse2DMap
 
 fun main() {
     val jetPattern = findInput(object {}).bufferedReader().readLine()
@@ -51,15 +52,9 @@ val ROCKS = listOf(
 fun parseRock(rock: String): Map<Coord, Char> =
     rock.split("\n")
         .reversed()
-        .flatMapIndexed { y, line ->
-            line.flatMapIndexed { x, char ->
-                if (char == ROCK) {
-                    listOf(Coord(x, y) to char)
-                } else {
-                    emptyList()
-                }
-            }
-        }.toMap()
+        .parse2DMap()
+        .filter { (_, char) -> char == ROCK }
+        .toMap()
 
 private val LEFT = Coord(x = -1, y = 0)
 private val RIGHT = Coord(x = 1, y = 0)

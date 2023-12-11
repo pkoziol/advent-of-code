@@ -1,9 +1,6 @@
 package biz.koziolek.adventofcode.year2021.day25
 
-import biz.koziolek.adventofcode.Coord
-import biz.koziolek.adventofcode.findInput
-import biz.koziolek.adventofcode.getHeight
-import biz.koziolek.adventofcode.getWidth
+import biz.koziolek.adventofcode.*
 
 fun main() {
     val inputFile = findInput(object {})
@@ -14,11 +11,7 @@ fun main() {
 }
 
 fun parseSeaCucumberMap(lines: List<String>): Map<Coord, Char> =
-    lines.flatMapIndexed { y, line ->
-        line.mapIndexed { x, char ->
-            Coord(x, y) to char
-        }
-    }.toMap()
+    lines.parse2DMap().toMap()
 
 fun seaCucumberMapToString(seaCucumberMap: Map<Coord, Char>): String {
     val width = seaCucumberMap.getWidth()

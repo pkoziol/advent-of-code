@@ -2,6 +2,7 @@ package biz.koziolek.adventofcode.year2023.day11
 
 import biz.koziolek.adventofcode.LongCoord
 import biz.koziolek.adventofcode.findInput
+import biz.koziolek.adventofcode.parse2DMap
 
 fun main() {
     val inputFile = findInput(object {})
@@ -63,12 +64,7 @@ data class GalaxyMap(val galaxies: Set<LongCoord>) {
 }
 
 fun parseGalaxyMap(lines: Iterable<String>): GalaxyMap =
-    lines.flatMapIndexed { y, line ->
-        line.mapIndexedNotNull { x, char ->
-            if (char == GALAXY) {
-                LongCoord(x, y)
-            } else {
-                null
-            }
-        }
-    }.let { GalaxyMap(it.toSet()) }
+    lines.parse2DMap()
+        .filter { (_, char) -> char == GALAXY }
+        .map { it.first.toLong() }
+        .let { GalaxyMap(it.toSet()) }

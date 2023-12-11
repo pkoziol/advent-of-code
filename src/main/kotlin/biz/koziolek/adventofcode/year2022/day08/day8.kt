@@ -2,6 +2,7 @@ package biz.koziolek.adventofcode.year2022.day08
 
 import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
+import biz.koziolek.adventofcode.parse2DMap
 
 fun main() {
     val inputFile = findInput(object {})
@@ -11,11 +12,7 @@ fun main() {
 }
 
 fun parseTrees(lines: List<String>): Map<Coord, Int> =
-    lines.flatMapIndexed { y, line ->
-        line.mapIndexed { x, char ->
-            Coord(x, y) to char.toString().toInt()
-        }
-    }.toMap()
+    lines.parse2DMap { it.toString().toInt() }.toMap()
 
 fun countVisibleTreesFromEdges(trees: Map<Coord, Int>) =
     trees.count { (treeCoord, treeHeight) ->

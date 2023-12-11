@@ -3,6 +3,7 @@ package biz.koziolek.adventofcode.year2022.day23
 import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
 import biz.koziolek.adventofcode.getAdjacentCoords
+import biz.koziolek.adventofcode.parse2DMap
 import kotlin.math.max
 import kotlin.math.min
 
@@ -22,16 +23,9 @@ const val EMPTY = '.'
 
 fun parseElves(lines: Iterable<String>): Set<Coord> =
     lines
-        .flatMapIndexed { y, line ->
-            line.mapIndexed { x, char ->
-                if (char == ELF) {
-                    Coord(x, y)
-                } else {
-                    null
-                }
-            }
-        }
-        .filterNotNull()
+        .parse2DMap()
+        .filter { (_, char) -> char == ELF }
+        .map { (coord, _) -> coord }
         .toSet()
 
 fun visualizeElves(elves: Set<Coord>, corners: Pair<Coord, Coord>? = null): String {

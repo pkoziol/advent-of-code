@@ -29,11 +29,7 @@ data class Octopus(val energy: Int, val flashed: Boolean = false) {
 }
 
 fun parseOctopusMap(lines: List<String>): Map<Coord, Octopus> =
-    lines.flatMapIndexed { y, line ->
-        line.mapIndexed { x, char ->
-            Coord(x, y) to Octopus(char.digitToInt())
-        }
-    }.toMap()
+    lines.parse2DMap { Octopus(it.digitToInt()) }.toMap()
 
 fun countFlashes(map0: Map<Coord, Octopus>, maxStep: Int): Int =
     generateSequence(map0) { map -> calculateNextStep(map) }

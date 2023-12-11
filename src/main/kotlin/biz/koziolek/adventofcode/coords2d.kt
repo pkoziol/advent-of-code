@@ -28,6 +28,18 @@ data class Coord(val x: Int, val y: Int) {
     }
 }
 
+fun Iterable<String>.parse2DMap(): Sequence<Pair<Coord, Char>> =
+    parse2DMap { it }
+
+fun <T> Iterable<String>.parse2DMap(valueMapper: (Char) -> T): Sequence<Pair<Coord, T>> =
+    sequence {
+        flatMapIndexed { y, line ->
+            line.mapIndexedNotNull { x, char ->
+                yield(Coord(x, y) to valueMapper(char))
+            }
+        }
+    }
+
 fun IntProgression.zipAsCoord(ys: IntProgression) = zip(ys) { x, y -> Coord(x, y) }
 
 fun <T> Map<Coord, T>.getWidth() = keys.maxOfOrNull { it.x }?.plus(1) ?: 0

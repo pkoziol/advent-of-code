@@ -24,11 +24,7 @@ fun main() {
 }
 
 fun parseRiskMap(lines: List<String>): Map<Coord, Int> =
-    lines.flatMapIndexed { y, line ->
-        line.mapIndexed { x, char ->
-            Coord(x, y) to char.digitToInt()
-        }
-    }.toMap()
+    lines.parse2DMap { it.digitToInt() }.toMap()
 
 fun expandMap(riskMap: Map<Coord, Int>, expandWidth: Int, expandHeight: Int): Map<Coord, Int> {
     val width = riskMap.getWidth()
