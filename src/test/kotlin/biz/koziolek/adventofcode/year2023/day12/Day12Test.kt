@@ -111,6 +111,15 @@ internal class Day12Test {
                     ".###....##.#",
                 )),
             )
+
+        @JvmStatic
+        fun debugCountPossibleArrangements(): Stream<Arguments> =
+            findInput(object {})
+                .bufferedReader()
+                .readLines()
+                .let { parseHotSpringsRecords(it) }
+                .map { Arguments.of(it) }
+                .stream()
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -139,6 +148,19 @@ internal class Day12Test {
         val springs = parseHotSpringsRecords(input)
         assertEquals(7350, countPossibleArrangements(springs))
         assertEquals(7350, springs.sumOf { countPossibleArrangements(it) })
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    fun debugCountPossibleArrangements(springsRow: HotSpringsRow) {
+        val expectedCount = generatePossibleArrangements(springsRow).count().toLong()
+        val actualCount = countPossibleArrangements(springsRow)
+
+        if (actualCount != expectedCount) {
+            countPossibleArrangements(springsRow, debug = true)
+        }
+
+        assertEquals(expectedCount, actualCount)
     }
 
     @Test
