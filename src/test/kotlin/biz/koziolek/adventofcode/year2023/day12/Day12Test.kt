@@ -67,6 +67,12 @@ internal class Day12Test {
         assertEquals(List(6) { _ -> true }, springs.map { springsMatch(it.conditions, it.damagedGroupSizes) })
     }
 
+    @Test
+    fun testHotSpringsRowHasChanceToMatchPattern() {
+        val springs = parseHotSpringsRecords(sampleInputNotDamaged)
+        assertEquals(List(6) { _ -> true }, springs.map { springsHaveChanceToMatch(it.conditions, it.damagedGroupSizes) })
+    }
+
     companion object {
         @JvmStatic
         fun testGeneratePossibleArrangements(): Stream<Arguments> =
@@ -116,12 +122,14 @@ internal class Day12Test {
             expectedPatterns.map { HotSpringsRow(conditions = it, damagedGroupSizes = damagedGroupSizes) }.toSet(),
             generatePossibleArrangements(HotSpringsRow(conditions = damagedPattern, damagedGroupSizes = damagedGroupSizes)).toSet()
         )
+        assertEquals(expectedPatterns.size.toLong(), countPossibleArrangements(HotSpringsRow(conditions = damagedPattern, damagedGroupSizes = damagedGroupSizes)))
     }
 
     @Test
     fun testSampleAnswer1() {
         val springs = parseHotSpringsRecords(sampleInput)
         assertEquals(21, countPossibleArrangements(springs))
+        assertEquals(21, springs.sumOf { countPossibleArrangements(it) })
     }
 
     @Test
@@ -130,5 +138,35 @@ internal class Day12Test {
         val input = findInput(object {}).bufferedReader().readLines()
         val springs = parseHotSpringsRecords(input)
         assertEquals(7350, countPossibleArrangements(springs))
+        assertEquals(7350, springs.sumOf { countPossibleArrangements(it) })
+    }
+
+    @Test
+    fun testUnfold() {
+        assertEquals(
+            HotSpringsRow(".#?.#?.#?.#?.#", listOf(1, 1, 1, 1, 1)),
+            HotSpringsRow(".#", listOf(1)).unfold()
+        )
+        assertEquals(
+            HotSpringsRow("???.###????.###????.###????.###????.###", listOf(1, 1, 3, 1, 1, 3, 1, 1, 3, 1, 1, 3, 1, 1, 3)),
+            HotSpringsRow(conditions = "???.###", damagedGroupSizes = listOf(1, 1, 3)).unfold()
+        )
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val springs = parseHotSpringsRecords(sampleInput)
+        val unfolded = springs.map { it.unfold() }
+        assertEquals(525152, countPossibleArrangements(unfolded))
+        assertEquals(525152, unfolded.sumOf { countPossibleArrangements(it) })
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val springs = parseHotSpringsRecords(input)
+        val unfolded = springs.map { it.unfold() }
+        assertEquals(200_097_286_528_151, countPossibleArrangements(unfolded))
     }
 }
