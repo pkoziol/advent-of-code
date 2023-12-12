@@ -83,19 +83,24 @@ fun countPossibleArrangements(hotSpringsRow: HotSpringsRow, debug: Boolean = fal
 
     cacheMisses++
 
-    val indent = " ".repeat(level)
-    if (debug) print("$indent${hotSpringsRow.conditions} ${hotSpringsRow.damagedGroupSizes}")
+    val conditions = hotSpringsRow.conditions
+    val damagedGroupSizes = hotSpringsRow.damagedGroupSizes
+
+    if (debug) {
+        val indent = " ".repeat(level)
+        print("$indent$conditions $damagedGroupSizes")
+    }
 
     val newCount = if (!hotSpringsRow.isUnknown) {
-        if (springsMatch(hotSpringsRow.conditions, hotSpringsRow.damagedGroupSizes)) {
+        if (springsMatch(conditions, damagedGroupSizes)) {
             if (debug) println(" matches!")
             1
         } else {
             if (debug) println(" does not match")
             0
         }
-    } else if (hotSpringsRow.damagedGroupSizes.isEmpty()) {
-        if (hotSpringsRow.conditions.contains(DAMAGED)) {
+    } else if (damagedGroupSizes.isEmpty()) {
+        if (conditions.contains(DAMAGED)) {
             if (debug) println(" is not possible (v2)")
             0
         } else {
@@ -106,13 +111,13 @@ fun countPossibleArrangements(hotSpringsRow: HotSpringsRow, debug: Boolean = fal
         var matchedSizes = 0
         var firstUnmatchedPos = 0
         var damagedCount = 0
-        for (c in hotSpringsRow.conditions) {
+        for (c in conditions) {
             if (damagedCount > 0 && c != DAMAGED) {
-                if (damagedCount == hotSpringsRow.damagedGroupSizes[matchedSizes]) {
+                if (damagedCount == damagedGroupSizes[matchedSizes]) {
                     firstUnmatchedPos += damagedCount
                     damagedCount = 0
                     matchedSizes++
-                } else if (damagedCount > hotSpringsRow.damagedGroupSizes[matchedSizes]) {
+                } else if (damagedCount > damagedGroupSizes[matchedSizes]) {
                     if (debug) println(" too many #")
                     cache[hotSpringsRow] = 0
                     return 0
@@ -126,7 +131,7 @@ fun countPossibleArrangements(hotSpringsRow: HotSpringsRow, debug: Boolean = fal
             when (c) {
                 UNKNOWN -> break
                 DAMAGED -> {
-                    if (matchedSizes >= hotSpringsRow.damagedGroupSizes.size) {
+                    if (matchedSizes >= damagedGroupSizes.size) {
                         cache[hotSpringsRow] = 0
                         return 0
                     }
@@ -139,30 +144,26 @@ fun countPossibleArrangements(hotSpringsRow: HotSpringsRow, debug: Boolean = fal
         }
         if (debug) print(" firstUnmatchedPos=$firstUnmatchedPos sizes=$matchedSizes")
 
-        val matchedConditions = hotSpringsRow.conditions.substring(0, firstUnmatchedPos)
-        val remainingConditions = hotSpringsRow.conditions.substring(firstUnmatchedPos)
-        val remainingSizes = hotSpringsRow.damagedGroupSizes.drop(matchedSizes)
+        val remainingSizes = damagedGroupSizes.drop(matchedSizes)
 
-        if (firstUnmatchedPos > 0 && hotSpringsRow.conditions[firstUnmatchedPos - 1] == DAMAGED) {
+        if (firstUnmatchedPos > 0 && conditions[firstUnmatchedPos - 1] == DAMAGED) {
             if (debug) println(" add .")
             countPossibleArrangements(
-                HotSpringsRow(OPERATIONAL + remainingConditions.drop(1), remainingSizes),
+                HotSpringsRow(OPERATIONAL + conditions.substring(firstUnmatchedPos + 1), remainingSizes),
                 debug,
-                level + matchedConditions.length
+                level + firstUnmatchedPos
             )
         } else {
+            val before = conditions.substring(firstUnmatchedPos, firstUnmatchedPos + damagedCount)
+            val after = conditions.substring(firstUnmatchedPos + damagedCount + 1)
+
             if (damagedCount > 0) {
-                if (firstUnmatchedPos + damagedCount < hotSpringsRow.conditions.length && hotSpringsRow.conditions[firstUnmatchedPos + damagedCount] == UNKNOWN) {
+                if (firstUnmatchedPos + damagedCount < conditions.length && conditions[firstUnmatchedPos + damagedCount] == UNKNOWN) {
                     if (debug) println(" continue #")
                     countPossibleArrangements(
-                        HotSpringsRow(
-                            hotSpringsRow.conditions.substring(firstUnmatchedPos, firstUnmatchedPos + damagedCount)
-                                    + DAMAGED
-                                    + hotSpringsRow.conditions.substring(firstUnmatchedPos + damagedCount + 1),
-                            remainingSizes
-                        ),
+                        HotSpringsRow(before + DAMAGED + after, remainingSizes),
                         debug,
-                        level + matchedConditions.length
+                        level + firstUnmatchedPos
                     )
                 } else {
                     if (debug) println(" would like to continue # but it's not possible")
@@ -171,23 +172,13 @@ fun countPossibleArrangements(hotSpringsRow: HotSpringsRow, debug: Boolean = fal
             } else {
                 if (debug) println(" try # and .")
                 countPossibleArrangements(
-                    HotSpringsRow(
-                        hotSpringsRow.conditions.substring(firstUnmatchedPos, firstUnmatchedPos + damagedCount)
-                                + DAMAGED
-                                + hotSpringsRow.conditions.substring(firstUnmatchedPos + damagedCount + 1),
-                        remainingSizes
-                    ),
+                    HotSpringsRow(before + DAMAGED + after, remainingSizes),
                     debug,
-                    level + matchedConditions.length
+                    level + firstUnmatchedPos
                 ) + countPossibleArrangements(
-                    HotSpringsRow(
-                        hotSpringsRow.conditions.substring(firstUnmatchedPos, firstUnmatchedPos + damagedCount)
-                                + OPERATIONAL
-                                + hotSpringsRow.conditions.substring(firstUnmatchedPos + damagedCount + 1),
-                        remainingSizes
-                    ),
+                    HotSpringsRow(before + OPERATIONAL + after, remainingSizes),
                     debug,
-                    level + matchedConditions.length
+                    level + firstUnmatchedPos
                 )
             }
         }
