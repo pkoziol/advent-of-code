@@ -95,6 +95,22 @@ internal class Day13Test {
             ..#..######....
             ..#.########.#.
         """.trimIndent()).findReflection())
+
+        assertEquals(
+            setOf(
+                VerticalReflection(afterRow = 0),
+                VerticalReflection(afterRow = 3),
+            ),
+            RocksPattern.fromString("""
+                #....#..#
+                #....#..#
+                ..##..###
+                #####.##.
+                #####.##.
+                ..##..###
+                #....#..#
+            """.trimIndent()).findReflections()
+        )
     }
 
     @Test
@@ -109,5 +125,96 @@ internal class Day13Test {
         val input = findInput(object {}).bufferedReader().readLines()
         val notes = parseNotes202313(input)
         assertEquals(36015, notes.summarize())
+    }
+
+    @Test
+    fun testFixSmudge() {
+        val notes = parseNotes202313(sampleInput)
+
+        assertEquals(
+            RocksPattern.fromString("""
+                ..##..##.
+                ..#.##.#.
+                ##......#
+                ##......#
+                ..#.##.#.
+                ..##..##.
+                #.#.##.#.
+            """.trimIndent()),
+            notes.patterns[0].fixSmudge()
+        )
+        assertEquals(
+            setOf(
+                HorizontalReflection(afterColumn = 4),
+                VerticalReflection(afterRow = 2),
+            ),
+            notes.patterns[0].fixSmudge()?.findReflections()
+        )
+
+        assertEquals(
+            RocksPattern.fromString("""
+                #....#..#
+                #....#..#
+                ..##..###
+                #####.##.
+                #####.##.
+                ..##..###
+                #....#..#
+            """.trimIndent()),
+            notes.patterns[1].fixSmudge()
+        )
+        assertEquals(
+            setOf(
+                VerticalReflection(afterRow = 0),
+                VerticalReflection(afterRow = 3),
+            ),
+            notes.patterns[1].fixSmudge()?.findReflections()
+        )
+
+        assertEquals(
+            RocksPattern.fromString("""
+                .#.#..#.#.#..
+                ...###.#...##
+                ###..####..##
+                ..##.##..####
+                #...#.....###
+                .##..#...#.##
+                #.##.##.#....
+                ..#..#..#....
+                ..#..#..#....
+            """.trimIndent()),
+            RocksPattern.fromString("""
+                .#.#..#.#.#..
+                ...###.#...##
+                ###..####..##
+                ..##.##..####
+                #...#.....#.#
+                .##..#...#.##
+                #.##.##.#....
+                ..#..#..#....
+                ..#..#..#....
+            """.trimIndent()).fixSmudge()
+        )
+        assertEquals(
+            setOf(
+                VerticalReflection(afterRow = 0),
+                VerticalReflection(afterRow = 3),
+            ),
+            notes.patterns[1].fixSmudge()?.findReflections()
+        )
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val notes = parseNotes202313(sampleInput)
+        assertEquals(400, notes.fixSmudges().summarize(previousNotes = notes))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val notes = parseNotes202313(input)
+        assertEquals(35335, notes.fixSmudges().summarize(previousNotes = notes))
     }
 }
