@@ -47,4 +47,42 @@ internal class UtilsTest {
         assertEquals(26981974017, bitSet.toLong(1, 36))
         assertEquals(53963948034, bitSet.toLong(1, 37))
     }
+
+    @Test
+    fun transposeStringList() {
+        assertEquals(
+            listOf(
+                "adgj",
+                "behk",
+                "cfil",
+            ),
+            listOf(
+                "abc",
+                "def",
+                "ghi",
+                "jkl",
+            ).transpose()
+        )
+    }
+
+    @Test
+    fun testCharSwap() {
+        assertEquals('b', 'a'.swap('a', 'b'))
+        assertEquals('a', 'b'.swap('a', 'b'))
+    }
+
+    @Test
+    fun testSingleOrNullOnlyWhenZero() {
+        assertEquals(null, emptyList<Int>().singleOrNullOnlyWhenZero())
+        assertEquals(1, listOf(1).singleOrNullOnlyWhenZero())
+        assertThrows(IllegalArgumentException::class.java) {
+            listOf(3, 4).singleOrNullOnlyWhenZero()
+        }
+
+        assertEquals(null, emptySet<Int>().singleOrNullOnlyWhenZero())
+        assertEquals(2, setOf(2).singleOrNullOnlyWhenZero())
+        assertThrows(IllegalArgumentException::class.java) {
+            setOf(3, 4).singleOrNullOnlyWhenZero()
+        }
+    }
 }
