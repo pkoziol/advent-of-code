@@ -107,3 +107,53 @@ fun lcm(a: Long, b: Long): Long =
  */
 fun lcm(numbers: Iterable<Long>): Long =
     numbers.reduce { acc, l -> lcm(acc, l) }
+
+/**
+ * Transposes 2D strings.
+ *
+ *     abc    adgj
+ *     def -> behk
+ *     ghi    cfil
+ *     jkl
+ */
+fun List<String>.transpose(): List<String> =
+    fold(List(first().length) { "" }) { acc, line ->
+        line.mapIndexed { index, c -> acc[index] + c }
+    }
+
+/**
+ * Swaps this character to the other one from set of 2 characters.
+ */
+fun Char.swap(c1: Char, c2: Char): Char =
+    when (this) {
+        c1 -> c2
+        c2 -> c1
+        else -> throw IllegalArgumentException("No character to swap: $this")
+    }
+
+/**
+ * Returns single element, `null` if the iterable is empty
+ * or throws an exception if the iterable has more than one element.
+ *
+ * Mix of [Iterable.single] and [Iterable.singleOrNull]
+ */
+fun <T> Iterable<T>.singleOrNullOnlyWhenZero(): T? {
+    when (this) {
+        is List -> {
+            return when (size) {
+                0 -> null
+                1 -> this[0]
+                else -> throw IllegalArgumentException("Found more than one element")
+            }
+        }
+        else -> {
+            val iterator = iterator()
+            if (!iterator.hasNext())
+                return null
+            val single = iterator.next()
+            if (iterator.hasNext())
+                throw IllegalArgumentException("Found more than one element")
+            return single
+        }
+    }
+}

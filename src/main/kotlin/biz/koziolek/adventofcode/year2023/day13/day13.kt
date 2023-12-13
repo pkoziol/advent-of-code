@@ -1,8 +1,6 @@
 package biz.koziolek.adventofcode.year2023.day13
 
-import biz.koziolek.adventofcode.AsciiColor
-import biz.koziolek.adventofcode.Coord
-import biz.koziolek.adventofcode.findInput
+import biz.koziolek.adventofcode.*
 import kotlin.math.min
 
 fun main() {
@@ -33,13 +31,6 @@ data class Notes202313(val patterns: List<RocksPattern>) {
 const val ROCK = '#'
 const val ASH = '.'
 
-private fun <T> Collection<T>.singleOrNullOnlyWhenZero(): T? =
-    when (size) {
-        0 -> null
-        1 -> first()
-        else -> throw IllegalArgumentException("Found $size elements in $this")
-    }
-
 data class RocksPattern(val contents: List<String>) {
     val width = contents[0].length
     val height = contents.size
@@ -52,8 +43,8 @@ data class RocksPattern(val contents: List<String>) {
 
     private fun findReflections(lines: List<String>): Set<Reflection> =
         buildSet {
-            findHorizontalReflections(lines).forEach { add(it) }
-            findVerticalReflections(lines).forEach { add(it) }
+            addAll(findHorizontalReflections(lines))
+            addAll(findVerticalReflections(lines))
         }
 
     private fun findVerticalReflections(lines: List<String>): Set<VerticalReflection> =
@@ -61,13 +52,8 @@ data class RocksPattern(val contents: List<String>) {
             .mapTo(mutableSetOf()) { VerticalReflection(it) }
 
     private fun findHorizontalReflections(lines: List<String>): Set<HorizontalReflection> =
-        findReflectionIndexes(transpose(lines))
+        findReflectionIndexes(lines.transpose())
             .mapTo(mutableSetOf()) { HorizontalReflection(it) }
-
-    private fun transpose(lines: List<String>): List<String> =
-        lines.fold(List(lines.first().length) { "" }) { acc, line ->
-            line.mapIndexed { index, c -> acc[index] + c }
-        }
 
     private fun findReflectionIndexes(lines: List<String>): Set<Int> {
         val mirrorAfter = mutableSetOf<Int>()
@@ -94,27 +80,20 @@ data class RocksPattern(val contents: List<String>) {
 
     @Suppress("unused")
     fun toStringWithReflection(): String =
-        when (val reflection = findReflection()) {
-            is HorizontalReflection -> buildString {
-                for (line in contents) {
-                    for ((index, char) in line.withIndex()) {
-                        append(char)
-                        if (index == reflection.afterColumn) {
-                            append(AsciiColor.BRIGHT_WHITE.format("|"))
-                        }
-                    }
-                    append("\n")
-                }
-            }
-            is VerticalReflection -> buildString {
-                for ((index, line) in contents.withIndex()) {
-                    append("$line\n")
-                    if (index == reflection.afterRow) {
-                        append(AsciiColor.BRIGHT_WHITE.format("-".repeat(line.length)) + "\n")
+        buildString {
+            val reflection = findReflection()
+            for ((rowIndex, line) in contents.withIndex()) {
+                for ((columnIndex, char) in line.withIndex()) {
+                    append(char)
+                    if (reflection is HorizontalReflection && columnIndex == reflection.afterColumn) {
+                        append(AsciiColor.BRIGHT_WHITE.format("|"))
                     }
                 }
+                append("\n")
+                if (reflection is VerticalReflection && rowIndex == reflection.afterRow) {
+                    append(AsciiColor.BRIGHT_WHITE.format("-".repeat(line.length)) + "\n")
+                }
             }
-            null -> contents.joinToString("\n", postfix = "\n")
         }
 
     fun fixSmudge(): RocksPattern? {
@@ -128,7 +107,7 @@ data class RocksPattern(val contents: List<String>) {
     }
 
     private fun findSmudge(lines: List<String>, horizontalReflection: Boolean = false): Coord? {
-        val currentLines = if (horizontalReflection) transpose(lines) else lines
+        val currentLines = if (horizontalReflection) lines.transpose() else lines
         val existingReflections = findReflections(currentLines)
 
         for (index in currentLines.indices) {
@@ -175,21 +154,14 @@ data class RocksPattern(val contents: List<String>) {
             if (y == smudge.y) {
                 line.withIndex().joinToString("") { (x, char) ->
                     if (x == smudge.x) {
-                        opposite(char).toString()
+                        char.swap(ROCK, ASH)
                     } else {
-                        char.toString()
-                    }
+                        char
+                    }.toString()
                 }
             } else {
                 line
             }
-        }
-
-    private fun opposite(char: Char): Char =
-        when (char) {
-            ROCK -> ASH
-            ASH -> ROCK
-            else -> throw IllegalArgumentException("Unsupported char: $char")
         }
 
     companion object {
