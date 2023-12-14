@@ -31,11 +31,14 @@ data class Coord(val x: Int, val y: Int) {
 fun Iterable<String>.parse2DMap(): Sequence<Pair<Coord, Char>> =
     parse2DMap { it }
 
-fun <T> Iterable<String>.parse2DMap(valueMapper: (Char) -> T): Sequence<Pair<Coord, T>> =
+fun <T> Iterable<String>.parse2DMap(valueMapper: (Char) -> T?): Sequence<Pair<Coord, T>> =
     sequence {
-        flatMapIndexed { y, line ->
-            line.mapIndexedNotNull { x, char ->
-                yield(Coord(x, y) to valueMapper(char))
+        forEachIndexed { y, line ->
+            line.forEachIndexed { x, char ->
+                val value = valueMapper(char)
+                if (value != null) {
+                    yield(Coord(x, y) to value)
+                }
             }
         }
     }
