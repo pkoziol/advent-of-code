@@ -83,4 +83,52 @@ internal class Coords2dTest {
         val expectedAdjacentMiddleDiagonal = expectedAdjacentMiddle + setOf(Coord(0, 0), Coord(2, 0), Coord(2, 2), Coord(0, 2))
         assertEquals(expectedAdjacentMiddleDiagonal, map.getAdjacentCoords(middle, includeDiagonal = true))
     }
+
+    @Test
+    fun testWalkNorthTo() {
+        assertEquals(
+            listOf(Coord(10, 19), Coord(10, 18), Coord(10, 17)),
+            Coord(10, 20).walkNorthTo(dstY = 17, includeCurrent = false).toList()
+        )
+        assertEquals(
+            listOf(Coord(10, 20), Coord(10, 19), Coord(10, 18), Coord(10, 17)),
+            Coord(10, 20).walkNorthTo(dstY = 17, includeCurrent = true).toList()
+        )
+    }
+
+    @Test
+    fun testWalkWestTo() {
+        assertEquals(
+            listOf(Coord(9, 20), Coord(8, 20), Coord(7, 20)),
+            Coord(10, 20).walkWestTo(dstX = 7, includeCurrent = false).toList()
+        )
+        assertEquals(
+            listOf(Coord(10, 20), Coord(9, 20), Coord(8, 20), Coord(7, 20)),
+            Coord(10, 20).walkWestTo(dstX = 7, includeCurrent = true).toList()
+        )
+    }
+
+    @Test
+    fun testWalkSouthTo() {
+        assertEquals(
+            listOf(Coord(10, 21), Coord(10, 22), Coord(10, 23)),
+            Coord(10, 20).walkSouthTo(dstY = 23, includeCurrent = false).toList()
+        )
+        assertEquals(
+            listOf(Coord(10, 20), Coord(10, 21), Coord(10, 22), Coord(10, 23)),
+            Coord(10, 20).walkSouthTo(dstY = 23, includeCurrent = true).toList()
+        )
+    }
+
+    @Test
+    fun testWalkEastTo() {
+        assertEquals(
+            listOf(Coord(11, 20), Coord(12, 20), Coord(13, 20)),
+            Coord(10, 20).walkEastTo(dstX = 13, includeCurrent = false).toList()
+        )
+        assertEquals(
+            listOf(Coord(10, 20), Coord(11, 20), Coord(12, 20), Coord(13, 20)),
+            Coord(10, 20).walkEastTo(dstX = 13, includeCurrent = true).toList()
+        )
+    }
 }
