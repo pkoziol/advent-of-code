@@ -131,4 +131,96 @@ internal class Coords2dTest {
             Coord(10, 20).walkEastTo(dstX = 13, includeCurrent = true).toList()
         )
     }
+
+    @Test
+    fun testMapWalkSouth() {
+        val map = mapOf(
+            Coord(0, 0) to 'X',
+            Coord(3, 1) to 'X',
+        )
+        assertEquals(4, map.getWidth())
+        assertEquals(2, map.getHeight())
+        assertEquals(
+            listOf(
+                Coord(0, 0),
+                Coord(1, 0),
+                Coord(2, 0),
+                Coord(3, 0),
+                Coord(0, 1),
+                Coord(1, 1),
+                Coord(2, 1),
+                Coord(3, 1),
+            ),
+            map.walkSouth().toList()
+        )
+    }
+
+    @Test
+    fun testMapWalkEast() {
+        val map = mapOf(
+            Coord(0, 0) to 'X',
+            Coord(3, 1) to 'X',
+        )
+        assertEquals(4, map.getWidth())
+        assertEquals(2, map.getHeight())
+        assertEquals(
+            listOf(
+                Coord(0, 1),
+                Coord(0, 0),
+                Coord(1, 1),
+                Coord(1, 0),
+                Coord(2, 1),
+                Coord(2, 0),
+                Coord(3, 1),
+                Coord(3, 0),
+            ),
+            map.walkEast().toList()
+        )
+    }
+
+    @Test
+    fun testMapWalkNorth() {
+        val map = mapOf(
+            Coord(0, 0) to 'X',
+            Coord(3, 1) to 'X',
+        )
+        assertEquals(4, map.getWidth())
+        assertEquals(2, map.getHeight())
+        assertEquals(
+            listOf(
+                Coord(3, 1),
+                Coord(2, 1),
+                Coord(1, 1),
+                Coord(0, 1),
+                Coord(3, 0),
+                Coord(2, 0),
+                Coord(1, 0),
+                Coord(0, 0),
+            ),
+            map.walkNorth().toList()
+        )
+    }
+
+    @Test
+    fun testMapWalkWest() {
+        val map = mapOf(
+            Coord(0, 0) to 'X',
+            Coord(3, 1) to 'X',
+        )
+        assertEquals(4, map.getWidth())
+        assertEquals(2, map.getHeight())
+        assertEquals(
+            listOf(
+                Coord(3, 0),
+                Coord(3, 1),
+                Coord(2, 0),
+                Coord(2, 1),
+                Coord(1, 0),
+                Coord(1, 1),
+                Coord(0, 0),
+                Coord(0, 1),
+            ),
+            map.walkWest().toList()
+        )
+    }
 }

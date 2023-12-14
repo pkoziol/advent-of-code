@@ -105,7 +105,6 @@ internal class Day14Test {
     fun testSampleAnswer2() {
         val platform = parsePlatform(sampleInput)
         val cycled = platform.cycle(n = 1_000_000_000)
-        println(cycled.toString())
         assertEquals(64, cycled.totalLoad)
     }
 
