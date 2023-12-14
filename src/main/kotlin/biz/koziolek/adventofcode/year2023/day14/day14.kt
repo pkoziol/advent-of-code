@@ -112,11 +112,7 @@ data class Platform(val rocks: Map<Coord, Char>) {
                     Coord(x, y)
                 }
             },
-            coordsToFallAt = { startCoord -> sequence {
-                (startCoord.y - 1 downTo 0).forEach { y ->
-                    yield(Coord(startCoord.x, y))
-                }
-            }}
+            coordsToFallAt = { it.walkNorthTo(0, includeCurrent = false) }
         )
 
     fun slideWest(): Platform =
@@ -126,11 +122,7 @@ data class Platform(val rocks: Map<Coord, Char>) {
                     Coord(x, y)
                 }
             },
-            coordsToFallAt = { startCoord -> sequence {
-                (startCoord.x-1 downTo 0).forEach { x ->
-                    yield(Coord(x, startCoord.y))
-                }
-            }}
+            coordsToFallAt = { it.walkWestTo(0, includeCurrent = false) }
         )
 
     fun slideSouth(): Platform =
@@ -140,11 +132,7 @@ data class Platform(val rocks: Map<Coord, Char>) {
                     Coord(x, y)
                 }
             },
-            coordsToFallAt = { startCoord -> sequence {
-                (startCoord.y + 1 until height).forEach { y ->
-                    yield(Coord(startCoord.x, y))
-                }
-            }}
+            coordsToFallAt = { it.walkSouthTo(height - 1, includeCurrent = false) }
         )
 
     fun slideEast(): Platform =
@@ -154,11 +142,7 @@ data class Platform(val rocks: Map<Coord, Char>) {
                     Coord(x, y)
                 }
             },
-            coordsToFallAt = { startCoord -> sequence {
-                (startCoord.x + 1 until width).forEach { x ->
-                    yield(Coord(x, startCoord.y))
-                }
-            }}
+            coordsToFallAt = { it.walkEastTo(width - 1, includeCurrent = false) }
         )
 
     private fun slide(allCoordsToBrowse: Iterable<Coord>,

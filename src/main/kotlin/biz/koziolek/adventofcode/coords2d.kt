@@ -20,6 +20,34 @@ data class Coord(val x: Int, val y: Int) {
     infix fun manhattanDistanceTo(other: Coord): Int =
         abs(x - other.x) + abs(y - other.y)
 
+    fun walkNorthTo(dstY: Int, includeCurrent: Boolean) = sequence {
+        val startY = if (includeCurrent) y else y - 1
+        for (y in startY downTo dstY) {
+            yield(Coord(x, y))
+        }
+    }
+
+    fun walkWestTo(dstX: Int, includeCurrent: Boolean) = sequence {
+        val startX = if (includeCurrent) x else x - 1
+        for (x in startX downTo dstX) {
+            yield(Coord(x, y))
+        }
+    }
+
+    fun walkSouthTo(dstY: Int, includeCurrent: Boolean) = sequence {
+        val startY = if (includeCurrent) y else y + 1
+        for (y in startY..dstY) {
+            yield(Coord(x, y))
+        }
+    }
+
+    fun walkEastTo(dstX: Int, includeCurrent: Boolean) = sequence {
+        val startX = if (includeCurrent) x else x + 1
+        for (x in startX..dstX) {
+            yield(Coord(x, y))
+        }
+    }
+
     companion object {
         fun fromString(str: String): Coord =
             str.split(',')
