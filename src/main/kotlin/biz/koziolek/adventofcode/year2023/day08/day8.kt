@@ -105,7 +105,7 @@ data class WastelandNode(val id: String) {
 }
 
 fun parseWastelandMap(lines: List<String>): WastelandMap {
-    val instructions = lines.first
+    val instructions = lines.first()
     val regex = Regex("(?<start>[A-Z0-9]+) = \\((?<left>[A-Z0-9]+), (?<right>[A-Z0-9]+)\\)")
 
     val nodes = lines

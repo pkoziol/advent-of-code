@@ -19,28 +19,28 @@ fun parseOasisReport(lines: Iterable<String>): OasisReport =
         .let { OasisReport(it) }
 
 fun predictNextValue(history: List<Int>): Int =
-    extrapolateHistory(history).first.last
+    extrapolateHistory(history).first().last()
 
 fun predictPreviousValue(history: List<Int>): Int =
-    extrapolateHistoryBackwards(history).first.first
+    extrapolateHistoryBackwards(history).first().first()
 
 internal fun extrapolateHistory(history: List<Int>): List<List<Int>> {
     val reduced = reduceHistory(history)
-    val lastRowExtended = reduced.last + 0
+    val lastRowExtended = reduced.last() + 0
     return reduced
         .dropLast(1)
         .foldRight(listOf(lastRowExtended)) { ints, acc ->
-            val newRow = ints + (ints.last + acc.first.last)
+            val newRow = ints + (ints.last() + acc.first().last())
             listOf(newRow) + acc
         }
 }
 internal fun extrapolateHistoryBackwards(history: List<Int>): List<List<Int>> {
     val reduced = reduceHistory(history)
-    val lastRowExtended = listOf(0) + reduced.last
+    val lastRowExtended = listOf(0) + reduced.last()
     return reduced
         .dropLast(1)
         .foldRight(listOf(lastRowExtended)) { ints, acc ->
-            val newRow = listOf(ints.first - acc.first.first) + ints
+            val newRow = listOf(ints.first() - acc.first().first()) + ints
             listOf(newRow) + acc
         }
 }
