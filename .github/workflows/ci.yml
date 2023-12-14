@@ -13,7 +13,6 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'maven'
       - name: Build and test
         run: mvn --batch-mode --update-snapshots verify
       - name: Test Reporter
