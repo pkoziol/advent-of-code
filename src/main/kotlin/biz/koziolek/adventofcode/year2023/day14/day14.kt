@@ -15,19 +15,19 @@ const val EMPTY_SPACE = '.'
 
 data class Platform(val rocks: Map<Coord, Char>) {
 
-    val totalLoad: Int =
+    val width = rocks.getWidth()
+    val height = rocks.getHeight()
+    val totalLoad: Int by lazy {
         rocks
             .filter { it.value == ROUND_ROCK }
-            .map { rocks.getHeight() - it.key.y }
+            .map { height - it.key.y }
             .sum()
+    }
 
     override fun toString() = toString(color = false)
 
     fun toString(color: Boolean = false) =
         buildString {
-            val width = rocks.getWidth()
-            val height = rocks.getHeight()
-
             for (y in 0 until height) {
                 for (x in 0 until width) {
                     val coord = Coord(x, y)
@@ -50,11 +50,8 @@ data class Platform(val rocks: Map<Coord, Char>) {
             }
         }
 
-    private val seenPlatforms = mutableMapOf<Platform, MutableList<Int>>()
-
     fun cycle(n: Int): Platform {
-        seenPlatforms.clear()
-
+        val seenPlatforms = mutableMapOf<Platform, MutableList<Int>>()
         var newPlatform = this
         var startOffset: Int? = null
         var cyclePeriod: Int? = null
@@ -89,11 +86,6 @@ data class Platform(val rocks: Map<Coord, Char>) {
         println("Whole periods: $wholePeriods")
         println("End remainder: $endRemainder")
 
-        newPlatform = this
-        for (cycle in 1..startOffset) {
-//            println("Cycle $cycle")
-            newPlatform = cycleInternal(newPlatform, cycle)
-        }
         for (cycle in (startOffset + wholePeriods * cyclePeriod + 1)..(startOffset + wholePeriods * cyclePeriod + endRemainder)) {
 //            println("Cycle $cycle")
             newPlatform = cycleInternal(newPlatform, cycle)
@@ -116,8 +108,8 @@ data class Platform(val rocks: Map<Coord, Char>) {
     fun slideNorth(): Platform {
         val newRocks = rocks.toMutableMap()
 
-        for (y in 0..rocks.getHeight()) {
-            for (x in 0..rocks.getWidth()) {
+        for (y in 0..height) {
+            for (x in 0..width) {
                 val coord = Coord(x, y)
                 if (newRocks[coord] == ROUND_ROCK) {
                     var lastFreeY = y
@@ -141,8 +133,8 @@ data class Platform(val rocks: Map<Coord, Char>) {
     fun slideWest(): Platform {
         val newRocks = rocks.toMutableMap()
 
-        for (x in 0..rocks.getWidth()) {
-            for (y in 0..rocks.getHeight()) {
+        for (x in 0..width) {
+            for (y in 0..height) {
                 val coord = Coord(x, y)
                 if (newRocks[coord] == ROUND_ROCK) {
                     var lastFreeX = x
@@ -166,12 +158,12 @@ data class Platform(val rocks: Map<Coord, Char>) {
     fun slideSouth(): Platform {
         val newRocks = rocks.toMutableMap()
 
-        for (y in rocks.getHeight()-1 downTo 0) {
-            for (x in 0..rocks.getWidth()) {
+        for (y in height-1 downTo 0) {
+            for (x in 0..width) {
                 val coord = Coord(x, y)
                 if (newRocks[coord] == ROUND_ROCK) {
                     var lastFreeY = y
-                    for (yy in y+1 until rocks.getHeight()) {
+                    for (yy in y+1 until height) {
                         if (newRocks[Coord(x, yy)] == null) {
                             lastFreeY = yy
                         } else {
@@ -191,12 +183,12 @@ data class Platform(val rocks: Map<Coord, Char>) {
     fun slideEast(): Platform {
         val newRocks = rocks.toMutableMap()
 
-        for (x in rocks.getWidth()-1 downTo 0) {
-            for (y in 0..rocks.getHeight()) {
+        for (x in width-1 downTo 0) {
+            for (y in 0..height) {
                 val coord = Coord(x, y)
                 if (newRocks[coord] == ROUND_ROCK) {
                     var lastFreeX = x
-                    for (xx in x+1 until   rocks.getWidth()) {
+                    for (xx in x+1 until   width) {
                         if (newRocks[Coord(xx, y)] == null) {
                             lastFreeX = xx
                         } else {
