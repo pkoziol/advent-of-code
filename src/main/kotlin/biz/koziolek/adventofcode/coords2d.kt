@@ -77,6 +77,80 @@ fun <T> Map<Coord, T>.getWidth() = keys.maxOfOrNull { it.x }?.plus(1) ?: 0
 
 fun <T> Map<Coord, T>.getHeight() = keys.maxOfOrNull { it.y }?.plus(1) ?: 0
 
+/**
+ * Walk north -> south, west -> east.
+ *
+ *     |---> 1
+ *     |---> 2
+ *     |---> 3
+ *     V
+ */
+fun <T> Map<Coord, T>.walkSouth() = sequence {
+    val width = getWidth()
+    val height = getHeight()
+    for (y in 0..<height) {
+        for (x in 0..<width) {
+            yield(Coord(x, y))
+        }
+    }
+}
+
+/**
+ * Walk west -> east, south -> north.
+ *
+ *     1 2 3
+ *     ^ ^ ^
+ *     | | |
+ *     | | |
+ *     ----->
+ */
+fun <T> Map<Coord, T>.walkEast() = sequence {
+    val width = getWidth()
+    val height = getHeight()
+    for (x in 0..<width) {
+        for (y in height-1 downTo 0) {
+            yield(Coord(x, y))
+        }
+    }
+}
+
+/**
+ * Walk south -> north -> south, east -> west.
+ *
+ *           ^
+ *     3 <---|
+ *     2 <---|
+ *     1 <---|
+ */
+fun <T> Map<Coord, T>.walkNorth() = sequence {
+    val width = getWidth()
+    val height = getHeight()
+    for (y in height-1 downTo 0) {
+        for (x in width-1 downTo 0) {
+            yield(Coord(x, y))
+        }
+    }
+}
+
+/**
+ * Walk east -> west, north -> south.
+ *
+ *     <-----
+ *      | | |
+ *      | | |
+ *      V V V
+ *      3 2 1
+ */
+fun <T> Map<Coord, T>.walkWest() = sequence {
+    val width = getWidth()
+    val height = getHeight()
+    for (x in width-1 downTo 0) {
+        for (y in 0..<height) {
+            yield(Coord(x, y))
+        }
+    }
+}
+
 fun <T> Map<Coord, T>.getAdjacentCoords(coord: Coord, includeDiagonal: Boolean): Set<Coord> =
     keys.getAdjacentCoords(coord, includeDiagonal)
 

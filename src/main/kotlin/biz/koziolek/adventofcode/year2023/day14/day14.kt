@@ -107,45 +107,29 @@ data class Platform(val rocks: Map<Coord, Char>) {
 
     fun slideNorth(): Platform =
         slide(
-            allCoordsToBrowse = (0..height).flatMap { y ->
-                (0..width).map { x ->
-                    Coord(x, y)
-                }
-            },
+            allCoordsToBrowse = rocks.walkSouth(),
             coordsToFallAt = { it.walkNorthTo(0, includeCurrent = false) }
         )
 
     fun slideWest(): Platform =
         slide(
-            allCoordsToBrowse = (0..width).flatMap { x ->
-                (0..height).map { y ->
-                    Coord(x, y)
-                }
-            },
+            allCoordsToBrowse = rocks.walkEast(),
             coordsToFallAt = { it.walkWestTo(0, includeCurrent = false) }
         )
 
     fun slideSouth(): Platform =
         slide(
-            allCoordsToBrowse = (height-1 downTo 0).flatMap { y ->
-                (0..width).map { x ->
-                    Coord(x, y)
-                }
-            },
+            allCoordsToBrowse = rocks.walkNorth(),
             coordsToFallAt = { it.walkSouthTo(height - 1, includeCurrent = false) }
         )
 
     fun slideEast(): Platform =
         slide(
-            allCoordsToBrowse = (width-1 downTo 0).flatMap { x ->
-                (0..height).map { y ->
-                    Coord(x, y)
-                }
-            },
+            allCoordsToBrowse = rocks.walkWest(),
             coordsToFallAt = { it.walkEastTo(width - 1, includeCurrent = false) }
         )
 
-    private fun slide(allCoordsToBrowse: Iterable<Coord>,
+    private fun slide(allCoordsToBrowse: Sequence<Coord>,
                       coordsToFallAt: (Coord) -> Sequence<Coord>): Platform {
         val newRocks = rocks.toMutableMap()
 
