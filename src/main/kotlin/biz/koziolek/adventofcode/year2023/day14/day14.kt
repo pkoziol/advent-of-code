@@ -105,100 +105,79 @@ data class Platform(val rocks: Map<Coord, Char>) {
             .slideEast()
 //            .also { println("East:\n${it.toString(color = true)}\n") }
 
-    fun slideNorth(): Platform {
+    fun slideNorth(): Platform =
+        slide(
+            allCoordsToBrowse = (0..height).flatMap { y ->
+                (0..width).map { x ->
+                    Coord(x, y)
+                }
+            },
+            coordsToFallAt = { startCoord -> sequence {
+                (startCoord.y - 1 downTo 0).forEach { y ->
+                    yield(Coord(startCoord.x, y))
+                }
+            }}
+        )
+
+    fun slideWest(): Platform =
+        slide(
+            allCoordsToBrowse = (0..width).flatMap { x ->
+                (0..height).map { y ->
+                    Coord(x, y)
+                }
+            },
+            coordsToFallAt = { startCoord -> sequence {
+                (startCoord.x-1 downTo 0).forEach { x ->
+                    yield(Coord(x, startCoord.y))
+                }
+            }}
+        )
+
+    fun slideSouth(): Platform =
+        slide(
+            allCoordsToBrowse = (height-1 downTo 0).flatMap { y ->
+                (0..width).map { x ->
+                    Coord(x, y)
+                }
+            },
+            coordsToFallAt = { startCoord -> sequence {
+                (startCoord.y + 1 until height).forEach { y ->
+                    yield(Coord(startCoord.x, y))
+                }
+            }}
+        )
+
+    fun slideEast(): Platform =
+        slide(
+            allCoordsToBrowse = (width-1 downTo 0).flatMap { x ->
+                (0..height).map { y ->
+                    Coord(x, y)
+                }
+            },
+            coordsToFallAt = { startCoord -> sequence {
+                (startCoord.x + 1 until width).forEach { x ->
+                    yield(Coord(x, startCoord.y))
+                }
+            }}
+        )
+
+    private fun slide(allCoordsToBrowse: Iterable<Coord>,
+                      coordsToFallAt: (Coord) -> Sequence<Coord>): Platform {
         val newRocks = rocks.toMutableMap()
 
-        for (y in 0..height) {
-            for (x in 0..width) {
-                val coord = Coord(x, y)
-                if (newRocks[coord] == ROUND_ROCK) {
-                    var lastFreeY = y
-                    for (yy in y-1 downTo 0) {
-                        if (newRocks[Coord(x, yy)] == null) {
-                            lastFreeY = yy
-                        } else {
-                            break
-                        }
+        for (coord in allCoordsToBrowse) {
+            if (newRocks[coord] == ROUND_ROCK) {
+                var lastFreeCoord = coord
+                for (coordToFallAt in coordsToFallAt(coord)) {
+                    if (newRocks[coordToFallAt] == null) {
+                        lastFreeCoord = coordToFallAt
+                    } else {
+                        break
                     }
-
-                    newRocks.remove(coord)
-                    newRocks[Coord(x, lastFreeY)] = ROUND_ROCK
                 }
-            }
-        }
 
-        return Platform(newRocks)
-    }
-
-    fun slideWest(): Platform {
-        val newRocks = rocks.toMutableMap()
-
-        for (x in 0..width) {
-            for (y in 0..height) {
-                val coord = Coord(x, y)
-                if (newRocks[coord] == ROUND_ROCK) {
-                    var lastFreeX = x
-                    for (xx in x-1 downTo 0) {
-                        if (newRocks[Coord(xx, y)] == null) {
-                            lastFreeX = xx
-                        } else {
-                            break
-                        }
-                    }
-
-                    newRocks.remove(coord)
-                    newRocks[Coord(lastFreeX, y)] = ROUND_ROCK
-                }
-            }
-        }
-
-        return Platform(newRocks)
-    }
-
-    fun slideSouth(): Platform {
-        val newRocks = rocks.toMutableMap()
-
-        for (y in height-1 downTo 0) {
-            for (x in 0..width) {
-                val coord = Coord(x, y)
-                if (newRocks[coord] == ROUND_ROCK) {
-                    var lastFreeY = y
-                    for (yy in y+1 until height) {
-                        if (newRocks[Coord(x, yy)] == null) {
-                            lastFreeY = yy
-                        } else {
-                            break
-                        }
-                    }
-
-                    newRocks.remove(coord)
-                    newRocks[Coord(x, lastFreeY)] = ROUND_ROCK
-                }
-            }
-        }
-
-        return Platform(newRocks)
-    }
-
-    fun slideEast(): Platform {
-        val newRocks = rocks.toMutableMap()
-
-        for (x in width-1 downTo 0) {
-            for (y in 0..height) {
-                val coord = Coord(x, y)
-                if (newRocks[coord] == ROUND_ROCK) {
-                    var lastFreeX = x
-                    for (xx in x+1 until   width) {
-                        if (newRocks[Coord(xx, y)] == null) {
-                            lastFreeX = xx
-                        } else {
-                            break
-                        }
-                    }
-
-                    newRocks.remove(coord)
-                    newRocks[Coord(lastFreeX, y)] = ROUND_ROCK
-                }
+                newRocks.remove(coord)
+                newRocks[lastFreeCoord] = ROUND_ROCK
             }
         }
 
