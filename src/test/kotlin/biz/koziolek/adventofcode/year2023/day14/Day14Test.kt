@@ -59,4 +59,61 @@ internal class Day14Test {
         val platform = parsePlatform(input)
         assertEquals(108918, platform.slideNorth().totalLoad)
     }
+
+    @Test
+    fun testCycle() {
+        val platform = parsePlatform(sampleInput)
+        assertEquals("""
+            .....#....
+            ....#...O#
+            ...OO##...
+            .OO#......
+            .....OOO#.
+            .O#...O#.#
+            ....O#....
+            ......OOOO
+            #...O###..
+            #..OO#....
+        """.trimIndent(), platform.cycle(n = 1).toString())
+        assertEquals("""
+            .....#....
+            ....#...O#
+            .....##...
+            ..O#......
+            .....OOO#.
+            .O#...O#.#
+            ....O#...O
+            .......OOO
+            #..OO###..
+            #.OOO#...O
+        """.trimIndent(), platform.cycle(n = 2).toString())
+        assertEquals("""
+            .....#....
+            ....#...O#
+            .....##...
+            ..O#......
+            .....OOO#.
+            .O#...O#.#
+            ....O#...O
+            .......OOO
+            #...O###.O
+            #.OOO#...O
+        """.trimIndent(), platform.cycle(n = 3).toString())
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val platform = parsePlatform(sampleInput)
+        val cycled = platform.cycle(n = 1_000_000_000)
+        println(cycled.toString())
+        assertEquals(64, cycled.totalLoad)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val platform = parsePlatform(input)
+        assertEquals(100310, platform.cycle(n = 1_000_000_000).totalLoad)
+    }
 }
