@@ -6,10 +6,14 @@ fun main() {
     val inputFile = findInput(object {})
     val initSeq = parseInitializationSequence(inputFile.bufferedReader().readLines())
     println("Hash of initialization sequence is: ${initSeq.sumOf { it.hash() }}")
+    println("Boxes focusing power: ${BoxesLine().initialize(initSeq).contents.sumOf { it.focusingPower }}")
 }
 
 sealed interface InitOperation {
     val lensLabel: String
+    val boxId: Int
+        get() = hash(lensLabel)
+
     override fun toString(): String
     fun hash() = hash(this.toString())
 }
@@ -24,6 +28,42 @@ data class AddOperation(val lens: Lens) : InitOperation {
 }
 
 data class Lens(val label: String, val focalLength: Int)
+
+data class BoxesLine(val contents: List<Box> = List(size = 256, init = { Box(it, emptyList()) })) {
+    fun initialize(initSeq: List<InitOperation>): BoxesLine =
+        initSeq.fold(this) { boxes, operation ->
+            BoxesLine(
+                contents = boxes.contents.map { box ->
+                    if (box.id == operation.boxId) {
+                        when (operation) {
+                            is RemoveOperation -> box.remove(operation.lensLabel)
+                            is AddOperation -> box.add(operation.lens)
+                        }
+                    } else {
+                        box
+                    }
+                }
+            )
+        }
+}
+
+data class Box(val id: Int, val contents: List<Lens>) {
+    val focusingPower: Int = contents
+        .mapIndexed { index, lens ->
+            (id + 1) * (index + 1) * lens.focalLength
+        }
+        .sum()
+
+    fun remove(lensLabel: String): Box =
+        copy(contents = contents.filter { it.label != lensLabel })
+
+    fun add(newLens: Lens): Box =
+        copy(contents = if (contents.any { it.label == newLens.label }) {
+            contents.map { if (it.label == newLens.label) newLens else it }
+        } else {
+            contents + newLens
+        })
+}
 
 fun parseInitializationSequence(lines: Iterable<String>): List<InitOperation> =
     lines.first()
