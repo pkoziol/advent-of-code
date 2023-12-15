@@ -57,4 +57,37 @@ internal class Day15Test {
         val initSeq = parseInitializationSequence(input)
         assertEquals(513172, initSeq.sumOf { it.hash() })
     }
+
+    @Test
+    fun testFocusingPower() {
+        assertEquals(5, Box(id = 0, contents = listOf(
+            Lens(label = "rn", focalLength = 1),
+            Lens(label = "cm", focalLength = 2),
+        )).focusingPower)
+        assertEquals(140, Box(id = 3, contents = listOf(
+            Lens(label = "ot", focalLength = 7),
+            Lens(label = "ab", focalLength = 5),
+            Lens(label = "pc", focalLength = 6),
+        )).focusingPower)
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val initSeq = parseInitializationSequence(sampleInput)
+        val focusingPower = BoxesLine()
+            .initialize(initSeq)
+            .contents.sumOf { it.focusingPower }
+        assertEquals(145, focusingPower)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val initSeq = parseInitializationSequence(input)
+        val focusingPower = BoxesLine()
+            .initialize(initSeq)
+            .contents.sumOf { it.focusingPower }
+        assertEquals(237806, focusingPower)
+    }
 }
