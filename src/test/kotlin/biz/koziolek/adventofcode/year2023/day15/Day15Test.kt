@@ -17,17 +17,17 @@ internal class Day15Test {
         val initSeq = parseInitializationSequence(sampleInput)
         assertEquals(
             listOf(
-                InitOperation(name = "rn", symbol = '=', value = 1),
-                InitOperation(name = "cm", symbol = '-'),
-                InitOperation(name = "qp", symbol = '=', value = 3),
-                InitOperation(name = "cm", symbol = '=', value = 2),
-                InitOperation(name = "qp", symbol = '-'),
-                InitOperation(name = "pc", symbol = '=', value = 4),
-                InitOperation(name = "ot", symbol = '=', value = 9),
-                InitOperation(name = "ab", symbol = '=', value = 5),
-                InitOperation(name = "pc", symbol = '-'),
-                InitOperation(name = "pc", symbol = '=', value = 6),
-                InitOperation(name = "ot", symbol = '=', value = 7),
+                AddOperation(lens = Lens(label = "rn", focalLength = 1)),
+                RemoveOperation(lensLabel = "cm"),
+                AddOperation(lens = Lens(label = "qp", focalLength = 3)),
+                AddOperation(lens = Lens(label = "cm", focalLength = 2)),
+                RemoveOperation(lensLabel = "qp"),
+                AddOperation(lens = Lens(label = "pc", focalLength = 4)),
+                AddOperation(lens = Lens(label = "ot", focalLength = 9)),
+                AddOperation(lens = Lens(label = "ab", focalLength = 5)),
+                RemoveOperation(lensLabel = "pc"),
+                AddOperation(lens = Lens(label = "pc", focalLength = 6)),
+                AddOperation(lens = Lens(label = "ot", focalLength = 7)),
             ),
             initSeq
         )
@@ -40,8 +40,8 @@ internal class Day15Test {
 
     @Test
     fun testInitOperationToString() {
-        assertEquals("rn=1", InitOperation(name = "rn", symbol = '=', value = 1).toString())
-        assertEquals("cm-", InitOperation(name = "cm", symbol = '-').toString())
+        assertEquals("rn=1", AddOperation(lens = Lens(label = "rn", focalLength = 1)).toString())
+        assertEquals("cm-", RemoveOperation(lensLabel = "cm").toString())
     }
 
     @Test

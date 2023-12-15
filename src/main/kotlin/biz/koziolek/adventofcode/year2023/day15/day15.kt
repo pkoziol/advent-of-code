@@ -8,23 +8,40 @@ fun main() {
     println("Hash of initialization sequence is: ${initSeq.sumOf { it.hash() }}")
 }
 
-data class InitOperation(val name: String, val symbol: Char, val value: Int? = null) {
-
-    override fun toString() = "$name$symbol${value ?: ""}"
-
+sealed interface InitOperation {
+    val lensLabel: String
+    override fun toString(): String
     fun hash() = hash(this.toString())
 }
+
+data class RemoveOperation(override val lensLabel: String) : InitOperation {
+    override fun toString() = "$lensLabel-"
+}
+
+data class AddOperation(val lens: Lens) : InitOperation {
+    override val lensLabel = lens.label
+    override fun toString() = "${lens.label}=${lens.focalLength}"
+}
+
+data class Lens(val label: String, val focalLength: Int)
 
 fun parseInitializationSequence(lines: Iterable<String>): List<InitOperation> =
     lines.first()
         .split(',')
         .mapNotNull { Regex("^([a-zA-Z]+)(=([0-9]+)|-)$").find(it) }
         .map {
-            InitOperation(
-                name = it.groups[1]!!.value,
-                symbol = it.groups[2]!!.value.first(),
-                value = it.groups[3]?.value?.toInt()
-            )
+            when (val symbol = it.groups[2]!!.value.first()) {
+                '-' -> RemoveOperation(
+                    lensLabel = it.groups[1]!!.value,
+                )
+                '=' -> AddOperation(
+                    lens = Lens(
+                        label = it.groups[1]!!.value,
+                        focalLength = it.groups[3]!!.value.toInt(),
+                    ),
+                )
+                else -> throw IllegalArgumentException("Unknown operation character: $symbol")
+            }
         }
 
 fun hash(string: String): Int =
