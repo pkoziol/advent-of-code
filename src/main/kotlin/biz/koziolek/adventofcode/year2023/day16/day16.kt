@@ -115,3 +115,15 @@ fun showEnergizedTiles(beamPath: Sequence<Pair<Coord, Direction>>): String =
 
 fun countEnergizedTiles(beamPath: Sequence<Pair<Coord, Direction>>): Int =
     getEnergizedTiles(beamPath).keys.size
+
+fun findBestBeamStart(mirrors: Map<Coord, Char>): Pair<Coord, Direction> {
+    val width = mirrors.getWidth()
+    val height = mirrors.getHeight()
+    val startsNorth = (0..<width).map { x -> Coord(x, 0) to Direction.SOUTH }
+    val startsSouth = (0..<width).map { x -> Coord(x, height - 1) to Direction.NORTH }
+    val startsWest = (0..<height).map { y -> Coord(0, y) to Direction.EAST }
+    val startsEast = (0..<height).map { y -> Coord(width - 1, y) to Direction.WEST }
+
+    return (startsNorth + startsSouth + startsWest + startsEast)
+        .maxBy { countEnergizedTiles(simulateBeam(mirrors, it)) }
+}
