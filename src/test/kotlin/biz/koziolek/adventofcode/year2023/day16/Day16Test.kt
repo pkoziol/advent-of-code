@@ -94,4 +94,44 @@ internal class Day16Test {
         val beamPath = simulateBeam(mirrors)
         assertEquals(7242, countEnergizedTiles(beamPath))
     }
+
+    @Test
+    fun testFindBestBeamStart() {
+        val mirrors = parseMirrorContraption(sampleInput)
+        val bestBeamStart = findBestBeamStart(mirrors)
+        val beamPath = simulateBeam(mirrors, bestBeamStart)
+        assertEquals(
+            """
+                .#####....
+                .#.#.#....
+                .#.#.#####
+                .#.#.##...
+                .#.#.##...
+                .#.#.##...
+                .#.#####..
+                ########..
+                .#######..
+                .#...#.#..
+            """.trimIndent(),
+            showEnergizedTiles(beamPath)
+        )
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val mirrors = parseMirrorContraption(sampleInput)
+        val bestBeamStart = findBestBeamStart(mirrors)
+        val beamPath = simulateBeam(mirrors, bestBeamStart)
+        assertEquals(51, countEnergizedTiles(beamPath))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val mirrors = parseMirrorContraption(input)
+        val bestBeamStart = findBestBeamStart(mirrors)
+        val beamPath = simulateBeam(mirrors, bestBeamStart)
+        assertEquals(7572, countEnergizedTiles(beamPath))
+    }
 }
