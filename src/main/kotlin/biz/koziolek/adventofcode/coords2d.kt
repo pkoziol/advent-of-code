@@ -4,6 +4,13 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+enum class Direction {
+    NORTH,
+    SOUTH,
+    WEST,
+    EAST,
+}
+
 data class Coord(val x: Int, val y: Int) {
     operator fun plus(other: Coord) = Coord(x + other.x, y + other.y)
     operator fun minus(other: Coord) = Coord(x - other.x, y - other.y)
@@ -19,6 +26,14 @@ data class Coord(val x: Int, val y: Int) {
 
     infix fun manhattanDistanceTo(other: Coord): Int =
         abs(x - other.x) + abs(y - other.y)
+
+    fun move(direction: Direction): Coord =
+        when (direction) {
+            Direction.NORTH -> copy(y = y - 1)
+            Direction.SOUTH -> copy(y = y + 1)
+            Direction.WEST -> copy(x = x - 1)
+            Direction.EAST -> copy(x = x + 1)
+        }
 
     fun walkNorthTo(dstY: Int, includeCurrent: Boolean) = sequence {
         val startY = if (includeCurrent) y else y - 1
@@ -150,6 +165,22 @@ fun <T> Map<Coord, T>.walkWest() = sequence {
         }
     }
 }
+
+fun <T> Map<Coord, T>.to2DString(formatter: (Coord, T?) -> Char): String =
+    buildString {
+        val width = getWidth()
+        val height = getHeight()
+        for (y in 0..<height) {
+            for (x in 0..<width) {
+                val coord = Coord(x, y)
+                val value = get(coord)
+                append(formatter(coord, value))
+            }
+            if (y != height-1) {
+                append('\n')
+            }
+        }
+    }
 
 fun <T> Map<Coord, T>.getAdjacentCoords(coord: Coord, includeDiagonal: Boolean): Set<Coord> =
     keys.getAdjacentCoords(coord, includeDiagonal)
