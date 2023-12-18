@@ -27,12 +27,12 @@ data class Coord(val x: Int, val y: Int) {
     infix fun manhattanDistanceTo(other: Coord): Int =
         abs(x - other.x) + abs(y - other.y)
 
-    fun move(direction: Direction): Coord =
+    fun move(direction: Direction, count: Int = 1): Coord =
         when (direction) {
-            Direction.NORTH -> copy(y = y - 1)
-            Direction.SOUTH -> copy(y = y + 1)
-            Direction.WEST -> copy(x = x - 1)
-            Direction.EAST -> copy(x = x + 1)
+            Direction.NORTH -> copy(y = y - count)
+            Direction.SOUTH -> copy(y = y + count)
+            Direction.WEST -> copy(x = x - count)
+            Direction.EAST -> copy(x = x + count)
         }
 
     fun walk(direction: Direction, distance: Int, includeCurrent: Boolean) =
@@ -72,6 +72,9 @@ data class Coord(val x: Int, val y: Int) {
     }
 
     companion object {
+        val yComparator: Comparator<Coord> = Comparator.comparing { it.y }
+        val xComparator: Comparator<Coord> = Comparator.comparing { it.x }
+
         fun fromString(str: String): Coord =
             str.split(',')
                 .map { it.toInt() }
@@ -105,6 +108,11 @@ fun <T> Map<Coord, T>.getHorizontalRange() =
 
 fun <T> Map<Coord, T>.getVerticalRange() =
     keys.minAndMaxOrNull { it.y }?.let { it.first..it.second } ?: IntRange.EMPTY
+
+fun Iterable<Coord>.sortByYX() =
+    sortedWith(
+        Coord.yComparator.thenComparing(Coord.xComparator)
+    )
 
 /**
  * Walk north -> south, west -> east.
