@@ -35,6 +35,14 @@ data class Coord(val x: Int, val y: Int) {
             Direction.EAST -> copy(x = x + 1)
         }
 
+    fun moveBackwards(direction: Direction): Coord =
+        when (direction) {
+            Direction.NORTH -> copy(y = y + 1)
+            Direction.SOUTH -> copy(y = y - 1)
+            Direction.WEST -> copy(x = x + 1)
+            Direction.EAST -> copy(x = x - 1)
+        }
+
     fun walk(direction: Direction, distance: Int, includeCurrent: Boolean) =
         when (direction) {
             Direction.NORTH -> walkNorthTo(y - distance, includeCurrent)
