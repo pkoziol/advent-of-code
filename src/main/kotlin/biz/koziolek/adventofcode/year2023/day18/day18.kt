@@ -8,11 +8,11 @@ fun main() {
     println("The trench can hold ${calculateTrenchVolume(buildTrenchEdge(digPlan))} cubic meters")
 }
 
-data class DigPlanEntry(val direction: Direction, val distance: Int, val color: String)
+data class DigPlanEntry(val direction: Direction, val distance: Long)
 
 fun parseDigPlan(lines: Iterable<String>): List<DigPlanEntry> =
     lines
-        .mapNotNull { line -> Regex("([UDLR]) ([0-9]+) \\((#[0-9a-fA-F]+)\\)").find(line) }
+        .mapNotNull { line -> Regex("([UDLR]) ([0-9]+) \\(#([0-9a-fA-F]{6})\\)").find(line) }
         .map { match ->
             DigPlanEntry(
                 direction = when (val dirStr = match.groups[1]!!.value) {
@@ -20,10 +20,25 @@ fun parseDigPlan(lines: Iterable<String>): List<DigPlanEntry> =
                     "D" -> Direction.SOUTH
                     "L" -> Direction.WEST
                     "R" -> Direction.EAST
-                    else -> throw IllegalArgumentException("Unexpected durection: $dirStr")
+                    else -> throw IllegalArgumentException("Unexpected direction: $dirStr")
                 },
-                distance = match.groups[2]!!.value.toInt(),
-                color = match.groups[3]!!.value,
+                distance = match.groups[2]!!.value.toLong(),
+            )
+        }
+
+fun parseDigPlanV2(lines: Iterable<String>): List<DigPlanEntry> =
+    lines
+        .mapNotNull { line -> Regex("([UDLR]) ([0-9]+) \\(#([0-9a-fA-F]{6})\\)").find(line) }
+        .map { match ->
+            DigPlanEntry(
+                direction = when (val lastHexDigit = match.groups[3]!!.value[5]) {
+                    '0' -> Direction.EAST
+                    '1' -> Direction.SOUTH
+                    '2' -> Direction.WEST
+                    '3' -> Direction.NORTH
+                    else -> throw IllegalArgumentException("Unexpected hex digit: $lastHexDigit")
+                },
+                distance = match.groups[3]!!.value.dropLast(1).toLong(radix = 16),
             )
         }
 
@@ -34,28 +49,18 @@ const val NORTH_EAST_CORNER = '7'
 const val NORTH_WEST_CORNER = 'F'
 const val SOUTH_WEST_CORNER = 'L'
 const val SOUTH_EAST_CORNER = 'J'
+const val VERTICAL_EDGE = '|'
 
-fun buildTrenchEdge(digPlan: List<DigPlanEntry>): Map<Coord, Char> {
-    var currentPos = Coord(0, 0)
+fun buildTrenchEdge(digPlan: List<DigPlanEntry>): Map<LongCoord, Char> {
+    var currentPos = LongCoord(0, 0)
     var previousDirection: Direction? = null
     val map = mutableMapOf(currentPos to TRENCH)
 
-    for ((direction, distance, color) in digPlan) {
-        var first = true
-        for (coord in currentPos.walk(direction, distance, includeCurrent = false)) {
-            val char = if (first) {
-                first = false
+    for ((direction, distance) in digPlan) {
+        map[currentPos] = getCornerCharacter(previousDirection, direction)
 
-                getCornerCharacter(previousDirection, direction)
-            } else {
-                direction.char
-            }
-
-            map[currentPos] = char
-
-            currentPos = coord
-            previousDirection = direction
-        }
+        currentPos = currentPos.move(direction, distance)
+        previousDirection = direction
     }
 
     map[currentPos] = getCornerCharacter(previousDirection, digPlan.first().direction)
@@ -92,61 +97,129 @@ private fun getCornerCharacter(previousDirection: Direction?, nextDirection: Dir
         null -> nextDirection.char
     }
 
-fun calculateTrenchVolume(trenchEdge: Map<Coord, Char>): Int {
-    var size = 0
-    val (minX, maxX) = trenchEdge.keys.minAndMaxOrNull { it.x }!!
-    val (minY, maxY) = trenchEdge.keys.minAndMaxOrNull { it.y }!!
+fun calculateTrenchVolume(trenchEdge: Map<LongCoord, Char>, debug: Boolean = false): Long {
+    var size = 0L
+    val coords = trenchEdge.keys.sortByYX()
+    val groupedCoords = coords.groupBy { it.y }
+    var previousY = coords.first().y
+    val verticals = mutableSetOf<Long>()
 
-    for (y in minY..maxY) {
+    for ((y, cornersInLine) in groupedCoords.entries.sortedBy { it.key }) {
+        if (debug) print("y = $y size = $size\n")
+
+        val yDiff = y - previousY
+
+        if (yDiff > 1) {
+            val skippedLines = yDiff - 1
+            val volumeInLine = sumEvenPairDifferences(verticals)
+            val count = skippedLines * volumeInLine
+            if (debug) println("  skipped $skippedLines of volume $volumeInLine = $count")
+            size += count
+        }
+
+        val line: List<Pair<Long, Char>> = cornersInLine
+            .map { it.x to (trenchEdge[it] ?: throw IllegalStateException("No corner found for $it")) }
+            .plus(
+                verticals
+                    .filter { x -> cornersInLine.none { it.x == x } }
+                    .map { x -> x to VERTICAL_EDGE }
+            )
+            .sortedBy { it.first }
+
         var isInside = false
         var previousCorner: Char? = null
+        var previousX = line.first().first - 1
 
-        for (x in minX..maxX) {
-            val coord = Coord(x, y)
-            val char = trenchEdge[coord] ?: LEVEL_TERRAIN
-
-            val counts = when {
-                isVerticalEdge(char) -> {
-                    isInside = !isInside
-                    true
+        if (debug) println(
+            (coords.minOf { it.x }..coords.maxOf { it.x })
+                .map { x ->
+                    line.firstOrNull { it.first == x }?.second ?: LEVEL_TERRAIN
                 }
-                isHorizontalEdge(char) -> true
+                .joinToString("") { it.toString() }
+        )
+
+        for ((x, char) in line) {
+            val xDiff = x - previousX
+            val count = when {
+                isVerticalEdge(char) -> {
+                    val wasInside = isInside
+                    isInside = !isInside
+
+                    if (wasInside)
+                        xDiff
+                    else
+                        1
+                }
+                isHorizontalEdge(char) -> throw IllegalStateException("Should never encounter horizontal edge but did at ($x,$y)")
+                isEastCornerSameAsWest(char, previousCorner) -> {
+                    previousCorner = char
+                    xDiff
+                }
                 isEastCornerDifferentThanWest(char, previousCorner) -> {
                     isInside = !isInside
                     previousCorner = char
-                    true
+                    xDiff
                 }
                 isCorner(char) -> {
                     previousCorner = char
-                    true
+
+                    if (isInside)
+                        xDiff
+                    else
+                        1
                 }
-                isLevelTerrain(char) -> isInside
+                isLevelTerrain(char) -> throw IllegalStateException("Should never encounter level terrain but did at ($x,$y)")
                 else -> throw IllegalArgumentException("Unexpected character: $char")
             }
 
-            if (counts) {
-                size++
+            size += count
+            if (debug) print("  $char @ x = $previousX -> $x = $count inside = $isInside\n")
+
+            when (char) {
+                NORTH_WEST_CORNER, NORTH_EAST_CORNER -> verticals.add(x)
+                SOUTH_EAST_CORNER, SOUTH_WEST_CORNER -> verticals.remove(x)
             }
+
+            previousX = x
         }
+
+        if (debug) println()
+
+        previousY = y
     }
 
     return size
 }
 
+internal fun sumEvenPairDifferences(numbers: Set<Long>): Long =
+    numbers.asSequence()
+        .sorted()
+        .zipWithNext()
+        .withIndex()
+        .filter { it.index % 2 == 0 }
+        .sumOf { it.value.second - it.value.first + 1 }
+
 private fun isLevelTerrain(char: Char) =
     char == LEVEL_TERRAIN
 
 private fun isVerticalEdge(char: Char) =
-    char == Direction.NORTH.char || char == Direction.SOUTH.char
+    char == Direction.NORTH.char
+            || char == Direction.SOUTH.char
+            || char == VERTICAL_EDGE
 
 private fun isHorizontalEdge(char: Char) =
-    char == Direction.WEST.char || char == Direction.EAST.char
+    char == Direction.WEST.char
+            || char == Direction.EAST.char
 
 private fun isCorner(char: Char) =
     char == NORTH_WEST_CORNER
             || char == NORTH_EAST_CORNER
             || char == SOUTH_EAST_CORNER
             || char == SOUTH_WEST_CORNER
+
+private fun isEastCornerSameAsWest(char: Char, previousCorner: Char?) =
+        (char == NORTH_EAST_CORNER && previousCorner == NORTH_WEST_CORNER)
+                || (char == SOUTH_EAST_CORNER && previousCorner == SOUTH_WEST_CORNER)
 
 private fun isEastCornerDifferentThanWest(char: Char, previousCorner: Char?) =
         (char == NORTH_EAST_CORNER && previousCorner == SOUTH_WEST_CORNER)
