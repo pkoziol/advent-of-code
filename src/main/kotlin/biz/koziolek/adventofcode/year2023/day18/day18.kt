@@ -105,40 +105,22 @@ fun calculateTrenchVolume(trenchEdge: Map<Coord, Char>): Int {
             val coord = Coord(x, y)
             val char = trenchEdge[coord] ?: LEVEL_TERRAIN
 
-            val counts = when (char) {
-                Direction.NORTH.char -> {
+            val counts = when {
+                isVerticalEdge(char) -> {
                     isInside = !isInside
                     true
                 }
-                Direction.SOUTH.char -> {
+                isHorizontalEdge(char) -> true
+                isEastCornerDifferentThanWest(char, previousCorner) -> {
                     isInside = !isInside
-                    true
-                }
-                Direction.WEST.char -> true
-                Direction.EAST.char -> true
-                NORTH_WEST_CORNER -> {
                     previousCorner = char
                     true
                 }
-                NORTH_EAST_CORNER -> {
-                    if (previousCorner == SOUTH_WEST_CORNER) {
-                        isInside = !isInside
-                    }
+                isCorner(char) -> {
                     previousCorner = char
                     true
                 }
-                SOUTH_WEST_CORNER -> {
-                    previousCorner = char
-                    true
-                }
-                SOUTH_EAST_CORNER -> {
-                    if (previousCorner == NORTH_WEST_CORNER) {
-                        isInside = !isInside
-                    }
-                    previousCorner = char
-                    true
-                }
-                LEVEL_TERRAIN -> isInside
+                isLevelTerrain(char) -> isInside
                 else -> throw IllegalArgumentException("Unexpected character: $char")
             }
 
@@ -150,3 +132,22 @@ fun calculateTrenchVolume(trenchEdge: Map<Coord, Char>): Int {
 
     return size
 }
+
+private fun isLevelTerrain(char: Char) =
+    char == LEVEL_TERRAIN
+
+private fun isVerticalEdge(char: Char) =
+    char == Direction.NORTH.char || char == Direction.SOUTH.char
+
+private fun isHorizontalEdge(char: Char) =
+    char == Direction.WEST.char || char == Direction.EAST.char
+
+private fun isCorner(char: Char) =
+    char == NORTH_WEST_CORNER
+            || char == NORTH_EAST_CORNER
+            || char == SOUTH_EAST_CORNER
+            || char == SOUTH_WEST_CORNER
+
+private fun isEastCornerDifferentThanWest(char: Char, previousCorner: Char?) =
+        (char == NORTH_EAST_CORNER && previousCorner == SOUTH_WEST_CORNER)
+                || (char == SOUTH_EAST_CORNER && previousCorner == NORTH_WEST_CORNER)
