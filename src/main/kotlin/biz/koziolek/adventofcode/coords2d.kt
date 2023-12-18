@@ -4,11 +4,11 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-enum class Direction {
-    NORTH,
-    SOUTH,
-    WEST,
-    EAST,
+enum class Direction(val char: Char) {
+    NORTH('^'),
+    SOUTH('v'),
+    WEST('<'),
+    EAST('>'),
 }
 
 data class Coord(val x: Int, val y: Int) {
@@ -33,6 +33,14 @@ data class Coord(val x: Int, val y: Int) {
             Direction.SOUTH -> copy(y = y + 1)
             Direction.WEST -> copy(x = x - 1)
             Direction.EAST -> copy(x = x + 1)
+        }
+
+    fun walk(direction: Direction, distance: Int, includeCurrent: Boolean) =
+        when (direction) {
+            Direction.NORTH -> walkNorthTo(y - distance, includeCurrent)
+            Direction.SOUTH -> walkSouthTo(y + distance, includeCurrent)
+            Direction.WEST -> walkWestTo(x - distance, includeCurrent)
+            Direction.EAST -> walkEastTo(x + distance, includeCurrent)
         }
 
     fun walkNorthTo(dstY: Int, includeCurrent: Boolean) = sequence {

@@ -23,8 +23,8 @@ fun simulateBeam(mirrors: Map<Coord, Char>,
                  start: Pair<Coord, Direction> = Coord(0, 0) to Direction.EAST): Sequence<Pair<Coord, Direction>> =
     sequence {
         var beams = listOf(start)
-        val horizontalRange = 0..<mirrors.getWidth()
-        val verticalRange = 0..<mirrors.getHeight()
+        val horizontalRange = mirrors.getHorizontalRange()
+        val verticalRange = mirrors.getVerticalRange()
         val seen = mutableSetOf<Pair<Coord, Direction>>()
 
         while (beams.isNotEmpty()) {
@@ -91,21 +91,13 @@ fun showPath(mirrors: Map<Coord, Char>, beamPath: Sequence<Pair<Coord, Direction
             mirror
                 ?: energizedTiles[coord]?.let {
                     when (it.size) {
-                        1 -> it[0].toChar()
+                        1 -> it[0].char
                         else -> it.size.digitToChar(radix = 36)
                     }
                 }
                 ?: EMPTY_SPACE
         }
 }
-
-private fun Direction.toChar() =
-    when (this) {
-        Direction.NORTH -> '^'
-        Direction.SOUTH -> 'v'
-        Direction.WEST -> '<'
-        Direction.EAST -> '>'
-    }
 
 fun showEnergizedTiles(beamPath: Sequence<Pair<Coord, Direction>>): String =
     beamPath
