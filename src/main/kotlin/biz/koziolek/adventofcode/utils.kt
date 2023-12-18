@@ -157,3 +157,20 @@ fun <T> Iterable<T>.singleOrNullOnlyWhenZero(): T? {
         }
     }
 }
+
+fun <T, R : Comparable<R>> Iterable<T>.minAndMaxOrNull(selector: (T) -> R): Pair<R, R>? {
+    val iterator = iterator()
+    if (!iterator.hasNext()) return null
+    var minValue = selector(iterator.next())
+    var maxValue = minValue
+    while (iterator.hasNext()) {
+        val v = selector(iterator.next())
+        if (v < minValue) {
+            minValue = v
+        }
+        if (v > maxValue) {
+            maxValue = v
+        }
+    }
+    return minValue to maxValue
+}

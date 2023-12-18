@@ -88,9 +88,15 @@ fun <T> Iterable<String>.parse2DMap(valueMapper: (Char) -> T?): Sequence<Pair<Co
 
 fun IntProgression.zipAsCoord(ys: IntProgression) = zip(ys) { x, y -> Coord(x, y) }
 
-fun <T> Map<Coord, T>.getWidth() = keys.maxOfOrNull { it.x }?.plus(1) ?: 0
+fun <T> Map<Coord, T>.getWidth() = getHorizontalRange().count()
 
-fun <T> Map<Coord, T>.getHeight() = keys.maxOfOrNull { it.y }?.plus(1) ?: 0
+fun <T> Map<Coord, T>.getHeight() = getVerticalRange().count()
+
+fun <T> Map<Coord, T>.getHorizontalRange() =
+    keys.minAndMaxOrNull { it.x }?.let { it.first..it.second } ?: IntRange.EMPTY
+
+fun <T> Map<Coord, T>.getVerticalRange() =
+    keys.minAndMaxOrNull { it.y }?.let { it.first..it.second } ?: IntRange.EMPTY
 
 /**
  * Walk north -> south, west -> east.
@@ -101,10 +107,10 @@ fun <T> Map<Coord, T>.getHeight() = keys.maxOfOrNull { it.y }?.plus(1) ?: 0
  *     V
  */
 fun <T> Map<Coord, T>.walkSouth() = sequence {
-    val width = getWidth()
-    val height = getHeight()
-    for (y in 0..<height) {
-        for (x in 0..<width) {
+    val xRange = getHorizontalRange()
+    val yRange = getVerticalRange()
+    for (y in yRange) {
+        for (x in xRange) {
             yield(Coord(x, y))
         }
     }
@@ -120,10 +126,10 @@ fun <T> Map<Coord, T>.walkSouth() = sequence {
  *     ----->
  */
 fun <T> Map<Coord, T>.walkEast() = sequence {
-    val width = getWidth()
-    val height = getHeight()
-    for (x in 0..<width) {
-        for (y in height-1 downTo 0) {
+    val xRange = getHorizontalRange()
+    val yRange = getVerticalRange()
+    for (x in xRange) {
+        for (y in yRange.reversed()) {
             yield(Coord(x, y))
         }
     }
@@ -138,10 +144,10 @@ fun <T> Map<Coord, T>.walkEast() = sequence {
  *     1 <---|
  */
 fun <T> Map<Coord, T>.walkNorth() = sequence {
-    val width = getWidth()
-    val height = getHeight()
-    for (y in height-1 downTo 0) {
-        for (x in width-1 downTo 0) {
+    val xRange = getHorizontalRange()
+    val yRange = getVerticalRange()
+    for (y in yRange.reversed()) {
+        for (x in xRange.reversed()) {
             yield(Coord(x, y))
         }
     }
@@ -157,26 +163,29 @@ fun <T> Map<Coord, T>.walkNorth() = sequence {
  *      3 2 1
  */
 fun <T> Map<Coord, T>.walkWest() = sequence {
-    val width = getWidth()
-    val height = getHeight()
-    for (x in width-1 downTo 0) {
-        for (y in 0..<height) {
+    val xRange = getHorizontalRange()
+    val yRange = getVerticalRange()
+    for (x in xRange.reversed()) {
+        for (y in yRange) {
             yield(Coord(x, y))
         }
     }
 }
 
 fun <T> Map<Coord, T>.to2DString(formatter: (Coord, T?) -> Char): String =
+    to2DStringOfStrings { coord, t -> formatter(coord, t).toString() }
+
+fun <T> Map<Coord, T>.to2DStringOfStrings(formatter: (Coord, T?) -> String): String =
     buildString {
-        val width = getWidth()
-        val height = getHeight()
-        for (y in 0..<height) {
-            for (x in 0..<width) {
+        val (minX, maxX) = keys.minAndMaxOrNull { it.x }!!
+        val (minY, maxY) = keys.minAndMaxOrNull { it.y }!!
+        for (y in minY..maxY) {
+            for (x in minX..maxX) {
                 val coord = Coord(x, y)
                 val value = get(coord)
                 append(formatter(coord, value))
             }
-            if (y != height-1) {
+            if (y != maxY) {
                 append('\n')
             }
         }
