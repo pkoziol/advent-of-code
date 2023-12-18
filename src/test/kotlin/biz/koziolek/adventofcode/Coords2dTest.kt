@@ -7,18 +7,18 @@ import org.junit.jupiter.api.Assertions.*
 internal class Coords2dTest {
 
     private val map = mapOf(
-        Coord(0, 0) to 1,
-        Coord(1, 0) to 2,
-        Coord(2, 0) to 3,
-        Coord(0, 1) to 4,
-        Coord(1, 1) to 5,
-        Coord(2, 1) to 6,
-        Coord(0, 2) to 7,
-        Coord(1, 2) to 8,
-        Coord(2, 2) to 9,
-        Coord(0, 3) to 10,
-        Coord(1, 3) to 11,
-        Coord(2, 3) to 12,
+        Coord(-1, -2) to 1,
+        Coord(0, -2) to 2,
+        Coord(1, -2) to 3,
+        Coord(-1, -1) to 4,
+        Coord(0, -1) to 5,
+        Coord(1, -1) to 6,
+        Coord(-1, 0) to 7,
+        Coord(0, 0) to 8,
+        Coord(1, 0) to 9,
+        Coord(-1, 1) to 10,
+        Coord(0, 1) to 11,
+        Coord(1, 1) to 12,
     )
 
     @Test
@@ -59,52 +59,52 @@ internal class Coords2dTest {
 
     @Test
     fun testMapGetAdjacentCoords() {
-        val corner = Coord(0, 0)
+        val corner = Coord(-1, -2)
 
-        val expectedAdjacentCorner = setOf(Coord(1, 0), Coord(0, 1))
+        val expectedAdjacentCorner = setOf(Coord(0, -2), Coord(-1, -1))
         assertEquals(expectedAdjacentCorner, map.getAdjacentCoords(corner, includeDiagonal = false))
 
-        val expectedAdjacentCornerDiagonal = expectedAdjacentCorner + setOf(Coord(1, 1))
+        val expectedAdjacentCornerDiagonal = expectedAdjacentCorner + setOf(Coord(0, -1))
         assertEquals(expectedAdjacentCornerDiagonal, map.getAdjacentCoords(corner, includeDiagonal = true))
 
-        val edge = Coord(2, 2)
+        val edge = Coord(1, 0)
 
-        val expectedAdjacentEdge = setOf(Coord(2, 1), Coord(1, 2), Coord(2, 3))
+        val expectedAdjacentEdge = setOf(Coord(1, -1), Coord(0, 0), Coord(1, 1))
         assertEquals(expectedAdjacentEdge, map.getAdjacentCoords(edge, includeDiagonal = false))
 
-        val expectedAdjacentEdgeDiagonal = expectedAdjacentEdge + setOf(Coord(1, 1), Coord(1, 3))
+        val expectedAdjacentEdgeDiagonal = expectedAdjacentEdge + setOf(Coord(0, -1), Coord(0, 1))
         assertEquals(expectedAdjacentEdgeDiagonal, map.getAdjacentCoords(edge, includeDiagonal = true))
 
-        val middle = Coord(1, 1)
+        val middle = Coord(0, -1)
 
-        val expectedAdjacentMiddle = setOf(Coord(1, 0), Coord(2, 1), Coord(1, 2), Coord(0, 1))
+        val expectedAdjacentMiddle = setOf(Coord(0, -2), Coord(1, -1), Coord(0, 0), Coord(-1, -1))
         assertEquals(expectedAdjacentMiddle, map.getAdjacentCoords(middle, includeDiagonal = false))
 
-        val expectedAdjacentMiddleDiagonal = expectedAdjacentMiddle + setOf(Coord(0, 0), Coord(2, 0), Coord(2, 2), Coord(0, 2))
+        val expectedAdjacentMiddleDiagonal = expectedAdjacentMiddle + setOf(Coord(-1, -2), Coord(1, -2), Coord(1, 0), Coord(-1, 0))
         assertEquals(expectedAdjacentMiddleDiagonal, map.getAdjacentCoords(middle, includeDiagonal = true))
     }
 
     @Test
     fun testWalkNorthTo() {
         assertEquals(
-            listOf(Coord(10, 19), Coord(10, 18), Coord(10, 17)),
-            Coord(10, 20).walkNorthTo(dstY = 17, includeCurrent = false).toList()
+            listOf(Coord(10, 1), Coord(10, 0), Coord(10, -1)),
+            Coord(10, 2).walkNorthTo(dstY = -1, includeCurrent = false).toList()
         )
         assertEquals(
-            listOf(Coord(10, 20), Coord(10, 19), Coord(10, 18), Coord(10, 17)),
-            Coord(10, 20).walkNorthTo(dstY = 17, includeCurrent = true).toList()
+            listOf(Coord(10, 2), Coord(10, 1), Coord(10, 0), Coord(10, -1)),
+            Coord(10, 2).walkNorthTo(dstY = -1, includeCurrent = true).toList()
         )
     }
 
     @Test
     fun testWalkWestTo() {
         assertEquals(
-            listOf(Coord(9, 20), Coord(8, 20), Coord(7, 20)),
-            Coord(10, 20).walkWestTo(dstX = 7, includeCurrent = false).toList()
+            listOf(Coord(1, 20), Coord(0, 20), Coord(-1, 20)),
+            Coord(2, 20).walkWestTo(dstX = -1, includeCurrent = false).toList()
         )
         assertEquals(
-            listOf(Coord(10, 20), Coord(9, 20), Coord(8, 20), Coord(7, 20)),
-            Coord(10, 20).walkWestTo(dstX = 7, includeCurrent = true).toList()
+            listOf(Coord(2, 20), Coord(1, 20), Coord(0, 20), Coord(-1, 20)),
+            Coord(2, 20).walkWestTo(dstX = -1, includeCurrent = true).toList()
         )
     }
 
@@ -135,17 +135,24 @@ internal class Coords2dTest {
     @Test
     fun testMapWalkSouth() {
         val map = mapOf(
-            Coord(0, 0) to 'X',
+            Coord(-1, -1) to 'X',
             Coord(3, 1) to 'X',
         )
-        assertEquals(4, map.getWidth())
-        assertEquals(2, map.getHeight())
+        assertEquals(5, map.getWidth())
+        assertEquals(3, map.getHeight())
         assertEquals(
             listOf(
+                Coord(-1, -1),
+                Coord(0, -1),
+                Coord(1, -1),
+                Coord(2, -1),
+                Coord(3, -1),
+                Coord(-1, 0),
                 Coord(0, 0),
                 Coord(1, 0),
                 Coord(2, 0),
                 Coord(3, 0),
+                Coord(-1, 1),
                 Coord(0, 1),
                 Coord(1, 1),
                 Coord(2, 1),
@@ -158,21 +165,28 @@ internal class Coords2dTest {
     @Test
     fun testMapWalkEast() {
         val map = mapOf(
-            Coord(0, 0) to 'X',
+            Coord(-1, -1) to 'X',
             Coord(3, 1) to 'X',
         )
-        assertEquals(4, map.getWidth())
-        assertEquals(2, map.getHeight())
+        assertEquals(5, map.getWidth())
+        assertEquals(3, map.getHeight())
         assertEquals(
             listOf(
+                Coord(-1, 1),
+                Coord(-1, 0),
+                Coord(-1, -1),
                 Coord(0, 1),
                 Coord(0, 0),
+                Coord(0, -1),
                 Coord(1, 1),
                 Coord(1, 0),
+                Coord(1, -1),
                 Coord(2, 1),
                 Coord(2, 0),
+                Coord(2, -1),
                 Coord(3, 1),
                 Coord(3, 0),
+                Coord(3, -1),
             ),
             map.walkEast().toList()
         )
@@ -181,21 +195,28 @@ internal class Coords2dTest {
     @Test
     fun testMapWalkNorth() {
         val map = mapOf(
-            Coord(0, 0) to 'X',
+            Coord(-1, -1) to 'X',
             Coord(3, 1) to 'X',
         )
-        assertEquals(4, map.getWidth())
-        assertEquals(2, map.getHeight())
+        assertEquals(5, map.getWidth())
+        assertEquals(3, map.getHeight())
         assertEquals(
             listOf(
                 Coord(3, 1),
                 Coord(2, 1),
                 Coord(1, 1),
                 Coord(0, 1),
+                Coord(-1, 1),
                 Coord(3, 0),
                 Coord(2, 0),
                 Coord(1, 0),
                 Coord(0, 0),
+                Coord(-1, 0),
+                Coord(3, -1),
+                Coord(2, -1),
+                Coord(1, -1),
+                Coord(0, -1),
+                Coord(-1, -1),
             ),
             map.walkNorth().toList()
         )
@@ -204,21 +225,28 @@ internal class Coords2dTest {
     @Test
     fun testMapWalkWest() {
         val map = mapOf(
-            Coord(0, 0) to 'X',
+            Coord(-1, -1) to 'X',
             Coord(3, 1) to 'X',
         )
-        assertEquals(4, map.getWidth())
-        assertEquals(2, map.getHeight())
+        assertEquals(5, map.getWidth())
+        assertEquals(3, map.getHeight())
         assertEquals(
             listOf(
+                Coord(3, -1),
                 Coord(3, 0),
                 Coord(3, 1),
+                Coord(2, -1),
                 Coord(2, 0),
                 Coord(2, 1),
+                Coord(1, -1),
                 Coord(1, 0),
                 Coord(1, 1),
+                Coord(0, -1),
                 Coord(0, 0),
                 Coord(0, 1),
+                Coord(-1, -1),
+                Coord(-1, 0),
+                Coord(-1, 1),
             ),
             map.walkWest().toList()
         )
