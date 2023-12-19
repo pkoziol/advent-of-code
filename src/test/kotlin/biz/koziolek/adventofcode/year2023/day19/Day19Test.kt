@@ -35,16 +35,16 @@ internal class Day19Test {
         assertEquals(
             listOf(
                 XmasWorkflow(name = "px", rules = listOf(
-                    ConditionalXmasRule(variable = 'a', operator = '<', value = 2006, destination = "qkq"),
-                    ConditionalXmasRule(variable = 'm', operator = '>', value = 2090, destination = "A"),
+                    ConditionalXmasRule(property = 'a', operator = '<', value = 2006, destination = "qkq"),
+                    ConditionalXmasRule(property = 'm', operator = '>', value = 2090, destination = "A"),
                     DefaultXmasRule(destination = "rfg"),
                 )),
                 XmasWorkflow(name = "pv", rules = listOf(
-                    ConditionalXmasRule(variable = 'a', operator = '>', value = 1716, destination = "R"),
+                    ConditionalXmasRule(property = 'a', operator = '>', value = 1716, destination = "R"),
                     DefaultXmasRule(destination = "A"),
                 )),
                 XmasWorkflow(name = "lnx", rules = listOf(
-                    ConditionalXmasRule(variable = 'm', operator = '>', value = 1548, destination = "A"),
+                    ConditionalXmasRule(property = 'm', operator = '>', value = 1548, destination = "A"),
                     DefaultXmasRule(destination = "A"),
                 )),
             ),
@@ -78,5 +78,29 @@ internal class Day19Test {
         val xmasSystem = parseXmasSystem(input)
         val acceptedParts = xmasSystem.runWorkflows()
         assertEquals(487623, acceptedParts.sumOf { it.propsSum })
+    }
+
+    @Test
+    fun testQuantumMachinePart() {
+        assertEquals(256_000_000_000_000, QuantumMachinePart(
+            x = 1..4000,
+            m = 1..4000,
+            a = 1..4000,
+            s = 1..4000,
+        ).propsSum)
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val xmasSystem = parseXmasSystem(sampleInput)
+        assertEquals(167_409_079_868_000, xmasSystem.countAllAccepted())
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val xmasSystem = parseXmasSystem(input)
+        assertEquals(113_550_238_315_130, xmasSystem.countAllAccepted())
     }
 }
