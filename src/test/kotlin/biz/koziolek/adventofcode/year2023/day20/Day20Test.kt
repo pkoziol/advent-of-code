@@ -139,4 +139,12 @@ internal class Day20Test {
         val modules = parseModules(input)
         assertEquals(777666211, countPulses(modules, buttonPresses = 1000))
     }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val modules = parseModules(input)
+        assertEquals(243_081_086_866_483, findFewestButtonPresses(modules))
+    }
 }

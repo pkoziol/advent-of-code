@@ -6,6 +6,7 @@ fun main() {
     val inputFile = findInput(object {})
     val modules = parseModules(inputFile.bufferedReader().readLines())
     println("low pulses * high pulses: ${countPulses(modules, buttonPresses = 1000)}")
+    println("It takes ${findFewestButtonPresses(modules)} button presses to send low pulse to rx")
 }
 
 sealed interface Module {
@@ -50,8 +51,7 @@ data class ConjunctionModule(override val name: String,
 }
 
 data class UntypedModule(override val name: String,
-                         override val destinations: List<String>,
-                         val lastPulse: Pulse.Level = Pulse.Level.LOW) : Module {
+                         override val destinations: List<String> = emptyList()) : Module {
     override fun processPulse(pulse: Pulse) = this to pulse.level
 }
 
@@ -160,3 +160,60 @@ fun countPulses(modules: Map<String, Module>, buttonPresses: Int): Long {
 
     return lowCount * highCount
 }
+
+fun findFewestButtonPresses(modules: Map<String, Module>): Long {
+    var currentModules = modules
+    val rxInputName = currentModules.values.single { it.destinations == listOf("rx") }.name
+    val firstHighs: MutableMap<String, Int?> =
+        (currentModules[rxInputName] as ConjunctionModule)
+            .inputs
+            .associateWith { null }
+            .toMutableMap()
+
+    var buttonPresses = 0
+    while (true) {
+        buttonPresses++
+
+        for ((pulse, newModules) in generatePulses(currentModules, Pulse.BUTTON_PRESS)) {
+            currentModules = newModules
+
+            if (pulse.to == rxInputName && pulse.level == Pulse.Level.HIGH) {
+                firstHighs.computeIfAbsent(pulse.from) { buttonPresses }
+            }
+
+            if (firstHighs.all { it.value != null }) {
+                return firstHighs.values.fold(1L) { acc, i -> acc * i!! }
+            }
+        }
+    }
+}
+
+fun toGraphvizString(modules: Map<String, Module>): String {
+    val allModules = modules.values
+        .flatMap { it.destinations }
+        .distinct()
+        .map { modules[it] ?: UntypedModule(it) }
+
+    return modules.values
+        .flatMap { module -> module.destinations.map { module.name to it } }
+        .joinToString(
+            prefix = """
+                    digraph G {
+                        rankdir=LR
+                """.trimIndent() + allModules.joinToString(
+                prefix = "\n    ",
+                postfix = "\n",
+                separator = "\n    "
+            ) { "${it.name} [shape=${getGraphvizShape(it)}];" },
+            postfix = "\n}",
+            separator = "\n"
+        ) { "    ${it.first} -> ${it.second}" }
+}
+
+private fun getGraphvizShape(module: Module) =
+    when (module) {
+        is BroadcasterModule -> "hexagon"
+        is ConjunctionModule -> "box"
+        is FlipFlopModule -> "diamond"
+        is UntypedModule -> "oval"
+    }
