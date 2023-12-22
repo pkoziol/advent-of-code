@@ -27,6 +27,27 @@ data class Coord(val x: Int, val y: Int) {
     infix fun manhattanDistanceTo(other: Coord): Int =
         abs(x - other.x) + abs(y - other.y)
 
+    fun getAdjacentCoords(includeDiagonal: Boolean = false): Set<Coord> =
+        if (includeDiagonal) {
+            setOf(
+                this + Coord(-1, 0),
+                this + Coord(0, -1),
+                this + Coord(1, 0),
+                this + Coord(0, 1),
+                this + Coord(-1, -1),
+                this + Coord(1, -1),
+                this + Coord(-1, 1),
+                this + Coord(1, 1),
+            )
+        } else {
+            setOf(
+                this + Coord(-1, 0),
+                this + Coord(0, -1),
+                this + Coord(1, 0),
+                this + Coord(0, 1),
+            )
+        }
+
     fun move(direction: Direction, count: Int = 1): Coord =
         when (direction) {
             Direction.NORTH -> copy(y = y - count)
@@ -187,6 +208,9 @@ fun <T> Map<Coord, T>.walkWest() = sequence {
         }
     }
 }
+
+fun Map<Coord, Char>.to2DString(default: Char): String =
+    to2DString { _, c -> c ?: default }
 
 fun <T> Map<Coord, T>.to2DString(formatter: (Coord, T?) -> Char): String =
     to2DStringOfStrings { coord, t -> formatter(coord, t).toString() }
