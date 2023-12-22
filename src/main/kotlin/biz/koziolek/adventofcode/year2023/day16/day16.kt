@@ -103,7 +103,7 @@ fun showEnergizedTiles(beamPath: Sequence<Pair<Coord, Direction>>): String =
     beamPath
         .map { it.first to ENERGIZED_TILE }
         .toMap()
-        .to2DString { _, char -> char ?: EMPTY_SPACE }
+        .to2DString(EMPTY_SPACE)
 
 fun countEnergizedTiles(beamPath: Sequence<Pair<Coord, Direction>>): Int =
     getEnergizedTiles(beamPath).keys.size

@@ -66,9 +66,7 @@ internal class Day18Test {
                 .......
                 .L....J
             """.trimIndent(),
-            trenchEdge.to2DString { _, c ->
-                c ?: LEVEL_TERRAIN
-            }
+            trenchEdge.to2DString(LEVEL_TERRAIN)
         )
     }
 

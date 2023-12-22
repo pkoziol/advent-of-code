@@ -19,6 +19,27 @@ data class LongCoord(val x: Long, val y: Long) {
     infix fun manhattanDistanceTo(other: LongCoord): Long =
         abs(x - other.x) + abs(y - other.y)
 
+    fun getAdjacentCoords(includeDiagonal: Boolean = false): Set<LongCoord> =
+        if (includeDiagonal) {
+            setOf(
+                this + LongCoord(-1, 0),
+                this + LongCoord(0, -1),
+                this + LongCoord(1, 0),
+                this + LongCoord(0, 1),
+                this + LongCoord(-1, -1),
+                this + LongCoord(1, -1),
+                this + LongCoord(-1, 1),
+                this + LongCoord(1, 1),
+            )
+        } else {
+            setOf(
+                this + LongCoord(-1, 0),
+                this + LongCoord(0, -1),
+                this + LongCoord(1, 0),
+                this + LongCoord(0, 1),
+            )
+        }
+
     fun move(direction: Direction, count: Long = 1): LongCoord =
         when (direction) {
             Direction.NORTH -> copy(y = y - count)
@@ -48,6 +69,9 @@ fun Iterable<LongCoord>.sortByYX() =
     sortedWith(
         LongCoord.yComparator.thenComparing(LongCoord.xComparator)
     )
+
+fun Map<LongCoord, Char>.to2DString(default: Char): String =
+    to2DString { _, c -> c ?: default }
 
 fun <T> Map<LongCoord, T>.to2DString(formatter: (LongCoord, T?) -> Char): String =
     to2DStringOfStrings { coord, t -> formatter(coord, t).toString() }
