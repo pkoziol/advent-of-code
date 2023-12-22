@@ -51,5 +51,35 @@ internal class Day22Test {
         val bricks = parseBricks(input)
         assertEquals(465, findSafeToDisintegrate(bricks).size)
     }
+
+    @Test
+    fun testSampleAnswer2() {
+        val bricks = parseBricks(sampleInput)
+        val bricksThatWouldFall = countBricksThatWouldFall(bricks)
+
+        assertEquals(
+            mapOf(
+                Brick(from = Coord3d(1, 0, 1), to = Coord3d(1, 2, 1)) to 6,
+                Brick(from = Coord3d(0, 0, 2), to = Coord3d(2, 0, 2)) to 0,
+                Brick(from = Coord3d(0, 2, 3), to = Coord3d(2, 2, 3)) to 0,
+                Brick(from = Coord3d(0, 0, 4), to = Coord3d(0, 2, 4)) to 0,
+                Brick(from = Coord3d(2, 0, 5), to = Coord3d(2, 2, 5)) to 0,
+                Brick(from = Coord3d(0, 1, 6), to = Coord3d(2, 1, 6)) to 1,
+                Brick(from = Coord3d(1, 1, 8), to = Coord3d(1, 1, 9)) to 0,
+            ),
+            bricksThatWouldFall.mapKeys { it.key.original }
+        )
+
+        assertEquals(7, bricksThatWouldFall.values.sum())
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val bricks = parseBricks(input)
+        val bricksThatWouldFall = countBricksThatWouldFall(bricks)
+        assertEquals(79042, bricksThatWouldFall.values.sum())
+    }
 }
 

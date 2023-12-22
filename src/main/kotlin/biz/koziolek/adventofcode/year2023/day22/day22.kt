@@ -10,6 +10,7 @@ fun main() {
     val inputFile = findInput(object {})
     val bricks = parseBricks(inputFile.bufferedReader().readLines())
     println("${findSafeToDisintegrate(bricks).size} are safe to disintegrate")
+    println("${countBricksThatWouldFall(bricks).values.sum()} other bricks would fall when removing each brick")
 }
 
 data class Brick(val from: Coord3d, val to: Coord3d) {
@@ -52,45 +53,10 @@ fun parseBricks(lines: Iterable<String>): List<Brick> =
         )
     }
 
-fun findSafeToDisintegrate(bricks: Collection<Brick>, debug: Boolean = false): Set<StationaryBrick> {
+fun findSafeToDisintegrate(bricks: Collection<Brick>): Set<StationaryBrick> {
     val fallen = fallAll(bricks)
-    val supportingMap = fallen.associateWith { getSupportedBricks(it, fallen) }
-    val supportedByMap = supportingMap.entries
-        .flatMap { supporting ->
-            supporting.value.map { supported ->
-                supported to supporting.key
-            }
-        }
-        .groupBy { it.first }
-        .mapValues { entry -> entry.value.map { it.second } }
-
-    if (debug) {
-        println("Supporting map:")
-        supportingMap.forEach { (supporting, supportedList) ->
-            println("  $supporting a.k.a. ${getFriendlyName(supporting)} supports:")
-            supportedList.forEach { supported ->
-                println("    $supported a.k.a. ${getFriendlyName(supported)}")
-            }
-            println()
-        }
-
-        println("Supported by map:")
-        supportedByMap.forEach { (supported, supportingList) ->
-            println("  $supported a.k.a. ${getFriendlyName(supported)} is supported by:")
-            supportingList.forEach { supporting ->
-                println("    $supporting a.k.a. ${getFriendlyName(supporting)}")
-            }
-            println()
-        }
-    }
-
-    return supportingMap
-        .filter { supporting ->
-            supporting.value.all { supported ->
-                supportedByMap[supported]!!.size > 1
-            }
-        }
-        .keys
+    val (supportingMap, supportedByMap) = buildSupportMaps(fallen)
+    return fallen.filter { isSafeToDisintegrate(it, supportingMap, supportedByMap) }.toSet()
 }
 
 fun fallAll(bricks: Collection<Brick>): List<StationaryBrick> {
@@ -124,6 +90,75 @@ fun fallAll(bricks: Collection<Brick>): List<StationaryBrick> {
 
 fun getSupportedBricks(brick: StationaryBrick, bricks: Collection<StationaryBrick>): List<StationaryBrick> =
     bricks.filter { it.fallen.bottomZ == brick.fallen.topZ + 1 && it.fallen.crossSection.overlaps(brick.fallen.crossSection) }
+
+fun countBricksThatWouldFall(bricks: Collection<Brick>): Map<StationaryBrick, Int> {
+    val fallen = fallAll(bricks)
+    val sortedByZ = fallen.sortedByDescending { it.fallen.bottomZ }
+    val (supportingMap, supportedByMap) = buildSupportMaps(fallen)
+    val counts = mutableMapOf<StationaryBrick, Int>()
+
+    for (brick in sortedByZ) {
+        val disintegrated = mutableSetOf(brick)
+        val toCheck = mutableListOf(brick)
+
+        while (toCheck.isNotEmpty()) {
+            val b = toCheck.removeFirst()
+            val orphans = supportingMap[b]!!
+                .filter { supported ->
+                    supportedByMap[supported]!!.all { it in disintegrated }
+                }
+
+            disintegrated.addAll(orphans)
+            toCheck.addAll(orphans)
+        }
+
+        counts[brick] = disintegrated.size - 1
+    }
+
+    return counts
+}
+
+private fun buildSupportMaps(fallen: List<StationaryBrick>, debug: Boolean = false):
+        Pair<Map<StationaryBrick, List<StationaryBrick>>, Map<StationaryBrick, List<StationaryBrick>>> {
+    val supportingMap = fallen.associateWith { getSupportedBricks(it, fallen) }
+    val supportedByMap = supportingMap.entries
+        .flatMap { supporting ->
+            supporting.value.map { supported ->
+                supported to supporting.key
+            }
+        }
+        .groupBy { it.first }
+        .mapValues { entry -> entry.value.map { it.second } }
+
+    if (debug) {
+        println("Supporting map:")
+        supportingMap.forEach { (supporting, supportedList) ->
+            println("  $supporting a.k.a. ${getFriendlyName(supporting)} supports:")
+            supportedList.forEach { supported ->
+                println("    $supported a.k.a. ${getFriendlyName(supported)}")
+            }
+            println()
+        }
+
+        println("Supported by map:")
+        supportedByMap.forEach { (supported, supportingList) ->
+            println("  $supported a.k.a. ${getFriendlyName(supported)} is supported by:")
+            supportingList.forEach { supporting ->
+                println("    $supporting a.k.a. ${getFriendlyName(supporting)}")
+            }
+            println()
+        }
+    }
+
+    return supportingMap to supportedByMap
+}
+
+private fun isSafeToDisintegrate(brick: StationaryBrick,
+                                 supportingMap: Map<StationaryBrick, List<StationaryBrick>>,
+                                 supportedByMap: Map<StationaryBrick, List<StationaryBrick>>): Boolean =
+    supportingMap[brick]!!.all { supported ->
+        supportedByMap[supported]!!.size > 1
+    }
 
 internal fun getFriendlyName(stationaryBrick: StationaryBrick): String =
     when (stationaryBrick.original) {
