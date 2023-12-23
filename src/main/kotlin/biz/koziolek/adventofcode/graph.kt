@@ -155,7 +155,7 @@ class BiDirectionalGraphEdge<N : GraphNode>(
                 || (node1 == other.node2 && node2 == other.node1)
     }
 
-    override fun hashCode() = Objects.hash(node1, node2)
+    override fun hashCode() = node1.hashCode() + node2.hashCode()
 
     override fun toGraphvizString() = "${node1.id} -- ${node2.id}"
 }
