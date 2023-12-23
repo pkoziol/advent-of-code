@@ -22,7 +22,7 @@ data class Valve(
     override val id: String,
     val flowRate: Int
 ) : GraphNode {
-    override fun toGraphvizString() = id
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float) = id
 }
 
 fun parseValvesGraph(lines: List<String>): Graph<Valve, UniDirectionalGraphEdge<Valve>> =

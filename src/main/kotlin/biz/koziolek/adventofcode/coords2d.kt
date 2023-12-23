@@ -275,5 +275,15 @@ data class CoordNode(val coord: Coord) : GraphNode {
 
     override val id = "x${coord.x}_y${coord.y}"
 
-    override fun toGraphvizString() = id
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float): String {
+        val props = mutableListOf<String>()
+        if (exactXYPosition) props.add("pos=\"${coord.x * xyPositionScale},${coord.y * xyPositionScale}!\"")
+
+        val propsStr = when {
+            props.isNotEmpty() -> " [" + props.joinToString(",") + "]"
+            else -> ""
+        }
+
+        return "$id$propsStr"
+    }
 }

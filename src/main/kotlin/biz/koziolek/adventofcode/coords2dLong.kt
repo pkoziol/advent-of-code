@@ -136,5 +136,5 @@ data class LongCoordNode(val coord: LongCoord) : GraphNode {
 
     override val id = "x${coord.x}_y${coord.y}"
 
-    override fun toGraphvizString() = id
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float) = id
 }

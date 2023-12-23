@@ -11,7 +11,7 @@ fun main() {
 
 sealed interface YellingMonkey : GraphNode {
     override val id: String
-    override fun toGraphvizString() = id
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float) = id
 }
 
 data class SpecificNumberYellingMonkey(

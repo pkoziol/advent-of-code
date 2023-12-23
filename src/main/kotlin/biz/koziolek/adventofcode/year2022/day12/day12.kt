@@ -19,7 +19,7 @@ data class ElevationNode(
     val coord: Coord,
 ) : GraphNode {
     override val id = "${label}__${coord.x}_${coord.y}"
-    override fun toGraphvizString(): String = id
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float): String = id
 }
 
 fun buildElevationGraph(heightMap: Map<Coord, Char>): Graph<ElevationNode, UniDirectionalGraphEdge<ElevationNode>> =
