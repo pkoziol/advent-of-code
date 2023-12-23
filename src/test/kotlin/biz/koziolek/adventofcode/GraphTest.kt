@@ -19,6 +19,11 @@ internal class GraphTest {
     }
 
     @Test
+    fun testEdgeHashCode() {
+        assertEquals(BiDirectionalGraphEdge(b, a).hashCode(), BiDirectionalGraphEdge(a, b).hashCode())
+    }
+
+    @Test
     fun testEdgeContains() {
         val edge = BiDirectionalGraphEdge(a, b)
         assertTrue(edge.contains(a))
