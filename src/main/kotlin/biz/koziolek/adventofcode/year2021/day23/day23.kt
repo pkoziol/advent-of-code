@@ -143,7 +143,7 @@ data class AmphipodBurrow(val positions: String, val height: Int = 2) {
 
         data class PositionNode(val position: Int) : GraphNode {
             override val id = position.toString()
-            override fun toGraphvizString() = id
+            override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float) = id
             infix fun to(other: PositionNode) = BiDirectionalGraphEdge(this, other)
         }
 

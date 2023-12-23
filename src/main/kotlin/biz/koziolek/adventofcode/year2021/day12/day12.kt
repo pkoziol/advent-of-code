@@ -19,22 +19,22 @@ sealed interface CaveNode : GraphNode
 
 object StartCave : CaveNode {
     override val id = "start"
-    override fun toGraphvizString() = "node [shape=box]; $id;"
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float) = "node [shape=box]; $id;"
     override fun toString() = "${javaClass.simpleName}(id=$id)"
 }
 
 object EndCave : CaveNode {
     override val id = "end"
-    override fun toGraphvizString() = "node [shape=box]; $id;"
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float) = "node [shape=box]; $id;"
     override fun toString() = "${javaClass.simpleName}(id=$id)"
 }
 
 data class BigCave(override val id: String) : CaveNode {
-    override fun toGraphvizString() = "node [shape=doublecircle]; $id;"
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float) = "node [shape=doublecircle]; $id;"
 }
 
 data class SmallCave(override val id: String) : CaveNode {
-    override fun toGraphvizString() = "node [shape=circle]; $id;"
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float) = "node [shape=circle]; $id;"
 }
 
 fun parseCavesGraph(lines: List<String>): Graph<CaveNode, BiDirectionalGraphEdge<CaveNode>> {

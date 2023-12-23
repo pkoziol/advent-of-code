@@ -12,6 +12,10 @@ internal class GraphTest {
     private val d = SimpleGraphNode("d")
     private val e = SimpleGraphNode("e")
 
+    private val coordNode13 = CoordNode(Coord(1, 3))
+    private val coordNode72 = CoordNode(Coord(7, 2))
+    private val coordNode55 = CoordNode(Coord(5, 5))
+
     @Test
     fun testEdgeEquality() {
         assertEquals(BiDirectionalGraphEdge(b, a), BiDirectionalGraphEdge(a, b))
@@ -107,6 +111,7 @@ internal class GraphTest {
         assertEquals("""
             graph G {
                 rankdir=LR
+                layout=dot
                 a
                 b
                 c
@@ -136,6 +141,7 @@ internal class GraphTest {
         assertEquals("""
             digraph G {
                 rankdir=LR
+                layout=dot
                 a
                 b
                 c
@@ -149,5 +155,33 @@ internal class GraphTest {
                 e -> a
             }
         """.trimIndent(), graph.toGraphvizString())
+    }
+
+    @Test
+    fun testToGraphvizStringWithAdditionalProps() {
+        val graph = Graph<CoordNode, BiDirectionalGraphEdge<CoordNode>>()
+            .addEdge(BiDirectionalGraphEdge(coordNode13, coordNode55, 10))
+            .addEdge(BiDirectionalGraphEdge(coordNode13, coordNode72, 20))
+            .addEdge(BiDirectionalGraphEdge(coordNode55, coordNode72, 15))
+        println(graph.toGraphvizString())
+
+        assertEquals("""
+            graph G {
+                rankdir=LR
+                layout=dot
+                x1_y3 [pos="0.1,0.3!"]
+                x5_y5 [pos="0.5,0.5!"]
+                x7_y2 [pos="0.7,0.2!"]
+                x1_y3 -- x5_y5 [label=10,len=5.0]
+                x1_y3 -- x7_y2 [label=20,len=10.0]
+                x5_y5 -- x7_y2 [label=15,len=7.5]
+            }
+        """.trimIndent(), graph.toGraphvizString(
+            exactXYPosition = true,
+            xyPositionScale = .1f,
+            edgeWeightAsLabel = true,
+            exactEdgeLength = true,
+            edgeLengthScale = .5f,
+        ))
     }
 }

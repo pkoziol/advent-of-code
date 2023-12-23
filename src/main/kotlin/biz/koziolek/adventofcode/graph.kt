@@ -1,7 +1,11 @@
 package biz.koziolek.adventofcode
 
+import java.io.File
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.writeText
 
 fun <N : GraphNode, E : GraphEdge<N>> buildGraph(code: MutableSet<E>.() -> Unit): Graph<N, E> {
     val edges = mutableSetOf<E>()
@@ -50,15 +54,21 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
             nodes = nodes + edge.node1 + edge.node2,
         )
 
-    fun toGraphvizString() =
+    fun toGraphvizString(layout: String = "dot",
+                         edgeWeightAsLabel: Boolean = false,
+                         exactXYPosition: Boolean = false,
+                         xyPositionScale: Float = 1f,
+                         exactEdgeLength: Boolean = false,
+                         edgeLengthScale: Float = 1f) =
         edges.joinToString(
             prefix = """
                 ${if (isDirectional) "digraph" else "graph"} G {
                     rankdir=LR
-            """.trimIndent() + nodes.joinToString(prefix = "\n    ", postfix = "\n", separator = "\n    ") { it.toGraphvizString() },
+                    layout=$layout
+            """.trimIndent() + nodes.joinToString(prefix = "\n    ", postfix = "\n", separator = "\n    ") { it.toGraphvizString(exactXYPosition, xyPositionScale) },
             postfix = "\n}",
             separator = "\n"
-        ) { "    ${it.toGraphvizString()}" }
+        ) { "    ${it.toGraphvizString(edgeWeightAsLabel, exactEdgeLength, edgeLengthScale)}" }
 
     fun getAdjacentNodes(node: N): Set<N> =
         nodeStartingEdges[node]
@@ -118,6 +128,7 @@ sealed interface GraphEdge<N : GraphNode> {
     val node1: N
     val node2: N
     val weight: Int
+    val graphvizSymbol: String
 
     fun startsWith(node: N): Boolean
 
@@ -132,7 +143,22 @@ sealed interface GraphEdge<N : GraphNode> {
             else -> throw IllegalArgumentException("Node: $node is not part of edge: $this")
         }
 
-    fun toGraphvizString(): String
+    fun toGraphvizString(
+        weightAsLabel: Boolean = false,
+        exactLength: Boolean = false,
+        lengthScale: Float = 1f
+    ): String {
+        val props = mutableListOf<String>()
+        if (weightAsLabel) props.add("label=$weight")
+        if (exactLength) props.add("len=${weight * lengthScale}")
+
+        val propsStr = when {
+            props.isNotEmpty() -> " [" + props.joinToString(",") + "]"
+            else -> ""
+        }
+
+        return "${node1.id} $graphvizSymbol ${node2.id}$propsStr"
+    }
 }
 
 class BiDirectionalGraphEdge<N : GraphNode>(
@@ -140,6 +166,7 @@ class BiDirectionalGraphEdge<N : GraphNode>(
     override val node2: N,
     override val weight: Int = 1
 ) : GraphEdge<N> {
+    override val graphvizSymbol = "--"
 
     override fun startsWith(node: N) = contains(node)
 
@@ -156,8 +183,6 @@ class BiDirectionalGraphEdge<N : GraphNode>(
     }
 
     override fun hashCode() = node1.hashCode() + node2.hashCode()
-
-    override fun toGraphvizString() = "${node1.id} -- ${node2.id}"
 }
 
 data class UniDirectionalGraphEdge<N : GraphNode>(
@@ -165,19 +190,42 @@ data class UniDirectionalGraphEdge<N : GraphNode>(
     override val node2: N,
     override val weight: Int = 1
 ) : GraphEdge<N> {
+    override val graphvizSymbol = "->"
 
     override fun startsWith(node: N) = node == node1
 
     override fun endsWith(node: N) = node == node2
-
-    override fun toGraphvizString() = "${node1.id} -> ${node2.id}"
 }
 
 interface GraphNode {
     val id: String
-    fun toGraphvizString(): String
+    fun toGraphvizString(exactXYPosition: Boolean = false, xyPositionScale: Float = 1f): String
 }
 
 data class SimpleGraphNode(override val id: String) : GraphNode {
-    override fun toGraphvizString() = id
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float) = id
+}
+
+fun <N : GraphNode, E : GraphEdge<N>> generateGraphvizSvg(graph: Graph<N, E>, outFile: File) {
+    generateGraphvizSvg(graph.toGraphvizString(), outFile)
+}
+
+fun generateGraphvizSvg(graphvizString: String, outFile: File) {
+    val tempFile = kotlin.io.path.createTempFile("aoc-graphviz-")
+    try {
+        tempFile.writeText(graphvizString)
+
+        ProcessBuilder(listOf(
+            "/opt/homebrew/bin/dot",
+            "-Tsvg",
+            tempFile.absolutePathString()
+        ))
+            .redirectOutput(outFile)
+            .start()
+            .waitFor()
+    } finally {
+        try {
+            tempFile.deleteIfExists()
+        } catch (_: Exception) {}
+    }
 }
