@@ -76,6 +76,9 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
             ?.toSet()
             ?: emptySet()
 
+    fun getAdjacentEdges(node: N): Set<E> =
+        nodeStartingEdges[node] ?: emptySet()
+
     fun findShortestPath(start: N, end: N): List<N> =
         findShortestPath(end) { it == start }
 
@@ -121,6 +124,106 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
                     .minByOrNull { adjNode -> cumulativeDistance[adjNode] ?: Int.MAX_VALUE }
             }
         }.toList()
+    }
+
+    fun simplify(): Graph<N, E> {
+        val nodesToCheck = nodes.toMutableList()
+        val newEdges = edges.toMutableSet()
+
+        while (nodesToCheck.isNotEmpty()) {
+            val node = nodesToCheck.removeFirst()
+            val incomingEdges = newEdges.filter { it.endsWith(node) }
+            val outgoingEdges = newEdges.filter { it.startsWith(node) }
+
+            if (isDirectional && incomingEdges.size == 1 && outgoingEdges.size == 1) {
+                val incoming = incomingEdges.single()
+                val outgoing = outgoingEdges.single()
+                newEdges.remove(incoming)
+                newEdges.remove(outgoing)
+
+                @Suppress("UNCHECKED_CAST")
+                newEdges.add(UniDirectionalGraphEdge(
+                    node1 = incoming.node1,
+                    node2 = outgoing.node2,
+                    weight = incoming.weight + outgoing.weight,
+                ) as E)
+            } else if (!isDirectional && incomingEdges.size == 2 && incomingEdges == outgoingEdges) {
+                val otherNode1 = incomingEdges[0].getOther(node)
+                val otherNode2 = incomingEdges[1].getOther(node)
+                newEdges.remove(incomingEdges[0])
+                newEdges.remove(incomingEdges[1])
+
+                @Suppress("UNCHECKED_CAST")
+                newEdges.add(BiDirectionalGraphEdge(
+                    node1 = otherNode1,
+                    node2 = otherNode2,
+                    weight = incomingEdges[0].weight + incomingEdges[1].weight,
+                ) as E)
+            }
+        }
+
+        return buildGraph { addAll(newEdges) }
+    }
+
+    private data class BFSItem<N : GraphNode, E : GraphEdge<N>>(
+        val nodes: List<N>,
+        val edges: List<E>
+    ) {
+        fun extend(node: N, edge: E): BFSItem<N, E> =
+            copy(
+                nodes = nodes + node,
+                edges = edges + edge,
+            )
+
+        fun length() = edges.sumOf { it.weight }
+    }
+
+    fun findLongestPath(
+        start: N,
+        end: N,
+        debug: Boolean = false,
+    ): List<E> {
+        val toCheck = LinkedList<BFSItem<N, E>>()
+        toCheck.add(BFSItem(
+            nodes = listOf(start),
+            edges = emptyList(),
+        ))
+        var competed = 0
+        var completedLastPrint = -1
+        var longest: Int? = null
+        var longestItem: BFSItem<N, E>? = null
+
+        if (debug) println("${edges.size} edges")
+
+        while (toCheck.isNotEmpty()) {
+            val item = toCheck.removeFirst()
+            val lastNode = item.nodes.last()
+
+            if (debug && (toCheck.size % 100_000 == 0 || (competed % 10_000 == 0 && competed != completedLastPrint))) {
+                completedLastPrint = competed
+                println("to check: ${toCheck.size} completed: $competed longest: $longest")
+            }
+
+            if (lastNode == end) {
+                competed++
+
+                val length = item.length()
+                if (longest == null || length > longest) {
+                    longest = length
+                    longestItem = item
+
+                    if (debug) println("to check: ${toCheck.size} completed: $competed longest: $longest NEW!!!")
+                }
+            } else {
+                getAdjacentEdges(lastNode)
+                    .filter { edge -> edge !in item.edges && edge.getOther(lastNode) !in item.nodes }
+                    .forEach { edge -> toCheck.add(item.extend(edge.getOther(lastNode), edge)) }
+            }
+        }
+
+        if (debug) println("Found $competed paths")
+
+        return longestItem!!.edges
     }
 }
 

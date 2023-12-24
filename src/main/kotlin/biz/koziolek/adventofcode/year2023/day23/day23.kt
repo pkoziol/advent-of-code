@@ -4,8 +4,13 @@ import biz.koziolek.adventofcode.*
 
 fun main() {
     val inputFile = findInput(object {})
-    val hikingTrails = parseHikingTrails(inputFile.bufferedReader().readLines())
+    val lines = inputFile.bufferedReader().readLines()
+
+    val hikingTrails = parseHikingTrails(lines)
     println("Longest path has ${findLongestPathLen(hikingTrails)} steps")
+
+    val graph = parseHikingTrailsAsGraph(lines)
+    println("Longest path ignoring slopes has ${findLongestPathLen(graph)} steps")
 }
 
 const val PATH = '.'
@@ -24,6 +29,13 @@ private val slopeToDirection = mapOf(
 
 fun parseHikingTrails(lines: Iterable<String>): Map<Coord, Char> =
     lines.parse2DMap().filter { (_, char) -> char != FOREST }.toMap()
+
+fun parseHikingTrailsAsGraph(lines: Iterable<String>): Graph<CoordNode, BiDirectionalGraphEdge<CoordNode>> =
+    lines.parse2DMap()
+        .filter { (_, char) -> char != FOREST }
+        .toMap()
+        .mapValues { 1 }
+        .toBiDirectionalGraph(includeDiagonal = false)
 
 fun findLongestPathLen(hikingTrails: Map<Coord, Char>): Int {
     val start = hikingTrails.entries.single { it.key.y == 0 && it.value == PATH }.key
@@ -47,6 +59,15 @@ fun findLongestPathLen(hikingTrails: Map<Coord, Char>): Int {
 
     val end = hikingTrails.entries.single { it.key.y == hikingTrails.getHeight() - 1 }.key
     return distance[end]!!
+}
+
+fun findLongestPathLen(hikingTrails: Graph<CoordNode, BiDirectionalGraphEdge<CoordNode>>): Int {
+    val simplified = hikingTrails.simplify()
+    val path = simplified.findLongestPath(
+        start = simplified.nodes.minBy { it.coord.y },
+        end = simplified.nodes.maxBy { it.coord.y },
+    )
+    return path.sumOf { it.weight }
 }
 
 fun topologicalSort(
