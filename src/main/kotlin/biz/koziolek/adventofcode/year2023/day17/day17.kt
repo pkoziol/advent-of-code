@@ -46,14 +46,22 @@ fun findMinimalHeatLossPath(map: Map<Coord, Int>,
 
     val toVisit: Queue<PathElement> = PriorityQueue()
     toVisit.addAll(Direction.entries.map {
-        PathElement(coord = end, currentDirection = it, nextDirection = null, totalHeatLoss = map[end]!!)
+        PathElement(coord = start, currentDirection = it, nextDirection = null, totalHeatLoss = 0)
     })
 
     val visited: MutableMap<Coord, PathElement> = mutableMapOf()
 //    val totalHeatLossMap: MutableMap<Coord, Int> = mutableMapOf()
     var current: PathElement? = toVisit.poll()
 
-    while (current != null) {
+    while (toVisit.isNotEmpty()) {
+        val current = toVisit.remove()
+
+
+
+        for (next in getNext(current)) {
+            toVisit
+        }
+
         if (/*current.coord !in visited &&*/ current.isNotTooLongStraight()) {
 //            totalHeatLossMap[current.coord] = current.totalHeatLoss
 
@@ -68,8 +76,6 @@ fun findMinimalHeatLossPath(map: Map<Coord, Int>,
                 toVisit.addAll(nextToVisit)
             }
         }
-
-        current = toVisit.poll()
     }
 
     val path = sequence {
@@ -93,7 +99,7 @@ fun findMinimalHeatLossPath(map: Map<Coord, Int>,
     return path
 }
 
-private fun getPreviousCoords(coord: Coord, direction: Direction?): List<Pair<Coord, Direction>> =
+private fun getNextCoords(coord: Coord, direction: Direction?): List<Pair<Coord, Direction>> =
     when (direction) {
         Direction.NORTH -> listOf(
             Direction.WEST,

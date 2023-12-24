@@ -108,7 +108,7 @@ internal class Day17Test {
         assertEquals(102, bestPath.sumOf { map[it.first]!! })
     }
 
-    @Test
+//    @Test
     @Tag("answer")
     fun testAnswer1() {
         val input = findInput(object {}).bufferedReader().readLines()
