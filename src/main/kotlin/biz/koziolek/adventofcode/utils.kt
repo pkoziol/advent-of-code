@@ -1,5 +1,6 @@
 package biz.koziolek.adventofcode
 
+import java.awt.Color
 import java.io.File
 import java.util.*
 import kotlin.collections.HashSet
@@ -48,6 +49,15 @@ enum class AsciiColor(private val code: Int) {
     BRIGHT_WHITE(97);
 
     fun format(obj: Any?) = "$ESC[${code}m$obj$ESC[0m"
+
+    companion object {
+        fun rainbow(value: Float, obj: Any?): String {
+            val color = Color.getHSBColor(value, 1f, 1f)
+            return rgb(color.red, color.green, color.blue, obj)
+        }
+
+        fun rgb(r: Int, g: Int, b: Int, obj: Any?) = "$ESC[38;2;${r};${g};${b}m$obj$ESC[0m"
+    }
 }
 
 fun String.hexStringToBitSet(): BitSet {
