@@ -22,7 +22,7 @@ data class Coord3d(val x: Int, val y: Int, val z: Int) {
     companion object {
         fun fromString(str: String): Coord3d =
             str.split(',')
-                .map { it.toInt() }
+                .map { it.trim().toInt() }
                 .let { Coord3d(x = it[0], y = it[1], z = it[2]) }
     }
 

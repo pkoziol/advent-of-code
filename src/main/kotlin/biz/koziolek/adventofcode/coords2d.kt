@@ -98,7 +98,7 @@ data class Coord(val x: Int, val y: Int) {
 
         fun fromString(str: String): Coord =
             str.split(',')
-                .map { it.toInt() }
+                .map { it.trim().toInt() }
                 .let { Coord(x = it[0], y = it[1]) }
     }
 }
