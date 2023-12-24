@@ -231,6 +231,17 @@ fun <T> Map<Coord, T>.to2DStringOfStrings(formatter: (Coord, T?) -> String): Str
         }
     }
 
+fun <T> Map<Coord, T>.to2DRainbowString(formatter: (Coord, T?) -> Pair<String, Float?>): String =
+    to2DStringOfStrings { coord, value ->
+        val (str, colorPercentage) = formatter(coord, value)
+
+        if (colorPercentage != null) {
+            AsciiColor.rainbow(colorPercentage, str)
+        } else {
+            str
+        }
+    }
+
 fun <T> Map<Coord, T>.getAdjacentCoords(coord: Coord, includeDiagonal: Boolean): Set<Coord> =
     keys.getAdjacentCoords(coord, includeDiagonal)
 
@@ -261,6 +272,22 @@ fun Map<Coord, Int>.toGraph(includeDiagonal: Boolean): Graph<CoordNode, UniDirec
             getAdjacentCoords(coord, includeDiagonal)
                 .forEach { adjCoord ->
                     add(UniDirectionalGraphEdge(
+                        node1 = adjCoord.toGraphNode(),
+                        node2 = node2,
+                        weight = value,
+                    ))
+                }
+        }
+    }
+
+fun Map<Coord, Int>.toBiDirectionalGraph(includeDiagonal: Boolean): Graph<CoordNode, BiDirectionalGraphEdge<CoordNode>> =
+    buildGraph {
+        this@toBiDirectionalGraph.forEach { (coord, value) ->
+            val node2 = coord.toGraphNode()
+
+            getAdjacentCoords(coord, includeDiagonal)
+                .forEach { adjCoord ->
+                    add(BiDirectionalGraphEdge(
                         node1 = adjCoord.toGraphNode(),
                         node2 = node2,
                         weight = value,

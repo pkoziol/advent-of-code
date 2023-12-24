@@ -1,7 +1,8 @@
 package biz.koziolek.adventofcode.year2023.day23
 
-import biz.koziolek.adventofcode.findInput
+import biz.koziolek.adventofcode.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
@@ -52,5 +53,29 @@ internal class Day23Test {
         val input = findInput(object {}).bufferedReader().readLines()
         val hikingTrails = parseHikingTrails(input)
         assertEquals(2502, findLongestPathLen(hikingTrails))
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val graph = parseHikingTrailsAsGraph(sampleInput)
+//        generateGraphvizSvg(
+//            graph.simplify().toGraphvizString(layout = "neato", exactXYPosition = true, xyPositionScale = .2f, edgeWeightAsLabel = true, exactEdgeLength = true, edgeLengthScale = .2f),
+//            File("src/test/kotlin/biz/koziolek/adventofcode/year2023/day23/graph-2-sample.svg")
+//        )
+
+        assertEquals(154, findLongestPathLen(graph))
+    }
+
+    @Test
+    @Disabled("Takes 33s to finish on my machine")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val graph = parseHikingTrailsAsGraph(input)
+//        generateGraphvizSvg(
+//            graph.simplify().toGraphvizString(layout = "neato", exactXYPosition = true, xyPositionScale = .1f, edgeWeightAsLabel = true, exactEdgeLength = true, edgeLengthScale = .1f),
+//            File("src/test/kotlin/biz/koziolek/adventofcode/year2023/day23/graph-2.svg")
+//        )
+
+        assertEquals(6726, findLongestPathLen(graph))
     }
 }
