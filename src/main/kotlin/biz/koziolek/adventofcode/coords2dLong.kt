@@ -54,7 +54,7 @@ data class LongCoord(val x: Long, val y: Long) {
 
         fun fromString(str: String): LongCoord =
             str.split(',')
-                .map { it.toInt() }
+                .map { it.trim().toInt() }
                 .let { LongCoord(x = it[0], y = it[1]) }
     }
 }
