@@ -10,8 +10,12 @@ import kotlin.io.path.writeText
 fun <N : GraphNode, E : GraphEdge<N>> buildGraph(code: MutableSet<E>.() -> Unit): Graph<N, E> {
     val edges = mutableSetOf<E>()
     code(edges)
-    val nodes = edges.flatMap { setOf(it.node1, it.node2) }.toSet()
-    return Graph(edges, nodes)
+    return buildGraph(edges)
+}
+
+fun <N : GraphNode, E : GraphEdge<N>> buildGraph(edges: Collection<E>): Graph<N, E> {
+    val nodes = edges.flatMap { it.nodes }.toSet()
+    return Graph(edges.toSet(), nodes)
 }
 
 data class Graph<N : GraphNode, E : GraphEdge<N>>(
@@ -48,11 +52,39 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
         }
     }
 
-    fun addEdge(edge: E) =
-        copy(
-            edges = edges + edge,
-            nodes = nodes + edge.node1 + edge.node2,
+    fun addEdge(edge: E): Graph<N, E> =
+        addEdges(listOf(edge))
+
+    fun addEdges(edges: Collection<E>): Graph<N, E> =
+        Graph(
+            edges = this.edges + edges,
+            nodes = this.nodes + edges.map { it.node1 } + edges.map { it.node2 },
         )
+
+    fun removeEdge(edge: E): Collection<Graph<N, E>> =
+        removeEdges(listOf(edge))
+
+    fun removeEdges(edges: Collection<E>): Collection<Graph<N, E>> {
+        val toCheck = edges.flatMap { it.nodes }.toSet().toMutableList()
+        val newGraphs = mutableMapOf<N, Graph<N, E>>()
+
+        while (toCheck.isNotEmpty()) {
+            val currentNode = toCheck.removeFirst()
+            val reachable = mutableSetOf<E>()
+
+            visitAll(currentNode) { node ->
+                val nodeEdges = (nodeStartingEdges[node] ?: emptySet()).filter { it !in edges }
+                reachable.addAll(nodeEdges)
+                val adjNodes = nodeEdges.flatMap { it.nodes }
+                toCheck.removeAll(adjNodes)
+                adjNodes
+            }
+
+            newGraphs[currentNode] = buildGraph(reachable)
+        }
+
+        return newGraphs.values.toList()
+    }
 
     fun toGraphvizString(layout: String = "dot",
                          edgeWeightAsLabel: Boolean = false,
@@ -232,6 +264,9 @@ sealed interface GraphEdge<N : GraphNode> {
     val node2: N
     val weight: Int
     val graphvizSymbol: String
+
+    val nodes: Set<N>
+        get() = setOf(node1, node2)
 
     fun startsWith(node: N): Boolean
 
