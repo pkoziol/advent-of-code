@@ -39,4 +39,18 @@ internal class Day1Test {
         val data = parseLists(input)
         assertEquals(2815556, findTotalDistance(data))
     }
+
+    @Test
+    fun testSampleAnswer2() {
+        val data = parseLists(sampleInput)
+        assertEquals(31, findSimilarityScore(data))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val data = parseLists(input)
+        assertEquals(23927637, findSimilarityScore(data))
+    }
 }

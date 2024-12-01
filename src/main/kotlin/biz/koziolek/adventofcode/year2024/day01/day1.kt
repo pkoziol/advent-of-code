@@ -7,6 +7,7 @@ fun main() {
     val inputFile = findInput(object {})
     val data = parseLists(inputFile.bufferedReader().readLines())
     println("Total distance: ${findTotalDistance(data)}")
+    println("Similarity score: ${findSimilarityScore(data)}")
 }
 
 fun parseLists(lines: Iterable<String>): Pair<List<Int>, List<Int>> =
@@ -20,3 +21,6 @@ fun parseLists(lines: Iterable<String>): Pair<List<Int>, List<Int>> =
 fun findTotalDistance(data: Pair<List<Int>, List<Int>>): Int =
     data.first.sorted().zip(data.second.sorted())
         .sumOf { (it.second - it.first).absoluteValue }
+
+fun findSimilarityScore(data: Pair<List<Int>, List<Int>>): Int =
+    data.first.sumOf { num -> num * data.second.count { it == num } }
