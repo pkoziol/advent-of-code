@@ -61,6 +61,11 @@ else
        "https://adventofcode.com/$YEAR/day/$DAY/input"
 fi
 
+if command -v git &> /dev/null; then
+  echo "Adding the files to git..."
+  git add "$SRC_FILE" "$TEST_FILE" "$INPUT_FILE"
+fi
+
 if command -v idea &> /dev/null; then
   echo "Opening the files..."
   idea "$SRC_FILE" "$TEST_FILE" "$INPUT_FILE"
