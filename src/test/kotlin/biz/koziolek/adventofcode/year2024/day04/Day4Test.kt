@@ -24,8 +24,8 @@ internal class Day4Test {
     @Test
     fun testSampleAnswer1() {
         val letterGrid = parseLetterGrid(sampleInput)
-        val xmas = findXMAS(letterGrid)
-        assertEquals(18, xmas.size)
+        val xmas = countXMAS(letterGrid)
+        assertEquals(18, xmas)
     }
 
     @Test
@@ -33,7 +33,23 @@ internal class Day4Test {
     fun testAnswer1() {
         val input = findInput(object {}).bufferedReader().readLines()
         val letterGrid = parseLetterGrid(input)
-        val xmas = findXMAS(letterGrid)
-        assertEquals(2414, xmas.size)
+        val xmas = countXMAS(letterGrid)
+        assertEquals(2414, xmas)
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val letterGrid = parseLetterGrid(sampleInput)
+        val x_mas = countX_MAS(letterGrid)
+        assertEquals(9, x_mas)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val letterGrid = parseLetterGrid(input)
+        val x_mas = countX_MAS(letterGrid)
+        assertEquals(1871, x_mas)
     }
 }
