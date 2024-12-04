@@ -16,29 +16,14 @@ fun countXMAS(letterGrid: Map<Coord, Char>): Int =
     findText(letterGrid, "XMAS").size
 
 fun countX_MAS(letterGrid: Map<Coord, Char>): Int {
-    val allMas = findText(letterGrid, "MAS")
-    var count = 0
-    for (mas1 in allMas) {
-        for (mas2 in allMas) {
-            if (mas1 == mas2) {
-                continue
-            }
-
-            val coords1 = mas1.map { it.first }
-            val coords2 = mas2.map { it.first }
-
-            if (coords1[1] != coords2[1]) {
-                continue
-            }
-
-            val diagonalAdj = coords1[1].getAdjacentCoords(includeDiagonal = true) - coords1[1].getAdjacentCoords()
-            if (coords1[0] in diagonalAdj && coords1[2] in diagonalAdj && coords2[0] in diagonalAdj && coords2[2] in diagonalAdj) {
-                count++
-            }
+    return findText(letterGrid, "MAS")
+        .map { it.map { (coord, _) -> coord } }
+        .groupBy { it[1] }
+        .values
+        .sumOf { masList ->
+            productWithItself(masList, true)
+                .count { (mas1, mas2) -> isX(mas1, mas2) }
         }
-    }
-
-    return count / 2
 }
 
 private fun findText(letterGrid: Map<Coord, Char>, text: String): List<List<Pair<Coord, Char>>> =
@@ -60,3 +45,23 @@ private fun findText(letterGrid: Map<Coord, Char>, text: String): List<List<Pair
         .map { it.map { coord -> coord to letterGrid[coord]!! }.toList() }
         .filter { it.joinToString("") { it.second.toString() } == text }
         .toList()
+
+private fun <T> productWithItself(list: List<T>, diagonal: Boolean): Sequence<Pair<T, T>> =
+    sequence {
+        for ((index1, mas1) in list.withIndex()) {
+            for ((index2, mas2) in list.withIndex()) {
+                if (!diagonal || index2 > index1) {
+                    yield(mas1 to mas2)
+                }
+            }
+        }
+    }
+
+private fun isX(mas1: List<Coord>, mas2: List<Coord>): Boolean {
+    if (mas1[0] == mas2[0] || mas1[1] != mas2[1]) {
+        return false
+    }
+
+    val diagonalAdj = mas1[1].getAdjacentCoords(includeDiagonal = true) - mas1[1].getAdjacentCoords()
+    return (mas1[0] in diagonalAdj && mas1[2] in diagonalAdj && mas2[0] in diagonalAdj && mas2[2] in diagonalAdj)
+}
