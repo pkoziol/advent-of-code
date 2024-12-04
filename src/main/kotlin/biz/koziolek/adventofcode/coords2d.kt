@@ -64,6 +64,15 @@ data class Coord(val x: Int, val y: Int) {
             Direction.EAST -> walkEastTo(x + distance, includeCurrent)
         }
 
+    fun walk(direction1: Direction, direction2: Direction, distance: Int, includeCurrent: Boolean) =
+        when (direction1 to direction2) {
+            Direction.NORTH to Direction.EAST -> walkNorthEastTo(x + distance, y - distance, includeCurrent)
+            Direction.SOUTH to Direction.EAST -> walkSouthEastTo(x + distance, y + distance, includeCurrent)
+            Direction.SOUTH to Direction.WEST -> walkSouthWestTo(x - distance, y + distance, includeCurrent)
+            Direction.NORTH to Direction.WEST -> walkNorthWestTo(x - distance, y - distance, includeCurrent)
+            else -> throw IllegalArgumentException("Invalid directions: $direction1, $direction2")
+        }
+
     fun walkNorthTo(dstY: Int, includeCurrent: Boolean) = sequence {
         val startY = if (includeCurrent) y else y - 1
         for (y in startY downTo dstY) {
@@ -89,6 +98,54 @@ data class Coord(val x: Int, val y: Int) {
         val startX = if (includeCurrent) x else x + 1
         for (x in startX..dstX) {
             yield(Coord(x, y))
+        }
+    }
+
+    private fun walkNorthEastTo(dstX: Int, dstY: Int, includeCurrent: Boolean) = sequence {
+        val startX = if (includeCurrent) x else x + 1
+        val startY = if (includeCurrent) y else y - 1
+        var x = startX
+        var y = startY
+        while (x <= dstX && y >= dstY) {
+            yield(Coord(x, y))
+            x++
+            y--
+        }
+    }
+
+    private fun walkSouthEastTo(dstX: Int, dstY: Int, includeCurrent: Boolean) = sequence {
+        val startX = if (includeCurrent) x else x + 1
+        val startY = if (includeCurrent) y else y + 1
+        var x = startX
+        var y = startY
+        while (x <= dstX && y <= dstY) {
+            yield(Coord(x, y))
+            x++
+            y++
+        }
+    }
+
+    private fun walkSouthWestTo(dstX: Int, dstY: Int, includeCurrent: Boolean) = sequence {
+        val startX = if (includeCurrent) x else x - 1
+        val startY = if (includeCurrent) y else y + 1
+        var x = startX
+        var y = startY
+        while (x >= dstX && y <= dstY) {
+            yield(Coord(x, y))
+            x--
+            y++
+        }
+    }
+
+    private fun walkNorthWestTo(dstX: Int, dstY: Int, includeCurrent: Boolean) = sequence {
+        val startX = if (includeCurrent) x else x - 1
+        val startY = if (includeCurrent) y else y - 1
+        var x = startX
+        var y = startY
+        while (x >= dstX && y >= dstY) {
+            yield(Coord(x, y))
+            x--
+            y--
         }
     }
 
