@@ -49,7 +49,7 @@ internal class Day5Test {
     @Test
     fun testSampleAnswer1() {
         val (rules, updates) = parseSafetyManual(sampleInput)
-        val correctlyOrdered = findCorrectOrder(rules, updates)
+        val (correctlyOrdered, _) = findCorrectOrder(rules, updates)
         assertEquals(3, correctlyOrdered.size)
         val middlePageSum = correctlyOrdered.sumOf { it.middlePage }
         assertEquals(143, middlePageSum)
@@ -60,8 +60,29 @@ internal class Day5Test {
     fun testAnswer1() {
         val input = findInput(object {}).bufferedReader().readLines()
         val (rules, updates) = parseSafetyManual(input)
-        val correctlyOrdered = findCorrectOrder(rules, updates)
+        val (correctlyOrdered, _) = findCorrectOrder(rules, updates)
         val middlePageSum = correctlyOrdered.sumOf { it.middlePage }
         assertEquals(6612, middlePageSum)
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val (rules, updates) = parseSafetyManual(sampleInput)
+        val (_, incorrectlyOrdered) = findCorrectOrder(rules, updates)
+        assertEquals(3, incorrectlyOrdered.size)
+        val fixedOrder = fixOrdering(rules, incorrectlyOrdered)
+        val middlePageSum = fixedOrder.sumOf { it.middlePage }
+        assertEquals(123, middlePageSum)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val (rules, updates) = parseSafetyManual(input)
+        val (_, incorrectlyOrdered) = findCorrectOrder(rules, updates)
+        val fixedOrder = fixOrdering(rules, incorrectlyOrdered)
+        val middlePageSum = fixedOrder.sumOf { it.middlePage }
+        assertEquals(4944, middlePageSum)
     }
 }
