@@ -57,6 +57,9 @@ enum class AsciiColor(private val code: Int) {
         }
 
         fun rgb(r: Int, g: Int, b: Int, obj: Any?) = "$ESC[38;2;${r};${g};${b}m$obj$ESC[0m"
+
+        fun cleanUp(str: String) =
+            str.replace(Regex("$ESC\\[.*?m"), "")
     }
 }
 
