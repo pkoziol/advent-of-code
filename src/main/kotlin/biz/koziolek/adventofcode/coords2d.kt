@@ -272,10 +272,14 @@ fun Map<Coord, Char>.to2DString(default: Char): String =
 fun <T> Map<Coord, T>.to2DString(formatter: (Coord, T?) -> Char): String =
     to2DStringOfStrings { coord, t -> formatter(coord, t).toString() }
 
-fun <T> Map<Coord, T>.to2DStringOfStrings(formatter: (Coord, T?) -> String): String =
+fun <T> Map<Coord, T>.to2DStringOfStrings(from: Coord? = null,
+                                          to: Coord? = null,
+                                          formatter: (Coord, T?) -> String): String =
     buildString {
-        val (minX, maxX) = keys.minAndMaxOrNull { it.x }!!
-        val (minY, maxY) = keys.minAndMaxOrNull { it.y }!!
+        val minX = from?.x ?: keys.minOf { it.x }
+        val maxX = to?.x ?: keys.maxOf { it.x }
+        val minY = from?.y ?: keys.minOf { it.y }
+        val maxY = to?.y ?: keys.maxOf { it.y }
         for (y in minY..maxY) {
             for (x in minX..maxX) {
                 val coord = Coord(x, y)

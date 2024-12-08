@@ -25,8 +25,11 @@ data class AntennasMap(
             .count()
 
     fun addAntinodes(resonant: Boolean = false): AntennasMap {
-        val antinodesCoords = productWithItself(antennas.entries.toList(), diagonal = false)
-            .filter { (a, b) -> a.value != EMPTY.toString() && b.value != EMPTY.toString() }
+        val antinodesCoords = antennas
+            .filterValues { it != "$EMPTY" }
+            .entries
+            .toList()
+            .let { productWithItself(it, ordered = true, withSelf = false) }
             .filter { (a, b) ->
                 a.key != b.key
                         && findFrequency(a.value) == findFrequency(b.value)
@@ -35,33 +38,31 @@ data class AntennasMap(
             .flatMap { (a, b) ->
                 val diff = b - a
                 sequence {
-                    var c = b
                     if (resonant) {
-                        yield(c)
+                        yield(b)
                     }
 
-                    c += diff
+                    var c = b + diff
                     yield(c)
 
-                    if (resonant) {
+                    while (resonant) {
                         c += diff
-                        while (c in this@AntennasMap) {
-                            yield(c)
-                            c += diff
-                        }
+                        yield(c)
                     }
-                }
+                }.takeWhile { it in this }
             }
             .filter { it in this }
             .toSet()
-        val antinodes = antinodesCoords.associate { coord ->
-            val existingStr: String = antennas[coord] ?: EMPTY.toString()
-            if (existingStr != EMPTY.toString()) {
-                coord to existingStr + ANTINODE
+
+        val antinodes = antinodesCoords.associateWith { coord ->
+            val existingStr: String = antennas[coord] ?: "$EMPTY"
+            if (existingStr != "$EMPTY") {
+                existingStr + ANTINODE
             } else {
-                coord to ANTINODE.toString()
+                "$ANTINODE"
             }
         }
+
         return copy(antennas = antennas + antinodes)
     }
 
@@ -69,33 +70,33 @@ data class AntennasMap(
         coord.x in 0 ..< width && coord.y in 0 ..< height
 
     override fun toString(): String {
-        val tmpMap = mapOf(
-            Coord(0, 0) to EMPTY.toString(),
-            Coord(width - 1, height - 1) to EMPTY.toString(),
-        ) + antennas
-        return tmpMap.to2DStringOfStrings { _, str ->
+        return antennas.to2DStringOfStrings(
+            from = Coord(0, 0),
+            to = Coord(width - 1, height - 1)
+        ) { _, str ->
             val frequency = findFrequency(str)
             val char = frequency ?: str?.last() ?: EMPTY
-            val colors = listOf(
-                AsciiColor.RED,
-                AsciiColor.GREEN,
-                AsciiColor.YELLOW,
-                AsciiColor.BLUE,
-                AsciiColor.MAGENTA,
-                AsciiColor.CYAN,
-                AsciiColor.WHITE,
-            )
 
-            when (char) {
-                EMPTY -> AsciiColor.BRIGHT_BLACK.format(char)
-                ANTINODE -> AsciiColor.BRIGHT_WHITE.format(char)
-                else -> {
-                    colors[char.code % colors.size].format(char)
-                }
+            val color = when (char) {
+                EMPTY -> AsciiColor.BRIGHT_BLACK
+                ANTINODE -> AsciiColor.BRIGHT_WHITE
+                else -> frequencyColors[char.code % frequencyColors.size]
             }
+
+            color.format(char)
         }
     }
 }
+
+private val frequencyColors = listOf(
+    AsciiColor.RED,
+    AsciiColor.GREEN,
+    AsciiColor.YELLOW,
+    AsciiColor.BLUE,
+    AsciiColor.MAGENTA,
+    AsciiColor.CYAN,
+    AsciiColor.WHITE,
+)
 
 fun findFrequency(str: String?): Char? =
     str?.singleOrNull { it != ANTINODE }

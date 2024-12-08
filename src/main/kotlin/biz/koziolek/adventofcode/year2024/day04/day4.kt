@@ -21,7 +21,7 @@ fun countX_MAS(letterGrid: Map<Coord, Char>): Int {
         .groupBy { it[1] }
         .values
         .sumOf { masList ->
-            productWithItself(masList, true)
+            productWithItself(masList, ordered = false, withSelf = false)
                 .count { (mas1, mas2) -> isX(mas1, mas2) }
         }
 }

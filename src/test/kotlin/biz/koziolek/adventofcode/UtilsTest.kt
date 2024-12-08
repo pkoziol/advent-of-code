@@ -85,4 +85,56 @@ internal class UtilsTest {
             setOf(3, 4).singleOrNullOnlyWhenZero()
         }
     }
+
+    @Test
+    fun testProductWithItself() {
+        assertEquals(
+            listOf(
+                1 to 1,
+                1 to 2,
+                1 to 3,
+                2 to 1,
+                2 to 2,
+                2 to 3,
+                3 to 1,
+                3 to 2,
+                3 to 3,
+            ),
+            productWithItself(listOf(1, 2, 3)).toList(),
+            "Full product (square)"
+        )
+        assertEquals(
+            listOf(
+                1 to 2,
+                1 to 3,
+                2 to 1,
+                2 to 3,
+                3 to 1,
+                3 to 2,
+            ),
+            productWithItself(listOf(1, 2, 3), withSelf = false).toList(),
+            "Product without self (square without diagonal)"
+        )
+        assertEquals(
+            listOf(
+                1 to 1,
+                1 to 2,
+                1 to 3,
+                2 to 2,
+                2 to 3,
+                3 to 3,
+            ),
+            productWithItself(listOf(1, 2, 3), ordered = false).toList(),
+            "Unordered product (triangle including diagonal)"
+        )
+        assertEquals(
+            listOf(
+                1 to 2,
+                1 to 3,
+                2 to 3,
+            ),
+            productWithItself(listOf(1, 2, 3), ordered = false, withSelf = false).toList(),
+            "Unordered product without self (triangle without diagonal)"
+        )
+    }
 }
