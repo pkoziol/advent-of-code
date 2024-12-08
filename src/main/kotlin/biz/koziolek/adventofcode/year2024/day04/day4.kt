@@ -46,17 +46,6 @@ private fun findText(letterGrid: Map<Coord, Char>, text: String): List<List<Pair
         .filter { it.joinToString("") { it.second.toString() } == text }
         .toList()
 
-private fun <T> productWithItself(list: List<T>, diagonal: Boolean): Sequence<Pair<T, T>> =
-    sequence {
-        for ((index1, mas1) in list.withIndex()) {
-            for ((index2, mas2) in list.withIndex()) {
-                if (!diagonal || index2 > index1) {
-                    yield(mas1 to mas2)
-                }
-            }
-        }
-    }
-
 private fun isX(mas1: List<Coord>, mas2: List<Coord>): Boolean {
     if (mas1[0] == mas2[0] || mas1[1] != mas2[1]) {
         return false

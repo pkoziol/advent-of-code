@@ -187,3 +187,14 @@ fun <T, R : Comparable<R>> Iterable<T>.minAndMaxOrNull(selector: (T) -> R): Pair
     }
     return minValue to maxValue
 }
+
+fun <T> productWithItself(list: List<T>, diagonal: Boolean): Sequence<Pair<T, T>> =
+    sequence {
+        for ((index1, mas1) in list.withIndex()) {
+            for ((index2, mas2) in list.withIndex()) {
+                if (!diagonal || index2 > index1) {
+                    yield(mas1 to mas2)
+                }
+            }
+        }
+    }
