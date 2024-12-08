@@ -5,8 +5,8 @@ import biz.koziolek.adventofcode.*
 fun main() {
     val inputFile = findInput(object {})
     val map = parseAntennasMap(inputFile.bufferedReader().readLines())
-    val mapWithAntinodes = map.addAntinodes()
-    println("Number of unique antinodes ${mapWithAntinodes.countUnique('#')}")
+    println("Number of unique antinodes: ${map.addAntinodes().countUnique('#')}")
+    println("Number of unique antinodes including resonant harmonics: ${map.addAntinodes(resonant = true).countUnique('#')}")
 }
 
 const val EMPTY = '.'
@@ -24,7 +24,7 @@ data class AntennasMap(
             .distinct()
             .count()
 
-    fun addAntinodes(): AntennasMap {
+    fun addAntinodes(resonant: Boolean = false): AntennasMap {
         val antinodesCoords = productWithItself(antennas.entries.toList(), diagonal = false)
             .filter { (a, b) -> a.value != EMPTY.toString() && b.value != EMPTY.toString() }
             .filter { (a, b) ->
@@ -32,13 +32,27 @@ data class AntennasMap(
                         && findFrequency(a.value) == findFrequency(b.value)
             }
             .map { (a, b) -> a.key to b.key }
-            .map { (a, b) ->
-                Coord(
-                    x = b.x + (b.x - a.x),
-                    y = b.y + (b.y - a.y),
-                )
+            .flatMap { (a, b) ->
+                val diff = b - a
+                sequence {
+                    var c = b
+                    if (resonant) {
+                        yield(c)
+                    }
+
+                    c += diff
+                    yield(c)
+
+                    if (resonant) {
+                        c += diff
+                        while (c in this@AntennasMap) {
+                            yield(c)
+                            c += diff
+                        }
+                    }
+                }
             }
-            .filter { it.x in 0..<width && it.y in 0..<height }
+            .filter { it in this }
             .toSet()
         val antinodes = antinodesCoords.associate { coord ->
             val existingStr: String = antennas[coord] ?: EMPTY.toString()
@@ -50,6 +64,9 @@ data class AntennasMap(
         }
         return copy(antennas = antennas + antinodes)
     }
+
+    operator fun contains(coord: Coord): Boolean =
+        coord.x in 0 ..< width && coord.y in 0 ..< height
 
     override fun toString(): String {
         val tmpMap = mapOf(
