@@ -72,50 +72,17 @@ fun defragmentDisk2(blocks: List<Block>): List<Block> {
     var movedFile = newBlocks.single { it.id == movedId }
 
     while (true) {
-//        println(newBlocks.toDebugString(verbose = false))
+//        println(newBlocks.toDebugString(verbose = true))
 //        Thread.sleep(500)
 
         val freeBlock = newBlocks.firstOrNull { it.isFree() && it.size >= movedFile.size }
         if (freeBlock != null) {
-            val freeBlockPos = newBlocks.findBlockPosition(freeBlock)
-            val movedFilePos = newBlocks.findBlockPosition(movedFile)
-            if (freeBlockPos <= movedFilePos) {
-                val freeBlockIndex = newBlocks.indexOf(freeBlock)
-                newBlocks.remove(freeBlock)
-                if (freeBlock.size > movedFile.size) {
-                    newBlocks.add(
-                        freeBlockIndex, Block(
-                            id = null,
-                            size = freeBlock.size - movedFile.size,
-                        )
-                    )
-                }
-                newBlocks.add(freeBlockIndex, movedFile)
+            val freeBlockIndex = newBlocks.indexOf(freeBlock)
+            var oldMovedFileIndex = newBlocks.lastIndexOf(movedFile)
 
-                val oldMovedFileIndex = newBlocks.lastIndexOf(movedFile)
-                var newFreeSize = movedFile.size
-                var removeNextFree = false
-                var removePrevFree = false
-                newBlocks.getOrNull(oldMovedFileIndex + 1)?.let {
-                    if (it.isFree()) {
-                        newFreeSize += it.size
-                        removeNextFree = true
-                    }
-                }
-                newBlocks.getOrNull(oldMovedFileIndex - 1)?.let {
-                    if (it.isFree()) {
-                        newFreeSize += it.size
-                        removePrevFree = true
-                    }
-                }
-
-                newBlocks[oldMovedFileIndex] = Block(id = null, size = newFreeSize)
-                if (removeNextFree) {
-                    newBlocks.removeAt(oldMovedFileIndex + 1)
-                }
-                if (removePrevFree) {
-                    newBlocks.removeAt(oldMovedFileIndex - 1)
-                }
+            if (freeBlockIndex < oldMovedFileIndex) {
+                oldMovedFileIndex = moveBlock(newBlocks, freeBlockIndex, freeBlock, oldMovedFileIndex, movedFile)
+                addNewFreeBlock(newBlocks, oldMovedFileIndex, movedFile.size)
             }
         }
 
@@ -123,15 +90,64 @@ fun defragmentDisk2(blocks: List<Block>): List<Block> {
             break
         } else {
             movedId--
-            movedFile = newBlocks.single { it.id == movedId }
+            movedFile = newBlocks.first { it.id == movedId }
         }
     }
 
     return newBlocks
 }
 
-private fun List<Block>.findBlockPosition(block: Block): Int =
-    takeWhile { it != block }.sumOf { it.size }
+private fun moveBlock(
+    newBlocks: MutableList<Block>,
+    freeBlockIndex: Int,
+    freeBlock: Block,
+    movedFileIndex: Int,
+    movedFile: Block
+): Int {
+    var updatedMovedFileIndex = movedFileIndex
+
+    newBlocks.remove(freeBlock)
+
+    if (freeBlock.size > movedFile.size) {
+        newBlocks.add(
+            freeBlockIndex, Block(
+                id = null,
+                size = freeBlock.size - movedFile.size,
+            )
+        )
+        updatedMovedFileIndex++
+    }
+
+    newBlocks.add(freeBlockIndex, movedFile)
+
+    return updatedMovedFileIndex
+}
+
+private fun addNewFreeBlock(newBlocks: MutableList<Block>, index: Int, size: Int) {
+    var newFreeSize = size
+    var removeNextFree = false
+    var removePrevFree = false
+    newBlocks.getOrNull(index + 1)?.let {
+        if (it.isFree()) {
+            newFreeSize += it.size
+            removeNextFree = true
+        }
+    }
+    newBlocks.getOrNull(index - 1)?.let {
+        if (it.isFree()) {
+            newFreeSize += it.size
+            removePrevFree = true
+        }
+    }
+
+    newBlocks[index] = Block(id = null, size = newFreeSize)
+    if (removeNextFree) {
+        newBlocks.removeAt(index + 1)
+    }
+    if (removePrevFree) {
+        newBlocks.removeAt(index - 1)
+    }
+}
 
 private fun List<Block>.toDebugString(verbose: Boolean): String =
     buildString {
