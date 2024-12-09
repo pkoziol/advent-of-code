@@ -128,4 +128,71 @@ internal class Day9Test {
         val checksum = calculateFilesystemChecksum(defragmentedBlocks)
         assertEquals(6225730762521, checksum)
     }
+
+    @Test
+    fun testParseDiskMap2() {
+        val blocks = diskMapToBlocks(sampleInput, splitBlocks = false)
+        assertEquals(listOf(
+            Block(id = 0, size = 2),
+            Block(id = null, size = 3),
+            Block(id = 1, size = 3),
+            Block(id = null, size = 3),
+            Block(id = 2, size = 1),
+            Block(id = null, size = 3),
+            Block(id = 3, size = 3),
+            Block(id = null, size = 1),
+            Block(id = 4, size = 2),
+            Block(id = null, size = 1),
+            Block(id = 5, size = 4),
+            Block(id = null, size = 1),
+            Block(id = 6, size = 4),
+            Block(id = null, size = 1),
+            Block(id = 7, size = 3),
+            Block(id = null, size = 1),
+            Block(id = 8, size = 4),
+            Block(id = 9, size = 2),
+        ), blocks)
+    }
+
+    @Test
+    fun testDefragmentDisk2() {
+        val blocks = diskMapToBlocks(sampleInput, splitBlocks = false)
+        val defragmentedBlocks = defragmentDisk2(blocks)
+        assertEquals(listOf(
+            Block(id = 0, size = 2),
+            Block(id = 9, size = 2),
+            Block(id = 2, size = 1),
+            Block(id = 1, size = 3),
+            Block(id = 7, size = 3),
+            Block(id = null, size = 1),
+            Block(id = 4, size = 2),
+            Block(id = null, size = 1),
+            Block(id = 3, size = 3),
+            Block(id = null, size = 4),
+            Block(id = 5, size = 4),
+            Block(id = null, size = 1),
+            Block(id = 6, size = 4),
+            Block(id = null, size = 5),
+            Block(id = 8, size = 4),
+            Block(id = null, size = 2),
+        ), defragmentedBlocks)
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val blocks = diskMapToBlocks(sampleInput, splitBlocks = false)
+        val defragmentedBlocks = defragmentDisk2(blocks)
+        val checksum = calculateFilesystemChecksum(defragmentedBlocks)
+        assertEquals(2858, checksum)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val blocks = diskMapToBlocks(input, splitBlocks = false)
+        val defragmentedBlocks = defragmentDisk2(blocks)
+        val checksum = calculateFilesystemChecksum(defragmentedBlocks)
+        assertEquals(6250605700557, checksum)
+    }
 }

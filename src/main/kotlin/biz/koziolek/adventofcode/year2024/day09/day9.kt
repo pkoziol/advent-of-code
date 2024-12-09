@@ -10,20 +10,33 @@ fun main() {
     println("Checksum: $checksum")
 }
 
-data class Block(val id: Int?) {
+data class Block(val id: Int?, val size: Int = 1) {
     fun isFile() = id != null
     fun isFree() = id == null
 }
 
-fun diskMapToBlocks(lines: Iterable<String>): List<Block> =
+fun diskMapToBlocks(lines: Iterable<String>, splitBlocks: Boolean = true): List<Block> =
     buildList {
         var id = 0
         var isFile = true
         for (c in lines.first()) {
             val count = c.digitToInt()
-            repeat(count) {
-                add(Block(id = if (isFile) id else null))
+
+            if (splitBlocks) {
+                repeat(count) {
+                    add(Block(id = if (isFile) id else null))
+                }
+            } else {
+                if (count > 0) {
+                    add(
+                        Block(
+                            id = if (isFile) id else null,
+                            size = count,
+                        )
+                    )
+                }
             }
+
             if (isFile) {
                 id++
             }
@@ -53,7 +66,100 @@ fun defragmentDisk(blocks: List<Block>): List<Block> {
     return newBlocks
 }
 
-fun calculateFilesystemChecksum(blocks: List<Block>): Long =
-    blocks.foldIndexed(0) { index, acc, block ->
-        acc + if (block.isFile()) block.id!! * index else 0
+fun defragmentDisk2(blocks: List<Block>): List<Block> {
+    val newBlocks = blocks.toMutableList()
+    var movedId = blocks.filter { it.isFile() }.mapNotNull { it.id }.max()
+    var movedFile = newBlocks.single { it.id == movedId }
+
+    while (true) {
+//        println(newBlocks.toDebugString(verbose = false))
+//        Thread.sleep(500)
+
+        val freeBlock = newBlocks.firstOrNull { it.isFree() && it.size >= movedFile.size }
+        if (freeBlock != null) {
+            val freeBlockPos = newBlocks.findBlockPosition(freeBlock)
+            val movedFilePos = newBlocks.findBlockPosition(movedFile)
+            if (freeBlockPos <= movedFilePos) {
+                val freeBlockIndex = newBlocks.indexOf(freeBlock)
+                newBlocks.remove(freeBlock)
+                if (freeBlock.size > movedFile.size) {
+                    newBlocks.add(
+                        freeBlockIndex, Block(
+                            id = null,
+                            size = freeBlock.size - movedFile.size,
+                        )
+                    )
+                }
+                newBlocks.add(freeBlockIndex, movedFile)
+
+                val oldMovedFileIndex = newBlocks.lastIndexOf(movedFile)
+                var newFreeSize = movedFile.size
+                var removeNextFree = false
+                var removePrevFree = false
+                newBlocks.getOrNull(oldMovedFileIndex + 1)?.let {
+                    if (it.isFree()) {
+                        newFreeSize += it.size
+                        removeNextFree = true
+                    }
+                }
+                newBlocks.getOrNull(oldMovedFileIndex - 1)?.let {
+                    if (it.isFree()) {
+                        newFreeSize += it.size
+                        removePrevFree = true
+                    }
+                }
+
+                newBlocks[oldMovedFileIndex] = Block(id = null, size = newFreeSize)
+                if (removeNextFree) {
+                    newBlocks.removeAt(oldMovedFileIndex + 1)
+                }
+                if (removePrevFree) {
+                    newBlocks.removeAt(oldMovedFileIndex - 1)
+                }
+            }
+        }
+
+        if (movedId == 0) {
+            break
+        } else {
+            movedId--
+            movedFile = newBlocks.single { it.id == movedId }
+        }
     }
+
+    return newBlocks
+}
+
+private fun List<Block>.findBlockPosition(block: Block): Int =
+    takeWhile { it != block }.sumOf { it.size }
+
+private fun List<Block>.toDebugString(verbose: Boolean): String =
+    buildString {
+        require(this@toDebugString.maxOf { it.id ?: 0 } <= 9) { "Only 10 blocks are supported" }
+
+        for (block in this@toDebugString) {
+            if (verbose) {
+                append('[')
+            }
+            repeat(block.size) {
+                append(if (block.isFile()) block.id else '.')
+            }
+            if (verbose) {
+                append(']')
+            }
+        }
+    }
+
+fun calculateFilesystemChecksum(blocks: List<Block>): Long {
+    var pos = 0
+    var checksum = 0L
+    for (block in blocks) {
+        for (i in 0 until block.size) {
+            if (block.isFile()) {
+                checksum += pos.toLong() * block.id!!
+            }
+            pos++
+        }
+    }
+    return checksum
+}
