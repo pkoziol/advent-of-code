@@ -11,6 +11,7 @@ fun main() {
     val trails = findTrails(map)
     val scores = findTrailHeadScores(trails)
     println("The sum of the trail head scores is $scores")
+    println("The sum of the trail head ranking is ${trails.size}")
 }
 
 fun parseMap(lines: Iterable<String>): Map<Coord, Int> =

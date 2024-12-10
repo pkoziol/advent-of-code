@@ -36,4 +36,20 @@ internal class Day10Test {
         val scores = findTrailHeadScores(trails)
         assertEquals(566, scores)
     }
+
+    @Test
+    fun testSampleAnswer2() {
+        val map = parseMap(sampleInput)
+        val trails = findTrails(map)
+        assertEquals(81, trails.size)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val map = parseMap(input)
+        val trails = findTrails(map)
+        assertEquals(1324, trails.size)
+    }
 }
