@@ -28,9 +28,11 @@ internal class Day11Test {
         val stones6 = updateStones(stones0, times = 6)
         assertEquals(listOf(2097446912L, 14168L, 4048L, 2L, 0L, 2L, 4L, 40L, 48L, 2024L, 40L, 48L, 80L, 96L, 2L, 8L, 6L, 7L, 6L, 0L, 3L, 2L), stones6)
         assertEquals(22, stones6.size)
+        assertEquals(22, countStones2(stones0, times = 6))
 
         val stones25 = updateStones(stones0, times = 25)
         assertEquals(55312, stones25.size)
+        assertEquals(55312, countStones2(stones0, times = 25))
     }
 
     @Test
@@ -40,5 +42,15 @@ internal class Day11Test {
         val stones0 = parseStones(input)
         val stones25 = updateStones(stones0, times = 25)
         assertEquals(218079, stones25.size)
+        assertEquals(218079, countStones2(stones0, times = 25))
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val stones0 = parseStones(input)
+        val stones75 = countStones2(stones0, times = 75)
+        assertEquals(259755538429618, stones75)
     }
 }
