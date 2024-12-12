@@ -13,14 +13,62 @@ fun main() {
 
 data class Region(val plant: Char, val coords: Set<Coord>, val map: Map<Coord, Char>) {
     val area: Int = coords.size
+
     val perimeter: Int by lazy {
         coords.sumOf { coord ->
             coord.getAdjacentCoords(includeDiagonal = false)
                 .count { it !in coords || map[it] != plant }
         }
     }
+
+    val sides: Int by lazy {
+        val visitedOutside = mutableSetOf<Pair<Coord, Coord>>()
+        var sides = 0
+
+        for (coord in coords) {
+            for (outsideCoord in coord.getAdjacentCoords(includeDiagonal = false)) {
+                val diffToInside = coord - outsideCoord
+
+                if (outsideCoord in coords || (outsideCoord to diffToInside) in visitedOutside) {
+                    continue
+                }
+
+                sides++
+
+                val diffToWalk = Coord(x = diffToInside.y, y = diffToInside.x)
+                val diffToWalkBack = Coord(x = -diffToInside.y, y = -diffToInside.x)
+                var current = outsideCoord
+
+                while (true) {
+                    val currentIn = current + diffToInside
+                    if (current in coords || currentIn !in coords) {
+                        break
+                    }
+                    visitedOutside.add(current to diffToInside)
+                    current += diffToWalk
+                }
+
+                current = outsideCoord
+                while (true) {
+                    val currentIn = current + diffToInside
+                    if (current in coords || currentIn !in coords) {
+                        break
+                    }
+                    visitedOutside.add(current to diffToInside)
+                    current += diffToWalkBack
+                }
+            }
+        }
+
+        sides
+    }
+
     val price: Int by lazy {
         area * perimeter
+    }
+
+    val discountedPrice: Int by lazy {
+        area * sides
     }
 }
 

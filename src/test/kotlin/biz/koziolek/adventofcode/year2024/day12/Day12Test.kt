@@ -74,4 +74,30 @@ internal class Day12Test {
         val prices = regions.map { it.price }
         assertEquals(1465112, prices.sum())
     }
+
+    @Test
+    fun testSampleAnswer2() {
+        val regions1 = parseRegions(sampleInput1)
+        val prices1 = regions1.map { it.discountedPrice }
+        assertEquals(listOf(4, 12, 16, 16, 32), prices1.sorted())
+        assertEquals(80, prices1.sum())
+
+        val regions2 = parseRegions(sampleInput2)
+        val prices2 = regions2.map { it.discountedPrice }
+        assertEquals(436, prices2.sum())
+
+        val regions3 = parseRegions(sampleInput3)
+        val prices3 = regions3.map { it.discountedPrice }
+        assertEquals(listOf(4, 16, 18, 30, 104, 120, 120, 130, 132, 224, 308), prices3.sorted())
+        assertEquals(1206, prices3.sum())
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val regions = parseRegions(input)
+        val prices = regions.map { it.discountedPrice }
+        assertEquals(893790, prices.sum())
+    }
 }
