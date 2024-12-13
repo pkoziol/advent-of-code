@@ -34,7 +34,6 @@ internal class Day13Test {
     }
 
     @Test
-    @Tag("answer")
     fun testSampleAnswer1() {
         val machines = parseClawMachines(sampleInput)
         val winningMoves = winAllPossible(machines)
@@ -52,5 +51,23 @@ internal class Day13Test {
         val machines = parseClawMachines(input)
         val winningMoves = winAllPossible(machines)
         assertEquals(25751, winningMoves.sumOf { it.cost })
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val machines = fixConversionError(parseClawMachines(sampleInput))
+        val winningMoves = winAllPossible(machines)
+        assertEquals(machines[1], winningMoves[0].machine)
+        assertEquals(machines[3], winningMoves[1].machine)
+        assertEquals(2, winningMoves.size)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val machines = fixConversionError(parseClawMachines(input))
+        val winningMoves = winAllPossible(machines)
+        assertEquals(108528956728655, winningMoves.sumOf { it.cost })
     }
 }
