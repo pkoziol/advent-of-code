@@ -15,6 +15,7 @@ data class Coord(val x: Int, val y: Int) {
     operator fun plus(other: Coord) = Coord(x + other.x, y + other.y)
     operator fun minus(other: Coord) = Coord(x - other.x, y - other.y)
     operator fun unaryMinus() = Coord(-x, -y)
+    operator fun times(num: Int): Coord = Coord(x * num, y * num)
     override fun toString() = "$x,$y"
 
     fun toLong() = LongCoord(x, y)
