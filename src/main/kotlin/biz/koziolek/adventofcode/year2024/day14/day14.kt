@@ -2,7 +2,6 @@ package biz.koziolek.adventofcode.year2024.day14
 
 import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
-import java.util.stream.Collectors
 
 fun main() {
     val inputFile = findInput(object {})
@@ -45,15 +44,14 @@ data class RobotMap(val robots: List<Robot>, val width: Int, val height: Int) {
 
     override fun toString() =
         buildString {
+            val robotsPerCoord = robots.groupingBy { it.position }.eachCount()
             for (y in 0 until height) {
                 for (x in 0 until width) {
-                    val robots = robots.count { it.position == Coord(x, y) }
-                    if (robots >= 10) {
-                        append("*")
-                    } else if (robots > 0) {
-                        append(robots)
-                    } else {
-                        append(".")
+                    val robotsCount = robotsPerCoord[Coord(x, y)] ?: 0
+                    when {
+                        robotsCount >= 10 -> append("*")
+                        robotsCount > 0 -> append(robotsCount)
+                        else -> append(".")
                     }
                 }
                 if (y < height - 1) {
@@ -86,19 +84,17 @@ fun simulate(map: RobotMap, seconds: Int): RobotMap =
 private data class MapWithStat(val seconds: Int, val map: RobotMap, val stat: Int)
 
 fun findTree(map: RobotMap): Int {
-    val stats = (1..20_000)
-        .toList()
-        .parallelStream()
+    val stats = (1..11_000)
+        .asSequence()
         .map { seconds ->
             val (m, stat) = findLongestConsecutive(map, seconds)
             MapWithStat(seconds, m, stat)
         }
         .takeWhile { it.map != map }
-        .filter { it.stat > 3 }
-        .collect(Collectors.groupingBy(
-            { it.stat },
-            Collectors.mapping({ it.seconds }, Collectors.toList())
-        ))
+        .groupBy(
+            keySelector = { it.stat },
+            valueTransform = { it.seconds },
+        )
 
     stats.entries
         .sortedByDescending { it.key }
@@ -109,10 +105,28 @@ fun findTree(map: RobotMap): Int {
 
 private fun findLongestConsecutive(map: RobotMap, seconds: Int): Pair<RobotMap, Int> {
     val mapI = simulate(map, seconds = seconds)
-    val mapString = mapI.toString()
-    val longestConsecutive = mapString.lines()
-        .maxOf { line ->
-            line.split('.').maxOf { it.length }
+    val longestConsecutive = mapI.robots
+        .groupBy { it.position.y }
+        .values
+        .map { robots -> robots.map { it.position.x }.sorted() }
+        .maxOf { xs ->
+            var maxConsecutive = 1
+            var curConsecutive = 1
+            var prevX = xs.first()
+
+            for (x in xs) {
+                when (x - prevX) {
+                    0 -> {}
+                    1 -> curConsecutive++
+                    else -> {
+                        maxConsecutive = maxOf(maxConsecutive, curConsecutive)
+                        curConsecutive = 0
+                    }
+                }
+                prevX = x
+            }
+
+            maxConsecutive
         }
 
     return mapI to longestConsecutive
