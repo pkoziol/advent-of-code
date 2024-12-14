@@ -43,25 +43,23 @@ fun parseClawMachines(lines: Iterable<String>): List<ClawMachine> =
 
 fun winAllPossible(machines: List<ClawMachine>): List<WinningMove> =
     machines.mapNotNull { machine ->
-        val pDiff = machine.prize.x * machine.b.y - machine.prize.y * machine.b.x
-        val xyDiff = machine.a.x * machine.b.y - machine.a.y * machine.b.x
-        if (xyDiff == 0) {
+        val aNumerator = machine.prize.x * machine.b.y - machine.prize.y * machine.b.x
+        val aDenominator = machine.a.x * machine.b.y - machine.a.y * machine.b.x
+
+        if (aDenominator == 0 || aNumerator % aDenominator != 0L) {
             return@mapNotNull null
-        } else {
-            if (pDiff % xyDiff != 0L) {
-                return@mapNotNull null
-            }
-            val a = pDiff / xyDiff
-            if ((machine.prize.y - machine.a.y * a) % machine.b.y != 0L) {
-                return@mapNotNull null
-            }
-            val b = (machine.prize.y - machine.a.y * a) / machine.b.y
-            if (a >= 0 && b >= 0) {
-                return@mapNotNull WinningMove(a, b, machine)
-            } else {
-                return@mapNotNull null
-            }
         }
+
+        val a = aNumerator / aDenominator
+        val bNumerator = machine.prize.y - machine.a.y * a
+        val bDenominator = machine.b.y
+
+        if (bDenominator == 0 || bNumerator % bDenominator != 0L) {
+            return@mapNotNull null
+        }
+
+        val b = bNumerator / machine.b.y
+        return@mapNotNull WinningMove(a, b, machine)
     }
 
 fun fixConversionError(machines: List<ClawMachine>): List<ClawMachine> =
