@@ -48,6 +48,18 @@ internal class Day15Test {
             v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^
         """.trimIndent().split("\n")
 
+    private val sampleInputToScale = """
+            #######
+            #...#.#
+            #.....#
+            #..OO@#
+            #..O..#
+            #.....#
+            #######
+
+            <vv<<^^<<^^
+        """.trimIndent().split("\n")
+
     @Test
     fun testParse() {
         val (warehouse, moves) = parseWarehouse(sampleInputSmall)
@@ -280,5 +292,166 @@ internal class Day15Test {
         val (warehouse, moves) = parseWarehouse(input)
         val finalWarehouse = warehouse.move(moves)
         assertEquals(1463715, finalWarehouse.sumBoxesCoords())
+    }
+
+    @Test
+    fun testScale() {
+        val (warehouse, _) = parseWarehouse(sampleInputLarger)
+        val scaledWarehouse = warehouse.scale()
+        assertEquals("""
+            ####################
+            ##....[]....[]..[]##
+            ##............[]..##
+            ##..[][]....[]..[]##
+            ##....[]@.....[]..##
+            ##[]##....[]......##
+            ##[]....[]....[]..##
+            ##..[][]..[]..[][]##
+            ##........[]......##
+            ####################
+        """.trimIndent(), AsciiColor.cleanUp(scaledWarehouse.toString()))
+    }
+
+    @Test
+    fun testScaledMovement() {
+        val (warehouse, moves) = parseWarehouse(sampleInputToScale)
+        val scaledWarehouse = warehouse.scale()
+        val allMovesString = buildString {
+            append("Initial state:\n")
+            append("$scaledWarehouse")
+            moves.fold(scaledWarehouse) { acc, direction ->
+                val newWarehouse = acc.move(direction)
+                append("\n\nMove ${direction.char}:\n")
+                append("$newWarehouse")
+                newWarehouse
+            }
+        }
+        assertEquals("""
+            Initial state:
+            ##############
+            ##......##..##
+            ##..........##
+            ##....[][]@.##
+            ##....[]....##
+            ##..........##
+            ##############
+
+            Move <:
+            ##############
+            ##......##..##
+            ##..........##
+            ##...[][]@..##
+            ##....[]....##
+            ##..........##
+            ##############
+
+            Move v:
+            ##############
+            ##......##..##
+            ##..........##
+            ##...[][]...##
+            ##....[].@..##
+            ##..........##
+            ##############
+
+            Move v:
+            ##############
+            ##......##..##
+            ##..........##
+            ##...[][]...##
+            ##....[]....##
+            ##.......@..##
+            ##############
+
+            Move <:
+            ##############
+            ##......##..##
+            ##..........##
+            ##...[][]...##
+            ##....[]....##
+            ##......@...##
+            ##############
+
+            Move <:
+            ##############
+            ##......##..##
+            ##..........##
+            ##...[][]...##
+            ##....[]....##
+            ##.....@....##
+            ##############
+
+            Move ^:
+            ##############
+            ##......##..##
+            ##...[][]...##
+            ##....[]....##
+            ##.....@....##
+            ##..........##
+            ##############
+
+            Move ^:
+            ##############
+            ##......##..##
+            ##...[][]...##
+            ##....[]....##
+            ##.....@....##
+            ##..........##
+            ##############
+
+            Move <:
+            ##############
+            ##......##..##
+            ##...[][]...##
+            ##....[]....##
+            ##....@.....##
+            ##..........##
+            ##############
+
+            Move <:
+            ##############
+            ##......##..##
+            ##...[][]...##
+            ##....[]....##
+            ##...@......##
+            ##..........##
+            ##############
+
+            Move ^:
+            ##############
+            ##......##..##
+            ##...[][]...##
+            ##...@[]....##
+            ##..........##
+            ##..........##
+            ##############
+
+            Move ^:
+            ##############
+            ##...[].##..##
+            ##...@.[]...##
+            ##....[]....##
+            ##..........##
+            ##..........##
+            ##############
+        """.trimIndent(), AsciiColor.cleanUp(allMovesString))
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val (warehouse, moves) = parseWarehouse(sampleInputLarger)
+        val scaledWarehouse = warehouse.scale()
+        val finalWarehouse = scaledWarehouse.move(moves)
+        assertEquals(9021, finalWarehouse.sumBoxesCoords())
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val (warehouse, moves) = parseWarehouse(input)
+        val scaledWarehouse = warehouse.scale()
+        val finalWarehouse = scaledWarehouse.move(moves)
+        assertEquals(1481392, finalWarehouse.sumBoxesCoords())
     }
 }
