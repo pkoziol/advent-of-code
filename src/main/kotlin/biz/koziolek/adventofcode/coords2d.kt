@@ -8,7 +8,18 @@ enum class Direction(val char: Char) {
     NORTH('^'),
     SOUTH('v'),
     WEST('<'),
-    EAST('>'),
+    EAST('>');
+
+    companion object {
+        fun fromChar(char: Char): Direction =
+            when (char) {
+                NORTH.char -> NORTH
+                SOUTH.char -> SOUTH
+                WEST.char -> WEST
+                EAST.char -> EAST
+                else -> throw IllegalArgumentException("Invalid direction: $char")
+            }
+    }
 }
 
 data class Coord(val x: Int, val y: Int) {
