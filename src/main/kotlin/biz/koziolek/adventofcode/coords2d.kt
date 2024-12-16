@@ -19,6 +19,16 @@ enum class Direction(val char: Char) {
                 EAST.char -> EAST
                 else -> throw IllegalArgumentException("Invalid direction: $char")
             }
+
+        fun fromCoord(diff: Coord): Direction {
+            return when {
+                diff.x == 0 && diff.y < 0 -> NORTH
+                diff.x == 0 && diff.y > 0 -> SOUTH
+                diff.x < 0 && diff.y == 0 -> WEST
+                diff.x > 0 && diff.y == 0 -> EAST
+                else -> throw IllegalArgumentException("Cannot get direction from: $diff")
+            }
+        }
     }
 }
 
@@ -375,6 +385,23 @@ fun Coord.toGraphNode() = CoordNode(this)
 data class CoordNode(val coord: Coord) : GraphNode {
 
     override val id = "x${coord.x}_y${coord.y}"
+
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float): String {
+        val props = mutableListOf<String>()
+        if (exactXYPosition) props.add("pos=\"${coord.x * xyPositionScale},${coord.y * xyPositionScale}!\"")
+
+        val propsStr = when {
+            props.isNotEmpty() -> " [" + props.joinToString(",") + "]"
+            else -> ""
+        }
+
+        return "$id$propsStr"
+    }
+}
+
+data class CoordWithDirectionNode(val coord: Coord, val direction: Direction) : GraphNode {
+
+    override val id = "x${coord.x}_y${coord.y} @ $direction"
 
     override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float): String {
         val props = mutableListOf<String>()

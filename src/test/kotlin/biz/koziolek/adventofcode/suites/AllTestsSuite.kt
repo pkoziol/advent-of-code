@@ -9,5 +9,6 @@ import org.junit.platform.suite.api.Suite
     Year2021Suite::class,
     Year2022Suite::class,
     Year2023Suite::class,
+    Year2024Suite::class,
 )
 class AllTestsSuite

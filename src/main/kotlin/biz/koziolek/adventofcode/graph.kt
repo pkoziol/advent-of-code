@@ -3,6 +3,7 @@ package biz.koziolek.adventofcode
 import java.io.File
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
@@ -111,8 +112,8 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
     fun getAdjacentEdges(node: N): Set<E> =
         nodeStartingEdges[node] ?: emptySet()
 
-    fun findShortestPath(start: N, end: N): List<N> =
-        findShortestPath(end) { it == start }
+//    fun findShortestPath(start: N, end: N): List<N> =
+//        findShortestPath(end) { it == start }
 
     fun findShortestPath(starts: Set<N>, end: N): List<N> =
         findShortestPath(end) { it in starts }
@@ -156,6 +157,49 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
                     .minByOrNull { adjNode -> cumulativeDistance[adjNode] ?: Int.MAX_VALUE }
             }
         }.toList()
+    }
+
+    fun findShortestPath(start: N, end: N): List<N> {
+        val cumulativeDistance: MutableMap<N, Int> = HashMap()
+        val prev: MutableMap<N, N> = HashMap()
+        val toVisit: MutableSet<N> = HashSet()
+
+        for (node in nodes) {
+            cumulativeDistance[node] = Int.MAX_VALUE
+            toVisit.add(node)
+        }
+        cumulativeDistance[start] = 0
+
+        while (toVisit.isNotEmpty()) {
+            val current = toVisit.minBy { node -> cumulativeDistance[node]!! }
+            toVisit.remove(current)
+
+            val currentNodeDistance = cumulativeDistance[current]!!
+
+            if (current !in nodeEndingEdges) {
+                continue
+            }
+
+            for (edge in nodeEndingEdges[current]!!) {
+                if (edge.endsWith(current)) {
+                    val otherNode = edge.getOther(current)
+                    if (otherNode in toVisit) {
+                        val otherNodeDistance = cumulativeDistance[otherNode]!!
+                        val newDistance = currentNodeDistance + edge.weight
+
+                        if (newDistance < otherNodeDistance) {
+                            cumulativeDistance[otherNode] = newDistance
+                            prev[otherNode] = current
+                        }
+                    }
+                }
+            }
+
+        }
+
+        return generateSequence(end) { node ->
+            prev[node]
+        }.toList().reversed()
     }
 
     fun simplify(): Graph<N, E> {
