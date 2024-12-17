@@ -8,67 +8,73 @@ fun main() {
     val computer = parseComputer(inputFile.bufferedReader().readLines())
     val haltedComputer = computer.run()
     println("Output: ${haltedComputer.output}")
+
+    val a = findCorrectA(computer)
+    println("A that causes the program to output a copy of itself: $a")
 }
 
 fun parseComputer(lines: Iterable<String>): Computer {
     val iterator = lines.iterator()
-    val a = Regex("Register A: ([0-9]+)").find(iterator.next())!!.groupValues.let { it[1].toInt() }
-    val b = Regex("Register B: ([0-9]+)").find(iterator.next())!!.groupValues.let { it[1].toInt() }
-    val c = Regex("Register C: ([0-9]+)").find(iterator.next())!!.groupValues.let { it[1].toInt() }
+    val a = Regex("Register A: ([0-9]+)").find(iterator.next())!!.groupValues.let { it[1].toLong() }
+    val b = Regex("Register B: ([0-9]+)").find(iterator.next())!!.groupValues.let { it[1].toLong() }
+    val c = Regex("Register C: ([0-9]+)").find(iterator.next())!!.groupValues.let { it[1].toLong() }
     iterator.next() // skip empty line
     val program = Regex("Program: ([0-9]+(,[0-9]+)+)").find(iterator.next())!!.groupValues.let { parseProgram(it[1]) }
     return Computer(a, b, c, program = program)
 }
 
 fun parseProgram(str: String): List<ProgramItem> =
-    buildList {
-        val opCodes = str.split(',').map { it.toInt() }
-        val iterator = opCodes.iterator()
+    try {
+        buildList {
+            val opCodes = str.split(',').map { it.toInt() }
+            val iterator = opCodes.iterator()
 
-        while (iterator.hasNext()) {
-            when (val opCode = iterator.next()) {
-                0 -> {
-                    add(Adv)
-                    add(ComboOperand(iterator.next()))
+            while (iterator.hasNext()) {
+                when (val opCode = iterator.next()) {
+                    0 -> {
+                        add(Adv)
+                        add(ComboOperand(iterator.next()))
+                    }
+                    1 -> {
+                        add(Bxl)
+                        add(LiteralOperand(iterator.next()))
+                    }
+                    2 -> {
+                        add(Bst)
+                        add(ComboOperand(iterator.next()))
+                    }
+                    3 -> {
+                        add(Jnz)
+                        add(LiteralOperand(iterator.next()))
+                    }
+                    4 -> {
+                        add(Bxc)
+                        add(EmptyOperand(iterator.next()))
+                    }
+                    5 -> {
+                        add(Out)
+                        add(ComboOperand(iterator.next()))
+                    }
+                    6 -> {
+                        add(Bdv)
+                        add(ComboOperand(iterator.next()))
+                    }
+                    7 -> {
+                        add(Cdv)
+                        add(ComboOperand(iterator.next()))
+                    }
+                    else -> throw IllegalArgumentException("Unknown opcode: $opCode")
                 }
-                1 -> {
-                    add(Bxl)
-                    add(LiteralOperand(iterator.next()))
-                }
-                2 -> {
-                    add(Bst)
-                    add(ComboOperand(iterator.next()))
-                }
-                3 -> {
-                    add(Jnz)
-                    add(LiteralOperand(iterator.next()))
-                }
-                4 -> {
-                    add(Bxc)
-                    iterator.next()
-                    add(EmptyOperand)
-                }
-                5 -> {
-                    add(Out)
-                    add(ComboOperand(iterator.next()))
-                }
-                6 -> {
-                    add(Bdv)
-                    add(ComboOperand(iterator.next()))
-                }
-                7 -> {
-                    add(Cdv)
-                    add(ComboOperand(iterator.next()))
-                }
-                else -> throw IllegalArgumentException("Unknown opcode: $opCode")
             }
         }
+    } catch (e: Exception) {
+        throw IllegalArgumentException("Error while parsing program: $str", e)
     }
 
 data class Computer(
-    var a: Int = 0,
-    var b: Int = 0,
-    var c: Int = 0,
+    var a: Long = 0,
+    var b: Long = 0,
+    var c: Long = 0,
     var output: String = "",
     var program: List<ProgramItem> = emptyList(),
     var instructionPointer: Int = 0,
@@ -106,7 +112,7 @@ data class Computer(
         }
     }
 
-    fun getOperandValue(offset: Int = 0): Int {
+    fun getOperandValue(offset: Int = 0): Long {
         val operand = program[instructionPointer + 1 + offset] as Operand
         return operand.getValue(this)
     }
@@ -127,28 +133,54 @@ data class Computer(
                 }
             }
         }
+
+    fun programToPseudocode(): String =
+        buildString {
+            var first = true
+            val iterator = program.iterator()
+
+            while (iterator.hasNext()) {
+                val instruction = iterator.next() as Instruction
+                val operand = iterator.next() as Operand
+                if (!first) {
+                    append("\n")
+                }
+                first = false
+                append(instruction.toPseudocode(operand))
+            }
+        }
+
+    fun programToCode(): List<Int> =
+        program.map { it.toCode() }
 }
 
-sealed interface ProgramItem
+sealed interface ProgramItem {
+    fun toPseudocode(operand: Operand): String
+    fun toCode(): Int
+}
 
-sealed class Instruction : ProgramItem {
+sealed class Instruction(val opcode: Int) : ProgramItem {
     abstract fun execute(computer: Computer): Computer
 
     override fun toString(): String = javaClass.simpleName.lowercase()
+    override fun toCode(): Int = opcode
 }
 
-object Adv : Instruction() {
+object Adv : Instruction(0) {
     override fun execute(computer: Computer): Computer {
         val numerator = computer.a
-        val denominator = 2.0.pow(computer.getOperandValue()).toInt()
+        val denominator = 2.0.pow(computer.getOperandValue().toInt()).toInt()
         return computer.copy(
             a = numerator / denominator,
             instructionPointer = computer.instructionPointer + 2,
         )
     }
+
+    override fun toPseudocode(operand: Operand): String =
+        "A = A / 2^${operand}"
 }
 
-object Bxl : Instruction() {
+object Bxl : Instruction(1) {
     override fun execute(computer: Computer): Computer {
         val value = computer.getOperandValue()
         return computer.copy(
@@ -156,40 +188,52 @@ object Bxl : Instruction() {
             instructionPointer = computer.instructionPointer + 2,
         )
     }
+
+    override fun toPseudocode(operand: Operand): String =
+        "B = B xor $operand"
 }
 
-object Bst : Instruction() {
+object Bst : Instruction(2) {
     override fun execute(computer: Computer): Computer {
         val value = computer.getOperandValue()
         return computer.copy(
-            b = value % 8,
+            b = value % 8L,
             instructionPointer = computer.instructionPointer + 2,
         )
     }
+
+    override fun toPseudocode(operand: Operand): String =
+        "B = $operand mod 8"
 }
 
-object Jnz : Instruction() {
+object Jnz : Instruction(3) {
     override fun execute(computer: Computer): Computer {
         return computer.copy(
             instructionPointer =
                 when (computer.a) {
-                    0 -> computer.instructionPointer + 2
-                    else -> computer.getOperandValue(0)
+                    0L -> computer.instructionPointer + 2
+                    else -> computer.getOperandValue(0).toInt()
                 }
         )
     }
+
+    override fun toPseudocode(operand: Operand): String =
+        "if (A != 0) jump(${operand})"
 }
 
-object Bxc : Instruction() {
+object Bxc : Instruction(4) {
     override fun execute(computer: Computer): Computer {
         return computer.copy(
             b = computer.b xor computer.c,
             instructionPointer = computer.instructionPointer + 2,
         )
     }
+
+    override fun toPseudocode(operand: Operand): String =
+        "B = B xor C"
 }
 
-object Out : Instruction() {
+object Out : Instruction(5) {
     override fun execute(computer: Computer): Computer {
         val value = computer.getOperandValue()
         val output = when {
@@ -202,43 +246,73 @@ object Out : Instruction() {
             instructionPointer = computer.instructionPointer + 2,
         )
     }
+
+    override fun toPseudocode(operand: Operand): String =
+        "print(${operand})"
 }
 
-object Bdv : Instruction() {
+object Bdv : Instruction(6) {
     override fun execute(computer: Computer): Computer {
         val numerator = computer.a
-        val denominator = 2.0.pow(computer.getOperandValue()).toInt()
+        val denominator = 2.0.pow(computer.getOperandValue().toInt()).toInt()
         return computer.copy(
             b = numerator / denominator,
             instructionPointer = computer.instructionPointer + 2,
         )
     }
+
+    override fun toPseudocode(operand: Operand): String =
+        "B = A / 2^${operand}"
 }
 
-object Cdv : Instruction() {
+object Cdv : Instruction(7) {
     override fun execute(computer: Computer): Computer {
         val numerator = computer.a
-        val denominator = 2.0.pow(computer.getOperandValue()).toInt()
-        return computer.copy(
-            c = numerator / denominator,
-            instructionPointer = computer.instructionPointer + 2,
-        )
+        val denominator = 2.0.pow(computer.getOperandValue().toInt()).toInt()
+        try {
+            return computer.copy(
+                c = numerator / denominator,
+                instructionPointer = computer.instructionPointer + 2,
+            )
+        } catch (e: Exception) {
+            println("Error while dividing $numerator by 2^${computer.getOperandValue()}")
+            println(computer)
+            throw e
+        }
+    }
+
+    override fun toPseudocode(operand: Operand): String =
+        "C = A / 2^${operand}"
+}
+
+sealed class Operand(val value: Int) : ProgramItem {
+    abstract fun getValue(computer: Computer): Long
+    override fun toPseudocode(operand: Operand): String = toString()
+    override fun toCode(): Int = value
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Operand
+
+        return value == other.value
+    }
+
+    override fun hashCode(): Int {
+        return value
     }
 }
 
-sealed interface Operand : ProgramItem {
-    fun getValue(computer: Computer): Int
-}
-
-data class LiteralOperand(val value: Int) : Operand {
-    override fun getValue(computer: Computer): Int = value
+class LiteralOperand(value: Int) : Operand(value) {
+    override fun getValue(computer: Computer): Long = value.toLong()
     override fun toString(): String = value.toString()
 }
 
-data class ComboOperand(val value: Int) : Operand {
-    override fun getValue(computer: Computer): Int =
+class ComboOperand(value: Int) : Operand(value) {
+    override fun getValue(computer: Computer): Long =
         when (value) {
-            in 0..3 -> value
+            in 0..3 -> value.toLong()
             4 -> computer.a
             5 -> computer.b
             6 -> computer.c
@@ -257,7 +331,30 @@ data class ComboOperand(val value: Int) : Operand {
         }
 }
 
-object EmptyOperand : Operand {
-    override fun getValue(computer: Computer): Int = throw IllegalArgumentException("Empty operand")
-    override fun toString(): String = ""
+class EmptyOperand(value: Int) : Operand(value) {
+    override fun getValue(computer: Computer): Long = throw IllegalArgumentException("Empty operand")
+    override fun toString(): String = "-"
+}
+
+fun findCorrectA(computer: Computer): Long {
+    var a = 0L
+    var wantedOutput = ""
+    for (opcode in computer.programToCode().reversed()) {
+        wantedOutput = if (wantedOutput.isEmpty()) "$opcode" else "$opcode,$wantedOutput"
+
+        for (aIncrease in 0..1_000_000_000) {
+            val newA = a * 8 + aIncrease
+            try {
+                val fixedComputer = computer.copy(a = newA)
+                val haltedComputer = fixedComputer.run()
+                if (haltedComputer.output == wantedOutput) {
+                    a = newA
+                    break
+                }
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+    }
+    return a
 }
