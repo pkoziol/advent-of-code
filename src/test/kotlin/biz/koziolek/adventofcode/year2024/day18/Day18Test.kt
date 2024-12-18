@@ -1,6 +1,7 @@
 package biz.koziolek.adventofcode.year2024.day18
 
 import biz.koziolek.adventofcode.AsciiColor
+import biz.koziolek.adventofcode.Coord
 import biz.koziolek.adventofcode.findInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Tag
@@ -79,5 +80,21 @@ internal class Day18Test {
         val memory = buildMemory(bytes.take(1024))
         val path = findExitPath(memory)
         assertEquals(338, path.size - 1)
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val bytes = parseFallingBytes(sampleInput)
+        val firstBlockingByte = findFirstBlockingByte(bytes, size = 6)
+        assertEquals(Coord(6, 1), firstBlockingByte)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val bytes = parseFallingBytes(input)
+        val firstBlockingByte = findFirstBlockingByte(bytes)
+        assertEquals(Coord(20, 44), firstBlockingByte)
     }
 }

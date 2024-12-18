@@ -56,6 +56,17 @@ fun findExitPath(memory: Map<Coord, Char>): List<Coord> {
     return path.map { it.coord }
 }
 
+fun findFirstBlockingByte(bytes: List<Coord>, size: Int = 70): Coord {
+    for (i in 1..bytes.size) {
+        val memory = buildMemory(bytes.take(i), size)
+        val path = findExitPath(memory)
+        if (path.isEmpty()) {
+            return bytes[i - 1]
+        }
+    }
+    throw IllegalStateException("No blocking byte found")
+}
+
 fun drawMemory(memory: Map<Coord, Char>): String = drawPath(memory, emptyList())
 
 fun drawPath(memory: Map<Coord, Char>, path: List<Coord>): String =
