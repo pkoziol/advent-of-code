@@ -54,4 +54,33 @@ internal class Day19Test {
         val (patterns, designs) = parseTowels(input)
         assertEquals(220, designs.count { isPossible(patterns, it) })
     }
+
+    @Test
+    fun testGetAllPossibilities() {
+        val (patterns, designs) = parseTowels(sampleInput)
+        assertEquals(2, countAllPossibilities(patterns, designs[0]), designs[0])
+        assertEquals(1, countAllPossibilities(patterns, designs[1]), designs[1])
+        assertEquals(4, countAllPossibilities(patterns, designs[2]), designs[2])
+        assertEquals(6, countAllPossibilities(patterns, designs[3]), designs[3])
+        assertEquals(0, countAllPossibilities(patterns, designs[4]), designs[4])
+        assertEquals(1, countAllPossibilities(patterns, designs[5]), designs[5])
+        assertEquals(2, countAllPossibilities(patterns, designs[6]), designs[6])
+        assertEquals(0, countAllPossibilities(patterns, designs[7]), designs[7])
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val (patterns, designs) = parseTowels(sampleInput)
+        assertEquals(16, designs.sumOf { countAllPossibilities(patterns, it) })
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val (patterns, designs) = parseTowels(input)
+        val count = designs.sumOf { countAllPossibilities(patterns, it) }
+        assertNotEquals(99472399, count)
+        assertEquals(565600047715343, count)
+    }
 }
