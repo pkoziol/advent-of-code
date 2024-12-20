@@ -7,8 +7,12 @@ import kotlin.collections.HashMap
 fun main() {
     val inputFile = findInput(object {})
     val racetrack = parseRacetrack(inputFile.bufferedReader().readLines())
-    val cheats = findCheats(racetrack)
-    println("There is ${cheats.count { it.value >= 100 }} saving at least 100 picoseconds")
+
+    val save = 100
+    for (duration in listOf(2, 20)) {
+        val cheats = findCheats(racetrack, duration)
+        println("There is ${cheats.count { it.value >= save }} $duration-picoseconds cheats saving at least $save picoseconds")
+    }
 }
 
 const val WALL = '#'
@@ -37,31 +41,21 @@ fun parseRacetrack(lines: Iterable<String>): Racetrack =
         .toMap()
         .let { Racetrack(it) }
 
-fun findCheats(racetrack: Racetrack): Map<Pair<Coord, Coord>, Int> {
+fun findCheats(racetrack: Racetrack, duration: Int): Map<Pair<Coord, Coord>, Int> {
     val distanceMap = buildDistanceMap(racetrack)
+    val nonWallCoords = racetrack.map.filterValues { it != WALL }.keys
 
-    return racetrack.map
-        .filterValues { it == WALL }
-        .keys
-        .flatMap { wallCoord ->
-            listOf(
-                Triple(wallCoord + Coord(-1, 0), wallCoord, wallCoord + Coord(1, 0)),
-                Triple(wallCoord + Coord(1, 0), wallCoord, wallCoord + Coord(-1, 0)),
-                Triple(wallCoord + Coord(0, -1), wallCoord, wallCoord + Coord(0, 1)),
-                Triple(wallCoord + Coord(0, 1), wallCoord, wallCoord + Coord(0, -1)),
-            )
+    return nonWallCoords
+        .flatMap { startCoord ->
+            nonWallCoords
+                .filter { endCoord -> startCoord.manhattanDistanceTo(endCoord) <= duration }
+                .map { endCoord -> startCoord to endCoord }
         }
-        .filter { (beforeWall, wall, afterWall) ->
-            beforeWall in racetrack.map && racetrack.map[beforeWall] != WALL
-                    && wall in racetrack.map && racetrack.map[wall] == WALL
-                    && afterWall in racetrack.map && racetrack.map[afterWall] != WALL
-        }
-        .map { (beforeWall, wall, afterWall) ->
+        .map { (beforeWall, afterWall) ->
             val distanceBeforeWall = distanceMap[beforeWall]!!
             val distanceAfterWall = distanceMap[afterWall]!!
-            val moveCost = 2
-            val savedDistance = distanceAfterWall - distanceBeforeWall - moveCost
-            Pair(wall to afterWall, savedDistance)
+            val savedDistance = distanceAfterWall - distanceBeforeWall - beforeWall.manhattanDistanceTo(afterWall)
+            Pair(beforeWall to afterWall, savedDistance)
         }
         .filter { it.second > 0 }
         .toMap()

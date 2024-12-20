@@ -37,19 +37,28 @@ internal class Day20Test {
     @Test
     fun testFindCheats() {
         val racetrack = parseRacetrack(sampleInput)
-        val cheats = findCheats(racetrack)
+        val cheats = findCheats(racetrack, duration = 2)
         println("Cheats: $cheats")
-        assertEquals(12, cheats[Coord(8, 1) to Coord(9, 1)])
-        assertEquals(20, cheats[Coord(10, 7) to Coord(11, 7)])
-        assertEquals(38, cheats[Coord(8, 8) to Coord(8, 9)])
-        assertEquals(64, cheats[Coord(6, 7) to Coord(5, 7)])
+        assertEquals(12, cheats[Coord(7, 1) to Coord(9, 1)])
+        assertEquals(20, cheats[Coord(9, 7) to Coord(11, 7)])
+        assertEquals(38, cheats[Coord(8, 7) to Coord(8, 9)])
+        assertEquals(64, cheats[Coord(7, 7) to Coord(5, 7)])
     }
 
     @Test
     fun testSampleAnswer1() {
         val racetrack = parseRacetrack(sampleInput)
-        val cheats = findCheats(racetrack)
-        assertEquals(44, cheats.size)
+        val cheats = findCheats(racetrack, duration = 2)
+
+
+        cheats.entries
+            .groupingBy { it.value }
+            .eachCount()
+            .entries
+            .sortedBy { it.key }
+            .forEach(::println)
+
+        assertEquals(14 + 14 + 2 + 4 + 2 + 3 + 1 + 1 + 1 + 1 + 1, cheats.size)
         assertEquals(5, cheats.count { it.value >= 20 })
     }
 
@@ -58,7 +67,31 @@ internal class Day20Test {
     fun testAnswer1() {
         val input = findInput(object {}).bufferedReader().readLines()
         val racetrack = parseRacetrack(input)
-        val cheats = findCheats(racetrack)
+        val cheats = findCheats(racetrack, duration = 2)
         assertEquals(1409, cheats.count { it.value >= 100 })
+    }
+
+    @Test
+    fun testSampleAnswer2() {
+        val racetrack = parseRacetrack(sampleInput)
+        val cheats = findCheats(racetrack, duration = 20)
+
+        cheats.entries
+            .groupingBy { it.value }
+            .eachCount()
+            .entries
+            .sortedBy { it.key }
+            .forEach(::println)
+
+        assertEquals(32 + 31 + 29 + 39 + 25 + 23 + 20 + 19 + 12 + 14 + 12 + 22 + 4 + 3, cheats.count { it.value >= 50 })
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val racetrack = parseRacetrack(input)
+        val cheats = findCheats(racetrack, duration = 20)
+        assertEquals(1012821, cheats.count { it.value >= 100 })
     }
 }
