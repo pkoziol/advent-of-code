@@ -38,7 +38,6 @@ internal class Day20Test {
     fun testFindCheats() {
         val racetrack = parseRacetrack(sampleInput)
         val cheats = findCheats(racetrack, duration = 2)
-        println("Cheats: $cheats")
         assertEquals(12, cheats[Coord(7, 1) to Coord(9, 1)])
         assertEquals(20, cheats[Coord(9, 7) to Coord(11, 7)])
         assertEquals(38, cheats[Coord(8, 7) to Coord(8, 9)])
@@ -49,15 +48,6 @@ internal class Day20Test {
     fun testSampleAnswer1() {
         val racetrack = parseRacetrack(sampleInput)
         val cheats = findCheats(racetrack, duration = 2)
-
-
-        cheats.entries
-            .groupingBy { it.value }
-            .eachCount()
-            .entries
-            .sortedBy { it.key }
-            .forEach(::println)
-
         assertEquals(14 + 14 + 2 + 4 + 2 + 3 + 1 + 1 + 1 + 1 + 1, cheats.size)
         assertEquals(5, cheats.count { it.value >= 20 })
     }
@@ -75,14 +65,6 @@ internal class Day20Test {
     fun testSampleAnswer2() {
         val racetrack = parseRacetrack(sampleInput)
         val cheats = findCheats(racetrack, duration = 20)
-
-        cheats.entries
-            .groupingBy { it.value }
-            .eachCount()
-            .entries
-            .sortedBy { it.key }
-            .forEach(::println)
-
         assertEquals(32 + 31 + 29 + 39 + 25 + 23 + 20 + 19 + 12 + 14 + 12 + 22 + 4 + 3, cheats.count { it.value >= 50 })
     }
 

@@ -63,35 +63,27 @@ fun findCheats(racetrack: Racetrack, duration: Int): Map<Pair<Coord, Coord>, Int
 
 private fun buildDistanceMap(racetrack: Racetrack): Map<Coord, Int> {
     val cumulativeDistance: MutableMap<Coord, Int> = HashMap()
-    val prev: MutableMap<Coord, Coord> = HashMap()
-    val toVisit: MutableSet<Coord> = HashSet()
-
-    for (node in racetrack.map.keys) {
-        cumulativeDistance[node] = Int.MAX_VALUE
-        toVisit.add(node)
-    }
+    val toVisit: Queue<Pair<Coord, Int>> = PriorityQueue(Comparator.comparing { (_, distance) -> distance })
+    var current: Coord? = racetrack.start
     cumulativeDistance[racetrack.start] = 0
 
-    while (toVisit.isNotEmpty()) {
-        val current = toVisit.minBy { node -> cumulativeDistance[node]!! }
-        toVisit.remove(current)
-
-        val currentNodeDistance = cumulativeDistance[current]!!
+    while (current != null) {
+        val currentNodeDistance = cumulativeDistance[current] ?: Int.MAX_VALUE
 
         for (otherNode in racetrack.map.getAdjacentCoords(current, includeDiagonal = false)) {
             if (racetrack.map[otherNode] == WALL) {
                 continue
             }
-            if (otherNode in toVisit) {
-                val otherNodeDistance = cumulativeDistance[otherNode]!!
-                val newDistance = currentNodeDistance + 1
+            val otherNodeDistance = cumulativeDistance[otherNode] ?: Int.MAX_VALUE
+            val newDistance = currentNodeDistance + 1
 
-                if (newDistance < otherNodeDistance) {
-                    cumulativeDistance[otherNode] = newDistance
-                    prev[otherNode] = current
-                }
+            if (newDistance < otherNodeDistance) {
+                cumulativeDistance[otherNode] = newDistance
+                toVisit.add(Pair(otherNode, newDistance))
             }
         }
+
+        current = toVisit.poll()?.first
     }
 
     return cumulativeDistance
