@@ -54,7 +54,10 @@ data class Keypad(val buttons: Map<Coord, Char>) {
         }.second
 
     fun isValidSequence(buttonsSeq: String, start: Char = 'A'): Boolean =
-        buttonsSeq.fold(this[start] to true) { (currentPos, isValid), command ->
+        isValidSequence(buttonsSeq, this[start])
+
+    fun isValidSequence(buttonsSeq: String, startPos: Coord = this['A']): Boolean =
+        buttonsSeq.fold(startPos to true) { (currentPos, isValid), command ->
             if (currentPos !in buttons) {
                 currentPos to false
             } else if (command == 'A') {
@@ -79,42 +82,112 @@ data class Keypad(val buttons: Map<Coord, Char>) {
     }
 }
 
-fun findButtonPresses(targetButtonsSeq: List<String>, keypads: List<Keypad>): List<String> =
-    targetButtonsSeq.map { findButtonPresses(it, keypads) }
+private val cache = mutableMapOf<Triple<String, Int, Coord>, String>()
+
+//fun findDeepButtonPresses(targetButtonsSeq: List<String>, keypads: List<Keypad>): List<String> =
+//    targetButtonsSeq.map { findDeepButtonPresses(it, keypads) }
+//
+//fun findDeepButtonPresses(targetButtonsSeq: String, keypads: List<Keypad>): String =
+//    targetButtonsSeq.split("A")
+//        .filter { it.isNotBlank() }
+//        .map { it + "A" }
+//        .map { findButtonPresses(listOf(it), keypads).single() }
+//        .joinToString("")
 
 fun findButtonPresses(targetButtonsSeq: String, keypads: List<Keypad>): String =
-    findButtonPressesInternal(targetButtonsSeq, keypads)
-        .filter { buttonsSequences ->
-            val allValid = buttonsSequences.reversed()
-                .zip(keypads.reversed())
-                .all { (buttonsSeq, keypad) -> keypad.isValidSequence(buttonsSeq) }
-            allValid
-        }
-        .minBy { it.last().length }
-        .last()
+    findButtonPresses(listOf(targetButtonsSeq), keypads).single()
 
-private fun findButtonPressesInternal(targetButtonsSeq: String, keypads: List<Keypad>, keypadIndex: Int = 0): List<List<String>> {
+fun findButtonPresses(targetButtonsSeq: List<String>, keypads: List<Keypad>): List<String> {
+    cache.clear()
+    return targetButtonsSeq.map { findButtonPressesInternalMemorized(it, keypads) }
+}
+
+private fun findButtonPressesInternalMemorized(targetButtonsSeq: String,
+                                               keypads: List<Keypad>,
+                                               keypadIndex: Int = 0,
+                                               startPos: Coord = keypads[keypadIndex]['A'],
+                                               prevStartPos: Coord = keypads[keypadIndex]['A']): String {
+    val indent = "  ".repeat(keypadIndex)
+//    println("${indent}targetButtonsSeq: $targetButtonsSeq @ $keypadIndex")
+    val key = Triple(targetButtonsSeq, keypadIndex, startPos)
+    if (key in cache) {
+//        println("${indent}cached!")
+        return cache[key]!!
+    }
+
+//    val words = targetButtonsSeq.split("A")
+//        .dropLast(1)
+////        .filter { it.isNotBlank() }
+//        .map { it + "A" }
+//
+////    println("${indent}  Words: $words @ $keypadIndex")
+
+    val ans = findButtonPressesInternal(targetButtonsSeq, keypads, keypadIndex, startPos, prevStartPos)
+
+    cache[key] = ans
+
+    return ans
+}
+
+private fun findButtonPressesInternal(targetButtonsSeq: String,
+                                      keypads: List<Keypad>,
+                                      keypadIndex: Int = 0,
+                                      startPos: Coord,
+                                      prevStartPos: Coord): String {
+    val indent = "  ".repeat(keypadIndex)
+    println("$indent$targetButtonsSeq: startPos: $startPos prevStartPos: $prevStartPos")
+
     val targetPermutations =
         if (shouldBePermuted(targetButtonsSeq)) {
             targetButtonsSeq
                 .split('A')
                 .let { permuteButtonGroups(it.dropLast(1)) }
                 .map { it.joinToString("A", postfix = "A") }
-                .filter { keypadIndex - 1 !in keypads.indices || keypads[keypadIndex - 1].isValidSequence(it) }
+//                .asSequence()
+                .filter { keypadIndex - 1 !in keypads.indices || keypads[keypadIndex - 1].isValidSequence(it, startPos) }
         }
         else {
             listOf(targetButtonsSeq)
         }
 
     val allAnswers = targetPermutations
-        .map { listOf(it, findButtonPresses(it, keypads[keypadIndex])) }
+        .map { findButtonPresses(it, keypads[keypadIndex], startPos) }
+    println("$indent  allAnswers: $allAnswers")
 
     if (keypadIndex == keypads.size - 1) {
-        return allAnswers
+        return allAnswers.minBy { it.length }
     }
 
     val moreAnswers = allAnswers
-        .flatMap { outer -> findButtonPressesInternal(outer.last(), keypads, keypadIndex + 1).map { outer.dropLast(1) + it } }
+        .map { outer ->
+            if (keypadIndex > -1) {
+                val words = outer.split("A")
+                    .dropLast(1)
+//        .filter { it.isNotBlank() }
+                    .map { it + "A" }
+                assert(words.size == targetButtonsSeq.length)
+                println("$indent  words: $words")
+                println("$indent  targetButtonsSeq: $targetButtonsSeq")
+
+                val zip = words.zip(("A" + targetButtonsSeq).toList())
+                println("$indent  zip: $zip")
+
+                zip.joinToString("") { (word, char) ->
+                    findButtonPressesInternalMemorized(
+                        targetButtonsSeq = word,
+                        keypads = keypads,
+                        keypadIndex = keypadIndex + 1,
+                        startPos = keypads[keypadIndex + 1][char],
+                        prevStartPos = startPos,
+                    )
+                }
+            } else {
+                findButtonPressesInternalMemorized(outer, keypads, keypadIndex + 1)
+            }
+
+//            findButtonPressesInternalMemorized(outer, keypads, keypadIndex + 1)
+        }
+        .minBy { it.length }
 
     return moreAnswers
 }
@@ -148,9 +221,10 @@ private fun String.permutations(): Sequence<String> =
     if (length == 1) sequenceOf(this)
     else asSequence().flatMapIndexed { index, c -> removeRange(index..index).permutations().map { c + it } }
 
-private fun findButtonPresses(targetButtonsSeq: String,
-                              keypad: Keypad): String =
-    targetButtonsSeq.fold(keypad['A'] to "") { (currentPos, buttonsSeq), buttonToPress ->
+fun findButtonPresses(targetButtonsSeq: String,
+                      keypad: Keypad,
+                      startPos: Coord): String =
+    targetButtonsSeq.fold(startPos to "") { (currentPos, buttonsSeq), buttonToPress ->
         val targetPos = keypad[buttonToPress]
         var xDiff = targetPos.x - currentPos.x
         var yDiff = targetPos.y - currentPos.y

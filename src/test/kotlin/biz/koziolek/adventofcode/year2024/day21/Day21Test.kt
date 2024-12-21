@@ -121,4 +121,21 @@ internal class Day21Test {
         assert(complexityScore > 200410)
         assertEquals(206798, complexityScore)
     }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val codes = parseCodes(input)
+        val keypads = listOf(NUMERIC_KEYPAD) + List(25) { DIRECTIONAL_KEYPAD }
+
+        val buttonsSeq = findButtonPresses(codes, keypads)
+
+        val complexityScore = calculateComplexityScore(codes, buttonsSeq)
+        assertNotEquals(212830, complexityScore)
+        assertNotEquals(200410, complexityScore)
+        assert(complexityScore < 212830)
+        assert(complexityScore > 200410)
+        assertEquals(206798, complexityScore)
+    }
 }
