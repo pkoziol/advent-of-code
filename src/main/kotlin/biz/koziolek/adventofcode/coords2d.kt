@@ -19,6 +19,15 @@ enum class Direction(val char: Char) {
                 EAST.char -> EAST
                 else -> throw IllegalArgumentException("Invalid direction: $char")
             }
+
+        fun fromCoord(coord: Coord): Direction =
+            when {
+                coord.x == 0 && coord.y < 0 -> NORTH
+                coord.x == 0 && coord.y > 0 -> SOUTH
+                coord.x < 0 && coord.y == 0 -> WEST
+                coord.x > 0 && coord.y == 0 -> EAST
+                else -> throw IllegalArgumentException("Cannot determine direction from $coord")
+            }
     }
 }
 
