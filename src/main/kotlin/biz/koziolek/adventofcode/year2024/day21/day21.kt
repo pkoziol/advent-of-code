@@ -79,21 +79,33 @@ data class Keypad(val buttons: Map<Coord, Char>) {
     }
 }
 
-fun findButtonPresses(targetButtonsSeq: List<String>, keypads: List<Keypad>): List<String> =
-    targetButtonsSeq.map { findButtonPresses(it, keypads) }
+private val cache = mutableMapOf<Pair<String, Int>, String>()
 
 fun findButtonPresses(targetButtonsSeq: String, keypads: List<Keypad>): String =
-    findButtonPressesInternal(targetButtonsSeq, keypads)
-        .filter { buttonsSequences ->
-            val allValid = buttonsSequences.reversed()
-                .zip(keypads.reversed())
-                .all { (buttonsSeq, keypad) -> keypad.isValidSequence(buttonsSeq) }
-            allValid
-        }
-        .minBy { it.last().length }
-        .last()
+    findButtonPresses(listOf(targetButtonsSeq), keypads).single()
 
-private fun findButtonPressesInternal(targetButtonsSeq: String, keypads: List<Keypad>, keypadIndex: Int = 0): List<List<String>> {
+fun findButtonPresses(targetButtonsSeq: List<String>, keypads: List<Keypad>): List<String> {
+    cache.clear()
+    return targetButtonsSeq.map { findButtonPressesInternalMemorized(it, keypads) }
+}
+
+private fun findButtonPressesInternalMemorized(targetButtonsSeq: String,
+                                               keypads: List<Keypad>,
+                                               keypadIndex: Int = 0): String {
+    val key = Pair(targetButtonsSeq, keypadIndex)
+    var ans = cache[key]
+
+    if (ans == null) {
+        ans = findButtonPressesInternal(targetButtonsSeq, keypads, keypadIndex)
+        cache[key] = ans
+    }
+
+    return ans
+}
+
+private fun findButtonPressesInternal(targetButtonsSeq: String,
+                                      keypads: List<Keypad>,
+                                      keypadIndex: Int = 0): String {
     val targetPermutations =
         if (shouldBePermuted(targetButtonsSeq)) {
             targetButtonsSeq
@@ -107,14 +119,15 @@ private fun findButtonPressesInternal(targetButtonsSeq: String, keypads: List<Ke
         }
 
     val allAnswers = targetPermutations
-        .map { listOf(it, findButtonPresses(it, keypads[keypadIndex])) }
+        .map { findButtonPresses(it, keypads[keypadIndex]) }
 
     if (keypadIndex == keypads.size - 1) {
-        return allAnswers
+        return allAnswers.minBy { it.length }
     }
 
     val moreAnswers = allAnswers
-        .flatMap { outer -> findButtonPressesInternal(outer.last(), keypads, keypadIndex + 1).map { outer.dropLast(1) + it } }
+        .map { outer -> findButtonPressesInternalMemorized(outer, keypads, keypadIndex + 1) }
+        .minBy { it.length }
 
     return moreAnswers
 }
