@@ -55,19 +55,19 @@ internal class Day21Test {
     @Test
     fun testFindButtonPresses() {
         val code = "029A"
-        val buttonsSeq1 = findButtonPresses(code, NUMERIC_KEYPAD)
+        val buttonsSeq1 = findButtonPresses(code, listOf(NUMERIC_KEYPAD))
         println("buttonsSeq1: $buttonsSeq1\n")
         assertEquals(code, NUMERIC_KEYPAD.pressButtons(buttonsSeq1))
         assertEquals("<A^A>^^AvvvA".length, buttonsSeq1.length)
         //            <A^A>^^AvvvA
 
-        val buttonsSeq2 = findButtonPresses(buttonsSeq1, DIRECTIONAL_KEYPAD)
+        val buttonsSeq2 = findButtonPresses(buttonsSeq1, listOf(DIRECTIONAL_KEYPAD))
         println("buttonsSeq2: $buttonsSeq2\n")
         assertEquals(buttonsSeq1, DIRECTIONAL_KEYPAD.pressButtons(buttonsSeq2))
         assertEquals("v<<A>>^A<A>AvA<^AA>A<vAAA>^A".length, buttonsSeq2.length)
         //            <v<A>>^A<A>AvA<^AA>A<vAAA>^A
 
-        val buttonsSeq3 = findButtonPresses(buttonsSeq2, DIRECTIONAL_KEYPAD)
+        val buttonsSeq3 = findButtonPresses(buttonsSeq2, listOf(DIRECTIONAL_KEYPAD))
         println("buttonsSeq3: $buttonsSeq3\n")
         assertEquals(buttonsSeq2, DIRECTIONAL_KEYPAD.pressButtons(buttonsSeq3))
         assertEquals("<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A".length, buttonsSeq3.length)
@@ -121,65 +121,4 @@ internal class Day21Test {
         assert(complexityScore > 200410)
         assertEquals(206798, complexityScore)
     }
-
-    @Test
-    fun debugOffBy4() {
-        val code = "143A"
-
-        val keypads = listOf(
-            NUMERIC_KEYPAD,
-            DIRECTIONAL_KEYPAD,
-            DIRECTIONAL_KEYPAD,
-        )
-        val allAnswers = findButtonPresses(code, keypads)
-
-        allAnswers
-            .map { generateDebugInfo(it, keypads) }
-            .sortedByDescending { it.lastLength }
-//            .forEach { println(it) }
-
-//        println("originalAnswer:")
-        keypads.fold(code) { buttonsSeq, keypad ->
-            val ans = findButtonPresses(buttonsSeq, keypad)
-//            println("$ans (${ans.length})")
-            ans
-        }
-
-//        assertEquals(72, buttonsSeq3b.length)
-    }
 }
-
-private fun generateDebugInfo(buttonsSequences: List<String>, keypads: List<Keypad>): DebugInfo {
-    val executionResults = buttonsSequences.reversed()
-        .zip(keypads.reversed())
-        .map { (buttonsSeq, keypad) ->
-            try {
-                keypad.pressButtons(buttonsSeq)
-            } catch (e: Exception) {
-                "failed"
-            }
-        }
-
-    val status =
-        if (executionResults.any { it == "failed" }) {
-            "failed exec"
-        } else if (executionResults != buttonsSequences.reversed().drop(1)) {
-            "not match"
-        } else {
-            "OK"
-        }
-
-    return DebugInfo(
-        buttonsSequences = buttonsSequences,
-        lastLength = buttonsSequences.last().length,
-        executionResults = executionResults,
-        status = status,
-    )
-}
-
-private data class DebugInfo(
-    val buttonsSequences: List<String>,
-    val lastLength: Int,
-    val executionResults: List<String>,
-    val status: String,
-)

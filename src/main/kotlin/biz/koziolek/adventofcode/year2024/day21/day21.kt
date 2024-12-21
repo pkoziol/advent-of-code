@@ -53,6 +53,19 @@ data class Keypad(val buttons: Map<Coord, Char>) {
             }
         }.second
 
+    fun isValidSequence(buttonsSeq: String, start: Char = 'A'): Boolean =
+        buttonsSeq.fold(this[start] to true) { (currentPos, isValid), command ->
+            if (currentPos !in buttons) {
+                currentPos to false
+            } else if (command == 'A') {
+                currentPos to isValid
+            } else {
+                val direction = Direction.fromChar(command)
+                val nextPos = currentPos.move(direction)
+                nextPos to isValid
+            }
+        }.second
+
     override fun toString(): String =
         buttons.to2DString(' ')
 
@@ -67,89 +80,41 @@ data class Keypad(val buttons: Map<Coord, Char>) {
 }
 
 fun findButtonPresses(targetButtonsSeq: List<String>, keypads: List<Keypad>): List<String> =
-    targetButtonsSeq.map {
-        findButtonPresses(it, keypads)
-            .filter { buttonsSequences ->
-                val allValid = buttonsSequences.reversed()
-                    .zip(keypads.reversed())
-                    .all { (buttonsSeq, keypad) ->
-                        isValidButtonsSequence(buttonsSeq, keypad)
-                    }
-                allValid
-            }
-            .minBy { it.last().length }
-            .last()
-    }
+    targetButtonsSeq.map { findButtonPresses(it, keypads) }
 
-fun isValidButtonsSequence(buttonsSeq: String, keypad: Keypad): Boolean =
-    try {
-        keypad.pressButtons(buttonsSeq)
-        true
-    } catch (e: IllegalArgumentException) {
-        false
-    }
+fun findButtonPresses(targetButtonsSeq: String, keypads: List<Keypad>): String =
+    findButtonPressesInternal(targetButtonsSeq, keypads)
+        .filter { buttonsSequences ->
+            val allValid = buttonsSequences.reversed()
+                .zip(keypads.reversed())
+                .all { (buttonsSeq, keypad) -> keypad.isValidSequence(buttonsSeq) }
+            allValid
+        }
+        .minBy { it.last().length }
+        .last()
 
-fun findButtonPresses(targetButtonsSeq: String, keypad: Keypad, debug: Boolean = false): String {
-//    val minAnswer = allAnswers.minBy { it.last().length }
-//    println("targetButtonsSeq: $targetButtonsSeq")
-//    println("org: $originalAnswer")
-//    println("min: $minAnswer")
-
-    val allAnswers = findButtonPresses(targetButtonsSeq, listOf(keypad))
-    if (debug) {
-        allAnswers
-            .map { it to it.last().length }
-            .sortedByDescending { it.second }
-            .forEach { println(it) }
-    }
-
-    return allAnswers.minBy { it.last().length }.last()
-}
-
-fun findButtonPresses(targetButtonsSeq: String, keypads: List<Keypad>, debug: Boolean = false): List<List<String>> {
-//    println("abc".permutations())
-//    return ""
-
-//    println("--------------------")
-//    // <Av<AA>>^A<A>AvAA<A>^A<vA>^A
-//    permuteButtonGroups(listOf("b", "xy", "", "123", "q", "G", "n", "", "!", "ty", "KL", "FV"))
-//        .forEach { println(it) }
-//    println("--------------------")
-
-    if (debug) {
-        println("targetButtonsSeq: $targetButtonsSeq - keypads: ${keypads.size}")
-    }
-
-//    if (keypads == 0) {
-//        return listOf(
-//            listOf(_findButtonPresses(targetButtonsSeq, keypad))
-//        )
-//    }
-
+private fun findButtonPressesInternal(targetButtonsSeq: String, keypads: List<Keypad>, keypadIndex: Int = 0): List<List<String>> {
     val targetPermutations =
         if (shouldBePermuted(targetButtonsSeq)) {
             targetButtonsSeq
                 .split('A')
                 .let { permuteButtonGroups(it.dropLast(1)) }
                 .map { it.joinToString("A", postfix = "A") }
+                .filter { keypadIndex - 1 !in keypads.indices || keypads[keypadIndex - 1].isValidSequence(it) }
         }
         else {
             listOf(targetButtonsSeq)
         }
 
     val allAnswers = targetPermutations
-        .map { listOf(it, findButtonPresses(it, keypads.first())) }
+        .map { listOf(it, findButtonPresses(it, keypads[keypadIndex])) }
 
-    if (keypads.size == 1) {
-//        println("allAnswers size: ${allAnswers.size}")
+    if (keypadIndex == keypads.size - 1) {
         return allAnswers
     }
 
-    val remainingKeypads = keypads.drop(1)
     val moreAnswers = allAnswers
-        .flatMap { outer -> findButtonPresses(outer.last(), remainingKeypads).map { outer.dropLast(1) + it } }
-
-//    println("moreAnswers size: ${moreAnswers.size}")
+        .flatMap { outer -> findButtonPressesInternal(outer.last(), keypads, keypadIndex + 1).map { outer.dropLast(1) + it } }
 
     return moreAnswers
 }
@@ -158,7 +123,6 @@ private fun shouldBePermuted(string: String): Boolean =
     "0123456789".none { string.contains(it) }
 
 private fun permuteButtonGroups(groups: List<String>): List<List<String>> {
-//    println(groups)
     if (groups.isEmpty()) {
         return emptyList()
     }
@@ -170,14 +134,11 @@ private fun permuteButtonGroups(groups: List<String>): List<List<String>> {
     val tailPerms = permuteButtonGroups(tail)
 
     if (tailPerms.isEmpty()) {
-//        println("tailPerms is empty - returning $headPerms")
         return headPerms.map { listOf(it) }
     }
 
     return headPerms.flatMap { headPerm ->
-//        println("headPerm: $headPerm - tailPerms: $tailPerms")
         tailPerms.map { tailPerm ->
-//            println("headPerm: $headPerm, tailPerm: $tailPerm")
             listOf(headPerm) + tailPerm
         }
     }
@@ -190,8 +151,6 @@ private fun String.permutations(): Sequence<String> =
 private fun findButtonPresses(targetButtonsSeq: String,
                               keypad: Keypad): String =
     targetButtonsSeq.fold(keypad['A'] to "") { (currentPos, buttonsSeq), buttonToPress ->
-//        println("Need to press $buttonToPress going from ${keypad.buttons[currentPos]} ($currentPos). Previously pressed: $buttonsSeq")
-
         val targetPos = keypad[buttonToPress]
         var xDiff = targetPos.x - currentPos.x
         var yDiff = targetPos.y - currentPos.y
@@ -211,22 +170,29 @@ private fun findButtonPresses(targetButtonsSeq: String,
             }
         }
 
-        try {
-            while (xDiff != 0) {
-                move(Coord(xDiff.sign, 0))
+        var restart = false
+        while (xDiff != 0) {
+            val delta = Coord(xDiff.sign, 0)
+            val nextPos = newPos + delta
+            if (!keypad.buttons.containsKey(nextPos)) {
+                restart = true
+                break
             }
-            while (yDiff != 0) {
-                move(Coord(0, yDiff.sign))
-            }
-        } catch (e: IllegalStateException) {
+            move(delta)
+        }
+
+        if (restart) {
             xDiff = targetPos.x - currentPos.x
             yDiff = targetPos.y - currentPos.y
             newPos = currentPos
             newButtonsSeq = ""
+        }
 
-            while (yDiff != 0) {
-                move(Coord(0, yDiff.sign))
-            }
+        while (yDiff != 0) {
+            move(Coord(0, yDiff.sign))
+        }
+
+        if (restart) {
             while (xDiff != 0) {
                 move(Coord(xDiff.sign, 0))
             }
@@ -240,6 +206,5 @@ private fun findButtonPresses(targetButtonsSeq: String,
 fun calculateComplexityScore(codes: List<String>, buttonsSeq: List<String>): Int =
     codes.zip(buttonsSeq).sumOf { (code, buttons) ->
         val numericPart = code.replace("A", "").toInt()
-//        println("$numericPart: ${buttons.length}")
         numericPart * buttons.length
     }
