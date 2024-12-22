@@ -18,7 +18,7 @@ internal class Day22Test {
     @Test
     fun testParseInitialSecrets() {
         val initialSecrets = parseInitialSecrets(sampleInput)
-        assertEquals(listOf(1L, 10L, 100L, 2024L), initialSecrets)
+        assertEquals(listOf(1, 10, 100, 2024), initialSecrets)
     }
 
     @Test
@@ -35,18 +35,18 @@ internal class Day22Test {
     fun testGetSecretNumber() {
         assertEquals(
             listOf(
-                15887950L,
-                16495136L,
-                527345L,
-                704524L,
-                1553684L,
-                12683156L,
-                11100544L,
-                12249484L,
-                7753432L,
-                5908254L,
+                15887950,
+                16495136,
+                527345,
+                704524,
+                1553684,
+                12683156,
+                11100544,
+                12249484,
+                7753432,
+                5908254,
             ),
-            (1..10).map { getSecretNumber(123, n = it) }
+            generateSecretNumbers(123).take(10).toList()
         )
     }
 
@@ -54,8 +54,8 @@ internal class Day22Test {
     fun testSampleAnswer1() {
         val initialSecrets = parseInitialSecrets(sampleInput)
         val twoThousandths = getSecretNumbers(initialSecrets, n = 2000)
-        assertEquals(listOf(8685429L, 4700978L, 15273692L, 8667524L), twoThousandths)
-        assertEquals(37327623L, twoThousandths.sum())
+        assertEquals(listOf(8685429, 4700978, 15273692, 8667524), twoThousandths)
+        assertEquals(37327623, sumSecrets(twoThousandths))
     }
 
     @Test
@@ -64,6 +64,6 @@ internal class Day22Test {
         val input = findInput(object {}).bufferedReader().readLines()
         val initialSecrets = parseInitialSecrets(input)
         val twoThousandths = getSecretNumbers(initialSecrets, n = 2000)
-        assertEquals(20411980517, twoThousandths.sum())
+        assertEquals(20411980517, sumSecrets(twoThousandths))
     }
 }
