@@ -92,4 +92,24 @@ internal class Day23Test {
         val answer = countTs(triples)
         assertEquals(1327, answer)
     }
+
+    @Test
+    fun testSampleAnswer2() {
+        val connections = parseComputerConnections(sampleInput)
+        val groups = findFullyConnectedGroups(connections)
+        val theBiggest = groups.maxBy { it.size }
+        val password = getPassword(theBiggest)
+        assertEquals("co,de,ka,ta", password)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val connections = parseComputerConnections(input)
+        val groups = findFullyConnectedGroups(connections)
+        val theBiggest = groups.maxBy { it.size }
+        val password = getPassword(theBiggest)
+        assertEquals("df,kg,la,mp,pb,qh,sk,th,vn,ww,xp,yp,zk", password)
+    }
 }
