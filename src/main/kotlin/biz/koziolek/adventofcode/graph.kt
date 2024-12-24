@@ -159,9 +159,12 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
         }.toList()
     }
 
-    fun findShortestPath(start: N, end: N): List<N> {
+    fun findShortestPath(start: N, end: N): List<N> =
+        findShortestPaths(start, end).first()
+
+    fun findShortestPaths(start: N, end: N): List<List<N>> {
         val cumulativeDistance: MutableMap<N, Int> = HashMap()
-        val prev: MutableMap<N, N> = HashMap()
+        val prev: MutableMap<N, Set<N>> = HashMap()
         val toVisit: MutableSet<N> = HashSet()
 
         for (node in nodes) {
@@ -189,17 +192,37 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
 
                         if (newDistance < otherNodeDistance) {
                             cumulativeDistance[otherNode] = newDistance
-                            prev[otherNode] = current
+                            prev[otherNode] = setOf(current)
+                        } else if (newDistance == otherNodeDistance) {
+                            prev[otherNode] = prev[otherNode]?.plus(current) ?: setOf(current)
                         }
                     }
                 }
             }
-
         }
 
-        return generateSequence(end) { node ->
-            prev[node]
-        }.toList().reversed()
+        val pathCandidates = mutableListOf(
+            listOf(end)
+        )
+        val paths = mutableListOf<List<N>>()
+
+        while (pathCandidates.isNotEmpty()) {
+            val candidate = pathCandidates.removeFirst()
+            val lastNode = candidate.first()
+            val prevNodes = prev[lastNode]
+                ?: throw IllegalStateException("No previous nodes found for node: $lastNode")
+
+            for (prevNode in prevNodes) {
+                val path = listOf(prevNode) + candidate
+                if (prevNode == start) {
+                    paths.add(path)
+                } else {
+                    pathCandidates.add(path)
+                }
+            }
+        }
+
+        return paths
     }
 
     fun simplify(): Graph<N, E> {

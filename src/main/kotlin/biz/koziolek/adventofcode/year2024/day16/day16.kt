@@ -34,7 +34,7 @@ data class Maze(
     fun findLowestScorePath(): MazePath =
         findPaths().minByOrNull { it.score }!!
 
-    private fun findPaths(): List<MazePath> {
+    fun findPaths(): List<MazePath> {
         val graph = buildGraph {
             val rotations = mapOf(
                 Direction.NORTH to listOf(Direction.WEST, Direction.EAST),
@@ -75,11 +75,11 @@ data class Maze(
         }
 
         val paths = Direction.entries
-            .map { endDirection ->
-                graph.findShortestPath(
+            .flatMap { endDirection ->
+                graph.findShortestPaths(
                     start = CoordWithDirectionNode(start, Direction.EAST),
                     end = CoordWithDirectionNode(end, endDirection),
-                ).let { path ->
+                ).map { path ->
                     val distinctCoords = path.fold(emptyList<Coord>()) { acc, node ->
                         if (acc.isEmpty() || acc.last() != node.coord) {
                             acc + node.coord

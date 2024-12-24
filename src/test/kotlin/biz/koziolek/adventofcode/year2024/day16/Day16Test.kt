@@ -133,4 +133,38 @@ internal class Day16Test {
         assertTrue(lowestScorePath.score < 88472)
         assertEquals(88468, lowestScorePath.score)
     }
+
+    @Test
+    fun testSampleAnswer2B() {
+        val maze = parseMaze(sampleInputB)
+        val paths = maze.findPaths()
+        val minScore = paths.minOf { it.score }
+
+        paths.sortedBy { it.score }
+            .filter { it.score == minScore }
+            .flatMapIndexed { index, path ->
+                println("#$index score: ${path.score} length: ${path.coords.size}")
+                path.coords
+            }
+            .distinct()
+            .let {
+                println("Unique coords: ${it.size}")
+            }
+    }
+
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val maze = parseMaze(input)
+        val paths = maze.findPaths()
+        val minScore = paths.minOf { it.score }
+        val uniqueCoords = paths.sortedBy { it.score }
+            .filter { it.score == minScore }
+            .flatMap { path -> path.coords }
+            .distinct()
+
+        assertEquals(616, uniqueCoords.size)
+    }
 }
