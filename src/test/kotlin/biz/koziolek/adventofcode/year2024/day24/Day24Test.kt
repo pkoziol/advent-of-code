@@ -1,9 +1,12 @@
 package biz.koziolek.adventofcode.year2024.day24
 
 import biz.koziolek.adventofcode.findInput
+import biz.koziolek.adventofcode.generateGraphvizSvg
+import biz.koziolek.adventofcode.isCI
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import java.io.File
 
 @Tag("2024")
 internal class Day24Test {
@@ -161,5 +164,43 @@ internal class Day24Test {
         val values = evaluate(gateConnections, initValues)
         val number = getNumber(values)
         assertEquals(59619940979346, number)
+    }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val input = findInput(object {}).bufferedReader().readLines()
+        val (_, gateConnections) = parseGates(input)
+
+        val graph = buildGraph(gateConnections)
+        if (!isCI) {
+            generateGraphvizSvg(
+                graph,
+                File("src/test/kotlin/biz/koziolek/adventofcode/year2024/day24/graph.svg")
+            )
+        }
+
+        // ...use human eyes to find mistakes...
+
+        val swaps = listOf(
+            "fkp" to "z06",
+            "ngr" to "z11",
+            "mfm" to "z31",
+            "bpt" to "krj", // near z38
+        )
+        val fixedConnections = swaps.fold(gateConnections) { connections, (first, second) ->
+            swapOutputs(first, second, connections)
+        }
+
+        val fixedGraph = buildGraph(fixedConnections)
+        if (!isCI) {
+            generateGraphvizSvg(
+                fixedGraph,
+                File("src/test/kotlin/biz/koziolek/adventofcode/year2024/day24/graph-fixed.svg")
+            )
+        }
+
+        val answer = getAnswerPart2(swaps)
+        assertEquals("bpt,fkp,krj,mfm,ngr,z06,z11,z31", answer)
     }
 }

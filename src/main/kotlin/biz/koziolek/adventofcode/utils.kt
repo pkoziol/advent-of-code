@@ -198,3 +198,5 @@ fun <T> productWithItself(list: List<T>, ordered: Boolean = true, withSelf: Bool
             }
         }
     }
+
+val isCI = System.getenv("CI") == "true"

@@ -1,5 +1,7 @@
 package biz.koziolek.adventofcode.year2024.day24
 
+import biz.koziolek.adventofcode.GraphNode
+import biz.koziolek.adventofcode.UniDirectionalGraphEdge
 import biz.koziolek.adventofcode.findInput
 
 fun main() {
@@ -36,8 +38,7 @@ fun parseGates(lines: Iterable<String>): Pair<Map<String, Boolean>, List<GateCon
     val initValues = lines
         .takeWhile { it.isNotBlank() }
         .map { it.split(": ") }
-        .map { it[0] to (it[1] == "1") }
-        .toMap()
+        .associate { it[0] to (it[1] == "1") }
 
     val gateConnections = lines
         .dropWhile { it.isNotBlank() }
@@ -108,3 +109,78 @@ fun getNumber(values: Map<String, Boolean>): Long {
         .map { if (it.value) 1L else 0L }
         .fold(0L) { acc, i -> acc * 2 + i }
 }
+
+fun getAnswerPart2(swaps: List<Pair<String, String>>) =
+    swaps.flatMap { listOf(it.first, it.second) }
+        .sorted()
+        .joinToString(",")
+
+fun swapOutputs(first: String, second: String, gateConnections: List<GateConnection>): List<GateConnection> {
+    val newConnections = gateConnections.toMutableList()
+    val firstConn = newConnections.single { it.output == first }
+    val secondConn = newConnections.single { it.output == second }
+
+    newConnections.remove(firstConn)
+    newConnections.remove(secondConn)
+
+    newConnections.add(firstConn.copy(output = second))
+    newConnections.add(secondConn.copy(output = first))
+
+    return newConnections
+}
+
+fun buildGraph(gateConnections: List<GateConnection>) =
+    biz.koziolek.adventofcode.buildGraph {
+        gateConnections.forEach { conn ->
+            add(createEdge(conn.input1, conn, gateConnections))
+            add(createEdge(conn.input2, conn, gateConnections))
+        }
+    }
+
+private fun createEdge(from: String, to: GateConnection, connections: List<GateConnection>): UniDirectionalGraphEdge<GateNode> {
+    val fromConn = connections.singleOrNull { it.output == from }
+    val color = when {
+        fromConn != null && isXXorY(fromConn) && isZFromXor(to) -> "red"
+        fromConn != null && isXAndY(fromConn) -> "blue"
+        else -> "black"
+    }
+    return UniDirectionalGraphEdge(ValueNode(from), ConnectionNode(to), color = color)
+}
+
+interface GateNode : GraphNode
+
+private data class ValueNode(override val id: String) : GateNode {
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float) = id
+}
+
+private data class ConnectionNode(val conn: GateConnection) : GateNode {
+    override val id: String
+        get() = conn.output
+
+    override fun toGraphvizString(exactXYPosition: Boolean, xyPositionScale: Float): String {
+        val color = when {
+            isXXorY(conn) -> "red"
+            isZFromXor(conn) -> "red"
+            isZOut(conn) -> "orange"
+            isXAndY(conn) -> "blue"
+            else -> "black"
+        }
+        return "\"$id\" [label=\"${conn.output} = ${conn.input1} ${conn.operation} ${conn.input2}\" color=$color]"
+    }
+}
+
+private fun isXXorY(conn: GateConnection) =
+    (conn.input1[0] == 'x' || conn.input1[0] == 'y')
+            && (conn.input2[0] == 'x' || conn.input2[0] == 'y')
+            && conn.operation == Operation.XOR
+
+private fun isXAndY(conn: GateConnection) =
+    (conn.input1[0] == 'x' || conn.input1[0] == 'y')
+            && (conn.input2[0] == 'x' || conn.input2[0] == 'y')
+            && conn.operation == Operation.AND
+
+private fun isZFromXor(conn: GateConnection) =
+    conn.output[0] == 'z' && conn.operation == Operation.XOR
+
+private fun isZOut(conn: GateConnection) =
+    conn.output[0] == 'z'

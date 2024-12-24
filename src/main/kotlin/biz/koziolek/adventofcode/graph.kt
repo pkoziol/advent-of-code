@@ -264,6 +264,7 @@ sealed interface GraphEdge<N : GraphNode> {
     val node2: N
     val weight: Int
     val graphvizSymbol: String
+    val color: String?
 
     val nodes: Set<N>
         get() = setOf(node1, node2)
@@ -289,6 +290,7 @@ sealed interface GraphEdge<N : GraphNode> {
         val props = mutableListOf<String>()
         if (weightAsLabel) props.add("label=$weight")
         if (exactLength) props.add("len=${weight * lengthScale}")
+        if (color != null) props.add("color=$color")
 
         val propsStr = when {
             props.isNotEmpty() -> " [" + props.joinToString(",") + "]"
@@ -302,7 +304,8 @@ sealed interface GraphEdge<N : GraphNode> {
 class BiDirectionalGraphEdge<N : GraphNode>(
     override val node1: N,
     override val node2: N,
-    override val weight: Int = 1
+    override val weight: Int = 1,
+    override val color: String? = null,
 ) : GraphEdge<N> {
     override val graphvizSymbol = "--"
 
@@ -326,7 +329,8 @@ class BiDirectionalGraphEdge<N : GraphNode>(
 data class UniDirectionalGraphEdge<N : GraphNode>(
     override val node1: N,
     override val node2: N,
-    override val weight: Int = 1
+    override val weight: Int = 1,
+    override val color: String? = null,
 ) : GraphEdge<N> {
     override val graphvizSymbol = "->"
 
