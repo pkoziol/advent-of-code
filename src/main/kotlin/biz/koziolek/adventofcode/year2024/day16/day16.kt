@@ -74,25 +74,15 @@ data class Maze(
             }
         }
 
-        val paths = Direction.entries
-            .flatMap { endDirection ->
-                graph.findShortestPaths(
-                    start = CoordWithDirectionNode(start, Direction.EAST),
-                    end = CoordWithDirectionNode(end, endDirection),
-                ).map { path ->
-                    val distinctCoords = path.fold(emptyList<Coord>()) { acc, node ->
-                        if (acc.isEmpty() || acc.last() != node.coord) {
-                            acc + node.coord
-                        } else {
-                            acc
-                        }
-                    }
-                    MazePath(
-                        maze = this,
-                        coords = distinctCoords,
-                    )
-                }
-            }
+        val paths = graph.findShortestPaths(
+            start = CoordWithDirectionNode(start, Direction.EAST),
+            end = CoordWithDirectionNode(end, Direction.EAST),
+        ).map { path ->
+            MazePath(
+                maze = this,
+                coords = path.map { it.coord }.distinct(),
+            )
+        }
 
         return paths
     }
