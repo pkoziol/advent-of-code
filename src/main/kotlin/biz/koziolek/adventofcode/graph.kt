@@ -3,7 +3,6 @@ package biz.koziolek.adventofcode
 import java.io.File
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
@@ -163,35 +162,40 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
         findShortestPaths(start, end).first()
 
     fun findShortestPaths(start: N, end: N): List<List<N>> {
+        val unvisited = mutableSetOf<N>()
+        val visitOrder: Queue<Pair<N, Int>> = PriorityQueue(Comparator.comparing { (_, distance) -> distance })
         val cumulativeDistance: MutableMap<N, Int> = HashMap()
         val prev: MutableMap<N, Set<N>> = HashMap()
-        val toVisit: MutableSet<N> = HashSet()
 
         for (node in nodes) {
-            cumulativeDistance[node] = Int.MAX_VALUE
-            toVisit.add(node)
+            val dist = if (node == start) 0 else Int.MAX_VALUE
+            unvisited.add(node)
+            visitOrder.add(node to dist)
+            cumulativeDistance[node] = dist
         }
-        cumulativeDistance[start] = 0
 
-        while (toVisit.isNotEmpty()) {
-            val current = toVisit.minBy { node -> cumulativeDistance[node]!! }
-            toVisit.remove(current)
+        while (visitOrder.isNotEmpty()) {
+            val (current, currentNodeDistance) = visitOrder.poll()
 
-            val currentNodeDistance = cumulativeDistance[current]!!
-
-            if (current !in nodeEndingEdges) {
+            if (!unvisited.remove(current)) {
+                // visitOrder contains duplicates to skip cost of cleaning up the queue
                 continue
             }
 
-            for (edge in nodeEndingEdges[current]!!) {
+            val edges = nodeEndingEdges[current]
+                ?: continue
+
+            for (edge in edges) {
                 if (edge.endsWith(current)) {
                     val otherNode = edge.getOther(current)
-                    if (otherNode in toVisit) {
+                    if (otherNode in unvisited) {
                         val otherNodeDistance = cumulativeDistance[otherNode]!!
                         val newDistance = currentNodeDistance + edge.weight
 
                         if (newDistance < otherNodeDistance) {
+                            visitOrder.add(otherNode to newDistance)
                             cumulativeDistance[otherNode] = newDistance
+
                             prev[otherNode] = setOf(current)
                         } else if (newDistance == otherNodeDistance) {
                             prev[otherNode] = prev[otherNode]?.plus(current) ?: setOf(current)
