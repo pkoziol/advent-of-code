@@ -61,6 +61,12 @@ data class Graph<N : GraphNode, E : GraphEdge<N>>(
             nodes = this.nodes + edges.map { it.node1 } + edges.map { it.node2 },
         )
 
+    fun removeNodesWithoutSplit(nodes: Collection<N>): Graph<N, E> =
+        copy(
+            nodes = this.nodes - nodes.toSet(),
+            edges = edges.filter { it.node1 !in nodes && it.node2 !in nodes }.toSet(),
+        )
+
     fun removeEdge(edge: E): Collection<Graph<N, E>> =
         removeEdges(listOf(edge))
 

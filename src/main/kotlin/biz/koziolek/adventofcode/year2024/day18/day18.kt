@@ -5,7 +5,7 @@ import biz.koziolek.adventofcode.*
 fun main() {
     val inputFile = findInput(object {})
     val bytes = parseFallingBytes(inputFile.bufferedReader().readLines())
-    val memory = buildMemory(bytes.take(1024))
+    val memory = Memory.fromBytes(bytes.take(1024))
     val path = findExitPath(memory)
     println("Steps to exit after 1kB: ${path.size - 1}")
 }
@@ -17,67 +17,89 @@ const val PATH = 'O'
 fun parseFallingBytes(lines: Iterable<String>): List<Coord> =
     lines.map { Coord.fromString(it) }
 
-fun buildMemory(bytes: List<Coord>, size: Int = 70): Map<Coord, Char> =
-    buildMap {
-        for (x in 0..size) {
-            for (y in 0..size) {
-                put(Coord(x, y), EMPTY)
+data class Memory(val contents: Map<Coord, Char>,
+                  val graph: Graph<CoordNode, BiDirectionalGraphEdge<CoordNode>>) {
+    fun getWidth(): Int = contents.getWidth()
+    fun getHeight(): Int = contents.getHeight()
+
+    fun update(byte: Coord) =
+        copy(
+            contents = contents + (byte to CORRUPTED),
+            graph = graph.removeNodesWithoutSplit(setOf(CoordNode(byte)))
+        )
+
+    override fun toString(): String = toString(emptyList())
+
+    fun toString(path: List<Coord>): String =
+        contents.to2DStringOfStrings { coord, c ->
+            if (coord in path) {
+                AsciiColor.WHITE.format(PATH)
+            } else if (c == CORRUPTED) {
+                AsciiColor.RED.format(CORRUPTED)
+            } else if (c == EMPTY) {
+                AsciiColor.BRIGHT_BLACK.format(EMPTY)
+            } else {
+                throw IllegalArgumentException("Unknown memory value $c at $coord")
             }
         }
-        for (byte in bytes) {
-            put(byte, CORRUPTED)
+
+
+    companion object {
+        fun fromBytes(bytes: List<Coord>, size: Int = 70): Memory {
+            val contents = buildContents(bytes, size)
+            val graph = buildGraph(contents)
+            return Memory(contents, graph)
         }
-    }
 
-fun findExitPath(memory: Map<Coord, Char>): List<Coord> {
-    val start = Coord(0, 0)
-    val exit = Coord(memory.getWidth() - 1, memory.getHeight() - 1)
+        private fun buildContents(bytes: List<Coord>, size: Int = 70): Map<Coord, Char> =
+            buildMap {
+                for (x in 0..size) {
+                    for (y in 0..size) {
+                        put(Coord(x, y), EMPTY)
+                    }
+                }
+                for (byte in bytes) {
+                    put(byte, CORRUPTED)
+                }
+            }
 
-    val graph = buildGraph {
-        memory.keys
-            .filter { memory[it] == EMPTY }
-            .forEach { coord ->
-                val node1 = coord.toGraphNode()
+        private fun buildGraph(contents: Map<Coord, Char>) =
+            buildGraph {
+                contents.keys
+                    .filter { contents[it] == EMPTY }
+                    .forEach { coord ->
+                        val node1 = coord.toGraphNode()
 
-                memory.getAdjacentCoords(coord, includeDiagonal = false)
-                    .filter { memory[it] == EMPTY }
-                    .forEach { adjCoord ->
-                        add(
-                            BiDirectionalGraphEdge(
-                                node1 = node1,
-                                node2 = adjCoord.toGraphNode(),
-                            )
-                        )
+                        contents.getAdjacentCoords(coord, includeDiagonal = false)
+                            .filter { contents[it] == EMPTY }
+                            .forEach { adjCoord ->
+                                add(
+                                    BiDirectionalGraphEdge(
+                                        node1 = node1,
+                                        node2 = adjCoord.toGraphNode(),
+                                    )
+                                )
+                            }
                     }
             }
     }
+}
 
-    val path = graph.findShortestPath(start.toGraphNode(), exit.toGraphNode())
+fun findExitPath(memory: Memory): List<Coord> {
+    val start = Coord(0, 0)
+    val exit = Coord(memory.getWidth() - 1, memory.getHeight() - 1)
+    val path = memory.graph.findShortestPath(start.toGraphNode(), exit.toGraphNode())
     return path.map { it.coord }
 }
 
 fun findFirstBlockingByte(bytes: List<Coord>, size: Int = 70): Coord {
-    for (i in 1..bytes.size) {
-        val memory = buildMemory(bytes.take(i), size)
+    var memory = Memory.fromBytes(emptyList(), size)
+    for (i in bytes.indices) {
+        memory = memory.update(bytes[i])
         val path = findExitPath(memory)
         if (path.isEmpty()) {
-            return bytes[i - 1]
+            return bytes[i]
         }
     }
     throw IllegalStateException("No blocking byte found")
 }
-
-fun drawMemory(memory: Map<Coord, Char>): String = drawPath(memory, emptyList())
-
-fun drawPath(memory: Map<Coord, Char>, path: List<Coord>): String =
-    memory.to2DStringOfStrings { coord, c ->
-        if (coord in path) {
-            AsciiColor.WHITE.format(PATH)
-        } else if (c == CORRUPTED) {
-            AsciiColor.RED.format(CORRUPTED)
-        } else if (c == EMPTY) {
-            AsciiColor.BRIGHT_BLACK.format(EMPTY)
-        } else {
-            throw IllegalArgumentException("Unknown memory value $c at $coord")
-        }
-    }

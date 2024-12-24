@@ -48,7 +48,7 @@ internal class Day18Test {
     fun testSampleAnswer1() {
         val bytes = parseFallingBytes(sampleInput)
 
-        val memory = buildMemory(bytes.take(12), size = 6)
+        val memory = Memory.fromBytes(bytes.take(12), size = 6)
         assertEquals("""
             ...#...
             ..#..#.
@@ -57,7 +57,7 @@ internal class Day18Test {
             ..#..#.
             .#..#..
             #.#....
-        """.trimIndent(), AsciiColor.cleanUp(drawMemory(memory)))
+        """.trimIndent(), AsciiColor.cleanUp(memory.toString()))
 
         val path = findExitPath(memory)
         assertEquals("""
@@ -68,7 +68,7 @@ internal class Day18Test {
             ..#OO#.
             .#.O#..
             #.#OOOO
-        """.trimIndent(), AsciiColor.cleanUp(drawPath(memory, path)))
+        """.trimIndent(), AsciiColor.cleanUp(memory.toString(path)))
         assertEquals(22, path.size - 1)
     }
 
@@ -77,7 +77,7 @@ internal class Day18Test {
     fun testAnswer1() {
         val input = findInput(object {}).bufferedReader().readLines()
         val bytes = parseFallingBytes(input)
-        val memory = buildMemory(bytes.take(1024))
+        val memory = Memory.fromBytes(bytes.take(1024))
         val path = findExitPath(memory)
         assertEquals(338, path.size - 1)
     }
