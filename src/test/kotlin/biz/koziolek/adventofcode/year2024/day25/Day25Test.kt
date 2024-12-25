@@ -80,4 +80,11 @@ internal class Day25Test {
         val fitting = countFitting(locks, keys)
         assertEquals(2900, fitting)
     }
+
+    @Test
+    @Tag("answer")
+    fun testAnswer2() {
+        val starCount = 50
+        assertEquals(50, starCount)
+    }
 }
