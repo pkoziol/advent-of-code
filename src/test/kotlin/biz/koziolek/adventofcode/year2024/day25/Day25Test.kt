@@ -56,8 +56,7 @@ internal class Day25Test {
         assertEquals(listOf(
             listOf(0, 5, 3, 4, 3),
             listOf(1, 2, 0, 5, 3),
-        ), locks
-        )
+        ), locks)
         assertEquals(listOf(
             listOf(5, 0, 2, 1, 3),
             listOf(4, 3, 4, 0, 2),

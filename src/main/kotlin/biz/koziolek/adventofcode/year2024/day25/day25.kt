@@ -12,35 +12,30 @@ fun main() {
 fun parseLocksAndKeys(lines: Iterable<String>): Pair<List<List<Int>>, List<List<Int>>> {
     val locks = mutableListOf<List<Int>>()
     val keys = mutableListOf<List<Int>>()
+    var target = locks
+    var element = mutableListOf<Int>()
+    var first = true
 
-    val maps2d = sequence {
-        var tmpMap = mutableListOf<String>()
-        for (line in lines) {
-            if (line.isBlank()) {
-                yield(tmpMap)
-                tmpMap = mutableListOf()
-            } else {
-                tmpMap.add(line)
-            }
-        }
-        if (tmpMap.isNotEmpty()) {
-            yield(tmpMap)
-        }
-    }
-
-    for (map in maps2d) {
-        val numbers = (0 until map.first().length)
-            .map { column ->
-                map.count { row -> row[column] == '#' } - 1
-            }
-        if (map.first().all { it == '#' }) {
-            locks.add(numbers)
+    for (line in lines) {
+        if (line.isBlank()) {
+            target.add(element)
+            first = true
         } else {
-            keys.add(numbers)
+            if (first) {
+                target = if (line.all { it == '#' }) locks else keys
+                element = MutableList(line.length) { -1 } // First or last needs to be skipped
+                first = false
+            }
+            line.forEachIndexed { index, c ->
+                element[index] += if (c == '#') 1 else 0
+            }
         }
     }
+    if (element.isNotEmpty()) {
+        target.add(element)
+    }
 
-    return locks.toList() to keys.toList()
+    return locks to keys
 }
 
 fun countFitting(locks: List<List<Int>>, keys: List<List<Int>>): Int =
